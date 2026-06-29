@@ -1,10 +1,7 @@
 import { getTranslations } from "next-intl/server";
-import { siteConfig } from "@/data/site";
-import { Link } from "@/lib/i18n/navigation";
-import type { Locale } from "@/lib/i18n/routing";
-import { Container } from "@/components/ui/Container";
-import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
 import { Navbar } from "@/components/layout/Navbar";
+import { siteConfig } from "@/data/site";
+import type { Locale } from "@/lib/i18n/routing";
 
 type HeaderProps = {
   locale: Locale;
@@ -12,24 +9,36 @@ type HeaderProps = {
 
 export async function Header({ locale }: HeaderProps) {
   const t = await getTranslations({ locale, namespace: "common" });
+  const layout = await getTranslations({ locale, namespace: "layout" });
+  const navItems = [
+    {
+      key: "home",
+      label: t("routes.home"),
+      href: siteConfig.homeRoute.paths[locale],
+    },
+    ...siteConfig.primaryRoutes.map((route) => ({
+      key: route.key,
+      label: t(`routes.${route.key}`),
+      href: route.paths[locale],
+    })),
+  ];
 
   return (
-    <header className="border-b border-border bg-background/95">
-      <Container className="flex min-h-16 items-center justify-between gap-4 py-4">
-        <Link href="/" className="text-base font-semibold sm:text-lg">
-          {siteConfig.name}
-        </Link>
-        <Navbar locale={locale} />
-        <div className="flex items-center gap-3">
-          <LanguageSwitcher locale={locale} />
-          <Link
-            href="/"
-            className="hidden rounded-md bg-accent px-4 py-2 text-sm font-medium text-accent-foreground sm:inline-flex"
-          >
-            {t("book_now")}
-          </Link>
-        </div>
-      </Container>
+    <header className="site-header">
+      <Navbar
+        locale={locale}
+        navItems={navItems}
+        reservationUrl={siteConfig.reservationUrl[locale]}
+        labels={{
+          brandMain: layout("brand.main"),
+          brandSub: layout("brand.sub"),
+          reservation: layout("reservation"),
+          languageName: layout(`languages.${locale}`),
+          menuOpen: layout("menu.open"),
+          menuClose: layout("menu.close"),
+          primaryNavigation: t("primary_navigation"),
+        }}
+      />
     </header>
   );
 }

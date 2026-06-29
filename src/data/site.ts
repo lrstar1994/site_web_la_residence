@@ -79,6 +79,22 @@ const primaryRoutes: SiteRoute[] = [
 export const siteConfig = {
   name: "La Résidence Ankerana",
   location: "Antananarivo, Madagascar",
+  reservationUrl: {
+    fr: "https://secure.reservit.com/engine/booking/2/450550/dates?specialMode=default&langcode=FR&m=booking",
+    en: "https://secure.reservit.com/engine/booking/2/450550/dates?specialMode=default&langcode=EN&m=booking",
+  },
+  contact: {
+    addressLine1: "Lot II H 40, Ankerana Ankadindramamy",
+    phoneDisplay: "034 01 807 70",
+    phoneHref: "+261340180770",
+    email: "contact.laresidenceankerana@gmail.com",
+  },
+  socialLinks: {
+    facebook: "#",
+    instagram: "#",
+    whatsapp: "https://wa.me/261340180772",
+  },
+  footerServices: ["stays", "meals", "meetings", "brunches"] as const,
   locales,
   homeRoute,
   primaryRoutes,

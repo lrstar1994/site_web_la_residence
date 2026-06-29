@@ -1,41 +1,66 @@
 "use client";
 
-import { Languages } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { siteConfig } from "@/data/site";
 import type { Locale } from "@/lib/i18n/routing";
-import { Link, usePathname } from "@/lib/i18n/navigation";
 
 type LanguageSwitcherProps = {
   locale: Locale;
+  currentLabel: string;
+  currentLanguageName: string;
+  variant?: "desktop" | "mobile";
 };
 
-const staticPathnames = [
-  "/",
-  "/hebergement",
-  "/restaurant",
-  "/salles",
-  "/evenements",
-  "/actualites",
-  "/boutique",
-] as const;
+function getAlternateHref(pathname: string, locale: Locale) {
+  const nextLocale = locale === "fr" ? "en" : "fr";
+  const route = siteConfig.seoRoutes.find(
+    (item) => item.paths[locale] === pathname,
+  );
 
-type StaticPathname = (typeof staticPathnames)[number];
+  return route?.paths[nextLocale] ?? siteConfig.homeRoute.paths[nextLocale];
+}
 
-export function LanguageSwitcher({ locale }: LanguageSwitcherProps) {
+export function LanguageSwitcher({
+  locale,
+  currentLabel,
+  currentLanguageName,
+  variant = "desktop",
+}: LanguageSwitcherProps) {
   const pathname = usePathname();
   const nextLocale = locale === "fr" ? "en" : "fr";
-  const switchHref = staticPathnames.includes(pathname as StaticPathname)
-    ? (pathname as StaticPathname)
-    : "/";
+  const alternateHref = getAlternateHref(pathname, locale);
+  const alternateLabel = nextLocale.toUpperCase();
+  const alternateName = nextLocale === "fr" ? "Francais" : "English";
+
+  if (variant === "mobile") {
+    return (
+      <div className="mobile-lang" aria-label="Language">
+        <span className="lang-link active" aria-current="true">
+          {currentLabel}
+        </span>
+        <span className="lang-separator" aria-hidden="true">
+          /
+        </span>
+        <Link className="lang-link" href={alternateHref} hrefLang={nextLocale}>
+          {alternateLabel}
+        </Link>
+      </div>
+    );
+  }
 
   return (
-    <Link
-      href={switchHref}
-      locale={nextLocale}
-      className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-border bg-white/70 text-sm font-medium transition hover:border-accent hover:text-accent"
-      aria-label={nextLocale === "fr" ? "Français" : "English"}
-      title={nextLocale === "fr" ? "Français" : "English"}
-    >
-      <Languages aria-hidden="true" size={18} />
-    </Link>
+    <details className="lang-switcher">
+      <summary>
+        <span>{currentLabel}</span>
+        <span className="lang-current-label">{currentLanguageName}</span>
+      </summary>
+      <div className="lang-menu">
+        <Link className="lang-link" href={alternateHref} hrefLang={nextLocale}>
+          <span>{alternateLabel}</span>
+          <span>{alternateName}</span>
+        </Link>
+      </div>
+    </details>
   );
 }

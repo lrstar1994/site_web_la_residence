@@ -6,12 +6,50 @@
     "footer_location": "Antananarivo, Madagascar",
     "temporary_page": "Temporary page",
     "routes": {
+      "home": "Home",
       "hebergement": "Accommodation",
       "restaurant": "Restaurant",
       "salles": "Venues",
       "evenements": "Events",
       "actualites": "Blog",
       "boutique": "Shop"
+    }
+  },
+  "layout": {
+    "brand": {
+      "main": "La Résidence",
+      "sub": "Ankerana"
+    },
+    "reservation": "Book now",
+    "languages": {
+      "fr": "French",
+      "en": "English"
+    },
+    "menu": {
+      "open": "Open menu",
+      "close": "Close menu"
+    },
+    "footer": {
+      "tagline": "Hotel restaurant in Ankerana Antananarivo, La Résidence Ankerana welcomes you for stays, meals, seminars and events in a peaceful setting.",
+      "socials": "Social links",
+      "navigation": "Navigation",
+      "services": "Services",
+      "contact": "Contact",
+      "addressLabel": "Address:",
+      "reservationsLabel": "Reservations:",
+      "emailLabel": "Email:",
+      "copyright": "© 2026 Résidence Ankerana. All rights reserved.",
+      "serviceItems": {
+        "stays": "Stays in Antananarivo",
+        "meals": "Meals and gourmet breaks",
+        "meetings": "Meetings and training",
+        "brunches": "Brunches and receptions"
+      },
+      "legal": {
+        "legal": "Legal notice",
+        "privacy": "Privacy",
+        "terms": "Terms"
+      }
     }
   },
   "home": {
