@@ -1,0 +1,57 @@
+{
+  "common": {
+    "book_now": "Réserver maintenant",
+    "discover_rooms": "Découvrir nos chambres",
+    "primary_navigation": "Navigation principale",
+    "footer_location": "Antananarivo, Madagascar",
+    "temporary_page": "Page temporaire",
+    "routes": {
+      "hebergement": "Hébergement",
+      "restaurant": "Restaurant",
+      "salles": "Salles",
+      "evenements": "Événements",
+      "actualites": "Actualités",
+      "boutique": "Boutique"
+    }
+  },
+  "home": {
+    "eyebrow": "Hôtel, restaurant et événements",
+    "title": "La Résidence Ankerana",
+    "subtitle": "Le village dans la ville",
+    "navigation_title": "Découvrir le site"
+  },
+  "pages": {
+    "hebergement": {
+      "title": "Hébergement",
+      "description": "Une page temporaire pour préparer les chambres et suites."
+    },
+    "restaurant": {
+      "title": "Restaurant",
+      "description": "Une page temporaire pour préparer l'offre de restauration."
+    },
+    "salles": {
+      "title": "Salles",
+      "description": "Une page temporaire pour présenter les espaces de réunion."
+    },
+    "evenements": {
+      "title": "Événements",
+      "description": "Une page temporaire pour préparer les événements privés et professionnels."
+    },
+    "actualites": {
+      "title": "Actualités",
+      "description": "Une page temporaire pour les futurs articles."
+    },
+    "article": {
+      "title": "Article",
+      "description": "Une page temporaire pour un article."
+    },
+    "boutique": {
+      "title": "Boutique",
+      "description": "Une page temporaire pour les futurs produits."
+    },
+    "product": {
+      "title": "Produit",
+      "description": "Une page temporaire pour un produit."
+    }
+  }
+}
