@@ -13,15 +13,15 @@ const timingItems = [
   },
   {
     key: "dinner",
-    image: "/ChatGPT Image 23 juil. 2026, 15_59_20.PNG",
+    image: "/ChatGPT Image 23 juil. 2026, 15_59_20.png",
   },
   {
     key: "lunch",
-    image: "/ChatGPT Image 23 juil. 2026, 16_00_42.PNG",
+    image: "/ChatGPT Image 23 juil. 2026, 16_00_42.png",
   },
   {
     key: "atmosphere",
-    image: "/30-08-24 197.JPG",
+    image: "/30-08-24 197.jpg",
   },
 ] as const;
 
@@ -40,7 +40,7 @@ export async function RestaurantHero({ locale }: RestaurantHeroProps) {
             <h1 id="restaurant-title">{t("title")}</h1>
           </div>
           <Image
-            src="/30-08-24 276.JPG"
+            src="/30-08-24 276.jpg"
             alt={t("main_alt")}
             width={960}
             height={700}

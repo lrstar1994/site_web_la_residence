@@ -36,7 +36,7 @@ export async function HomeEvents({ locale }: HomeEventsProps) {
         <div className="loft-image-side">
           <div className="frame-container">
             <Image
-              src="/brunch et fete.jpg"
+              src="/brunch et fete.JPG"
               alt={t("image_alt")}
               width={760}
               height={520}

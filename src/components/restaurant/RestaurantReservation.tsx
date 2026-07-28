@@ -22,7 +22,7 @@ export async function RestaurantReservation({ locale }: RestaurantReservationPro
       <div className="reservation-container">
         <div className="reservation-visual">
           <Image
-            src="/30-08-24 268.JPG"
+            src="/30-08-24 268.jpg"
             alt={t("image_alt")}
             width={900}
             height={620}
