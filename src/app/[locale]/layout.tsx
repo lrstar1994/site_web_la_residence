@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
+import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
@@ -45,6 +46,14 @@ export default async function LocaleLayout({
 
   const messages = await getMessages();
   const baseUrl = getBaseUrl();
+  const headersList = await headers();
+  const pathname = headersList.get("x-pathname") ?? "";
+  const isAdminRoute =
+    pathname === `/${locale}/admin` || pathname.startsWith(`/${locale}/admin/`);
+
+  if (isAdminRoute) {
+    return <NextIntlClientProvider messages={messages}>{children}</NextIntlClientProvider>;
+  }
 
   return (
     <NextIntlClientProvider messages={messages}>

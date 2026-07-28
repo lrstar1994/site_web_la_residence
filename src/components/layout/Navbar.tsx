@@ -1,8 +1,9 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
 import type { Locale } from "@/lib/i18n/routing";
 
@@ -15,8 +16,7 @@ type NavbarProps = {
   }[];
   reservationUrl: string;
   labels: {
-    brandMain: string;
-    brandSub: string;
+    logoAlt: string;
     reservation: string;
     languageName: string;
     menuOpen: string;
@@ -25,6 +25,10 @@ type NavbarProps = {
   };
 };
 
+function normalizePathname(pathname: string) {
+  return pathname.length > 1 ? pathname.replace(/\/+$/, "") : pathname;
+}
+
 export function Navbar({
   locale,
   navItems,
@@ -32,29 +36,30 @@ export function Navbar({
   labels,
 }: NavbarProps) {
   const pathname = usePathname();
+  const normalizedPathname = normalizePathname(pathname);
   const [isOpen, setIsOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
-
-  useEffect(() => {
-    function handleScroll() {
-      setIsScrolled(window.scrollY > 50);
-    }
-
-    handleScroll();
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
   return (
     <nav
-      className={isScrolled ? "navbar nav-scrolled" : "navbar"}
+      className="navbar nav-scrolled"
       id="mainNavbar"
       aria-label={labels.primaryNavigation}
     >
       <div className="logo">
-        <Link href={locale === "fr" ? "/fr" : "/en"} className="logo-image-link">
-          <span className="main-logo">{labels.brandMain}</span>
-          <span className="sub-logo">{labels.brandSub}</span>
+        <Link
+          href={locale === "fr" ? "/fr" : "/en"}
+          className="logo-image-link"
+          aria-label="La Résidence Ankerana"
+          onClick={() => setIsOpen(false)}
+        >
+          <Image
+            src="/logo_la_residence_ankerana_transparent.png"
+            alt={labels.logoAlt}
+            width={180}
+            height={76}
+            priority
+            className="h-11 w-auto sm:h-14"
+          />
         </Link>
       </div>
 
@@ -77,9 +82,11 @@ export function Navbar({
         role="list"
       >
         {navItems.map((item) => {
+          const normalizedHref = normalizePathname(item.href);
           const isActive =
-            pathname === item.href ||
-            (item.href !== `/${locale}` && pathname.startsWith(`${item.href}/`));
+            normalizedPathname === normalizedHref ||
+            (normalizedHref !== `/${locale}` &&
+              normalizedPathname.startsWith(`${normalizedHref}/`));
 
           return (
             <li key={item.key}>
@@ -99,6 +106,7 @@ export function Navbar({
             currentLabel={locale.toUpperCase()}
             currentLanguageName={labels.languageName}
             variant="mobile"
+            onNavigate={() => setIsOpen(false)}
           />
         </li>
         <li className="mobile-reserve-item">

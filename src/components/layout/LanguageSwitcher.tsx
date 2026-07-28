@@ -10,6 +10,7 @@ type LanguageSwitcherProps = {
   currentLabel: string;
   currentLanguageName: string;
   variant?: "desktop" | "mobile";
+  onNavigate?: () => void;
 };
 
 function getAlternateHref(pathname: string, locale: Locale) {
@@ -26,6 +27,7 @@ export function LanguageSwitcher({
   currentLabel,
   currentLanguageName,
   variant = "desktop",
+  onNavigate,
 }: LanguageSwitcherProps) {
   const pathname = usePathname();
   const nextLocale = locale === "fr" ? "en" : "fr";
@@ -42,7 +44,12 @@ export function LanguageSwitcher({
         <span className="lang-separator" aria-hidden="true">
           /
         </span>
-        <Link className="lang-link" href={alternateHref} hrefLang={nextLocale}>
+        <Link
+          className="lang-link"
+          href={alternateHref}
+          hrefLang={nextLocale}
+          onClick={onNavigate}
+        >
           {alternateLabel}
         </Link>
       </div>
@@ -56,7 +63,12 @@ export function LanguageSwitcher({
         <span className="lang-current-label">{currentLanguageName}</span>
       </summary>
       <div className="lang-menu">
-        <Link className="lang-link" href={alternateHref} hrefLang={nextLocale}>
+        <Link
+          className="lang-link"
+          href={alternateHref}
+          hrefLang={nextLocale}
+          onClick={onNavigate}
+        >
           <span>{alternateLabel}</span>
           <span>{alternateName}</span>
         </Link>

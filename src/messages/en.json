@@ -56,7 +56,89 @@
     "eyebrow": "Hotel, restaurant and events",
     "title": "La Résidence Ankerana",
     "subtitle": "The village within the city",
-    "navigation_title": "Explore the site"
+    "navigation_title": "Explore the site",
+    "hero": {
+      "eyebrow": "Welcome to La Résidence Ankerana",
+      "title": "The village within the city",
+      "description": "Discover La Résidence Ankerana, a peaceful address in Antananarivo for stays, dining, seminars and special events.",
+      "cta": "Discover",
+      "image_alt": "La Résidence Ankerana hotel in Antananarivo"
+    },
+    "services": {
+      "eyebrow": "La Résidence Ankerana",
+      "title": "Hotel, restaurant and events in Antananarivo",
+      "items": {
+        "hebergement": {
+          "visible_title": "Accommodation",
+          "seo_title": "Accommodation in Antananarivo",
+          "description": "Rooms, suites and apartments for your stays in Antananarivo, in a peaceful setting in Ankerana with restaurant, pool, parking and personalized service.",
+          "cta": "Explore"
+        },
+        "restaurant": {
+          "visible_title": "Restaurant",
+          "seo_title": "Gastronomic restaurant in Antananarivo",
+          "description": "The restaurant at La Résidence Ankerana welcomes hotel guests and outside visitors for lunch, dinner, gourmet breaks and group meals.",
+          "cta": "Explore"
+        },
+        "salles": {
+          "visible_title": "Venues",
+          "seo_title": "Venue rental and seminars",
+          "description": "Spaces designed for meetings, training sessions, seminars and professional receptions in Antananarivo.",
+          "cta": "Explore"
+        },
+        "evenements": {
+          "visible_title": "Events",
+          "seo_title": "Private and professional event planning",
+          "description": "La Résidence Ankerana hosts brunches, birthdays, family celebrations and receptions in an elegant and peaceful place.",
+          "cta": "Explore"
+        },
+        "boutique": {
+          "visible_title": "Shop",
+          "seo_title": "Shop and online orders",
+          "description": "Discover a selection of products and creations inspired by the Malagasy art of living.",
+          "cta": "Discover the collection"
+        }
+      }
+    },
+    "restaurant": {
+      "eyebrow": "Restaurant in Ankerana",
+      "visible_title": "Le Privilège",
+      "seo_title": "Restaurant in Antananarivo",
+      "description": "Discover Le Privilège, the restaurant of La Résidence Ankerana, a welcoming place for lunch, dinner, brunch and private events in Antananarivo.",
+      "cta": "Discover restaurant",
+      "image_alt": "Le Privilège restaurant in Antananarivo",
+      "features": {
+        "feature_1": "Open to guests and outside visitors",
+        "feature_2": "Local products and seasonal dishes",
+        "feature_3": "Group meals, coffee breaks and events"
+      }
+    },
+    "accommodation": {
+      "title": "Rooms and stays at La Résidence Ankerana",
+      "description": "For one night, a weekend or a longer stay in Antananarivo, enjoy a peaceful and convenient address in Ankerana.",
+      "cta": "Book now",
+      "image_alt": "Room at La Résidence Ankerana in Antananarivo"
+    },
+    "venues": {
+      "label": "Seminars & receptions",
+      "title": "Our venues",
+      "description": "Organize your seminars, training sessions, conferences, professional workshops, and corporate events.",
+      "cta": "View venues",
+      "image_alt": "Seminar venue in Antananarivo"
+    },
+    "events": {
+      "title": "Brunches, celebrations and events in Ankerana",
+      "description": "La Résidence Ankerana welcomes your important moments in Antananarivo in an elegant, peaceful and friendly setting.",
+      "cta": "Discover events",
+      "image_alt": "Private event at La Résidence Ankerana in Antananarivo"
+    },
+    "shop": {
+      "label": "La Résidence Ankerana Shop",
+      "title": "Local crafts and products to discover on site",
+      "description": "After a meal, a stay or an event, discover a selection of local creations and products inspired by Malagasy lifestyle.",
+      "cta": "Visit shop",
+      "image_alt": "Local craft shop at La Résidence Ankerana in Antananarivo"
+    }
   },
   "pages": {
     "hebergement": {
@@ -90,6 +172,253 @@
     "product": {
       "title": "Product",
       "description": "A temporary page for a product."
+    }
+  },
+  "restaurantPage": {
+    "hero": {
+      "eyebrow": "Restaurant in Ankerana",
+      "title": "Le Privilège",
+      "main_alt": "Le Privilège restaurant at La Résidence Ankerana",
+      "timings": {
+        "breakfast": {
+          "title": "Breakfast",
+          "value": "06:30 – 10:00",
+          "alt": "Breakfast served at La Résidence Ankerana"
+        },
+        "lunch": {
+          "title": "Lunch",
+          "value": "12:00 – 14:30",
+          "alt": "Lunch at Le Privilège restaurant"
+        },
+        "dinner": {
+          "title": "Dinner",
+          "value": "19:00 – 22:30",
+          "alt": "Dinner at Le Privilège restaurant in Antananarivo"
+        },
+        "atmosphere": {
+          "title": "Atmosphere",
+          "value": "Natural light",
+          "alt": "Natural light atmosphere at Le Privilège restaurant"
+        }
+      }
+    },
+    "menus": {
+      "eyebrow": "Our menus",
+      "title": "Menus at Le Privilège restaurant",
+      "description": "Browse the menus at our restaurant in Antananarivo by category, including Malagasy cuisine, pizzas, desserts and group meals at Le Privilège. Categories with several visuals open in a gallery.",
+      "tabs_label": "Menu categories",
+      "tabs": {
+        "all": "All",
+        "restaurant": "Restaurant",
+        "entrees": "Starters",
+        "plats": "Main courses",
+        "malagasy": "Malagasy",
+        "desserts": "Desserts",
+        "petit_dejeuner": "Breakfast",
+        "pizzas": "Pizzas",
+        "boissons": "Drinks"
+      },
+      "image_count_singular": "menu",
+      "image_count_plural": "menus",
+      "view_single": "View menu",
+      "view_multiple": "View menus",
+      "gallery_info": "Gallery of {count} images",
+      "modal": {
+        "close": "Close",
+        "previous": "Previous image",
+        "next": "Next image",
+        "thumbnails": "Menu thumbnails",
+        "show_image": "Show menu {index}",
+        "counter": "{current} / {total}"
+      }
+    },
+    "reservation": {
+      "label": "Restaurant booking",
+      "title": "Book a table in Ankerana",
+      "description": "For breakfast in Antananarivo, lunch in Ankerana, dinner in Antananarivo or group meals, contact La Résidence Ankerana.",
+      "phone_label": "Phone",
+      "email_label": "Email",
+      "caption_label": "Atmosphere",
+      "caption_title": "Meals in a peaceful setting",
+      "image_alt": "Table at Le Privilège restaurant in Ankerana"
+    }
+  },
+  "venuesPage": {
+    "hero": {
+      "label": "Seminars & Receptions",
+      "title": "Venues for your events",
+      "description": "Host training sessions, conferences, business workshops and corporate events in a seminar venue in Antananarivo, a meeting room in Ankerana or a reception venue at La Résidence Ankerana.",
+      "image_alt": "Seminar and event venues at La Résidence Ankerana in Antananarivo"
+    },
+    "catalog": {
+      "eyebrow": "Our spaces",
+      "title": "A collection of spaces designed for excellence",
+      "previous": "Previous venue",
+      "next": "Next venue",
+      "max_capacity": "max",
+      "details": "View details",
+      "details_prefix": "View details of the",
+      "details_suffix": " venue",
+      "modal": {
+        "close": "Close window",
+        "previous": "Previous image",
+        "next": "Next image",
+        "thumbnails": "Gallery thumbnails",
+        "setups_title": "Possible seating arrangements",
+        "area": "Area",
+        "capacity": "Maximum capacity"
+      }
+    },
+    "modal": {
+      "counter": "{current} / {total}",
+      "thumbnail": "Show image {index}"
+    }
+  },
+  "eventsPage": {
+    "hero": {
+      "label": "Ankerana Events",
+      "title_line_1": "Excellence for",
+      "title_line_2": "your events",
+      "description": "An elegant event venue in Antananarivo with attentive service and refined cuisine for seminars, wedding venue needs, reception venue moments and corporate event planning.",
+      "venues_cta": "Discover our venues",
+      "image_alt": "Events at La Résidence Ankerana in Antananarivo"
+    },
+    "showcase": {
+      "label": "Our services",
+      "title": "Events we help you organize"
+    }
+  },
+  "accommodationPage": {
+    "hero": {
+      "label": "Accommodation in Ankerana",
+      "title": "A peaceful retreat in Antananarivo",
+      "description": "Rooms, studios and an apartment for short or extended stays at La Résidence Ankerana.",
+      "cta": "Book now",
+      "image_alt": "Accommodation at La Résidence Ankerana in Antananarivo"
+    },
+    "intro": {
+      "label": "The Art of Relaxing",
+      "title": "Spaces designed for your comfort",
+      "description": "La Résidence Ankerana offers accommodation in Antananarivo with rooms in Ankerana, studios in Antananarivo and a furnished apartment for short and extended stays or family holidays.",
+      "indicators_label": "Key accommodation indicators",
+      "indicators": {
+        "options": {
+          "value": "10",
+          "label": "Accommodation options"
+        },
+        "surface": {
+          "value": "20–50 m²",
+          "label": "Floor areas"
+        },
+        "capacity": {
+          "value": "2–6",
+          "label": "Guests"
+        }
+      }
+    },
+    "grid": {
+      "eyebrow": "Our Accommodation",
+      "title": "Choose Your Retreat",
+      "price_from": "From",
+      "price_unit": "Ar / night",
+      "details": "View details",
+      "details_prefix": "View details of the"
+    },
+    "modal": {
+      "close": "Close details",
+      "previous_image": "Previous image",
+      "next_image": "Next image",
+      "gallery_label": "Accommodation photo gallery",
+      "price_from": "From",
+      "price_unit": "Ar / night",
+      "highlights": "Accommodation highlights",
+      "book_now": "Book now",
+      "whatsapp_button": "WhatsApp: {number}",
+      "book_online": "Book online",
+      "book_online_description": "Check availability and book your stay.",
+      "essentials": "Essentials",
+      "residence_benefits": "Residence benefits",
+      "whatsapp_message": "Hello, I would like more information and to book the {name} accommodation at La Résidence Ankerana.",
+      "image_counter": "{current} / {total}"
+    }
+  },
+  "adminAuth": {
+    "login": {
+      "title": "Administration",
+      "subtitle": "Sign in to manage the website content.",
+      "email": "Email address",
+      "password": "Password",
+      "submit": "Sign in",
+      "pending": "Signing in…",
+      "error": "Unable to sign in. Check your credentials.",
+      "logo_alt": "Official logo of La Résidence Ankerana"
+    }
+  },
+  "newsPage": {
+    "header": {
+      "eyebrow": "News",
+      "title": "Latest news from La Résidence",
+      "issueLabel": "Edition",
+      "issueNumber": "01"
+    },
+    "categories": {
+      "all": "All",
+      "event": "Events",
+      "restaurant": "Restaurant",
+      "venues": "Venues",
+      "accommodation": "Accommodation",
+      "offers": "Offers"
+    },
+    "filters": {
+      "categories_label": "News categories",
+      "category_count": "{label} ({count})",
+      "year_label": "Year",
+      "all_years": "All years",
+      "month_label": "Month",
+      "all_months": "All months",
+      "search_label": "Search",
+      "search_placeholder": "Search news…",
+      "sort_label": "Sort",
+      "reset": "Reset filters",
+      "active_prefix": "Active filters:",
+      "no_active": "No active filter",
+      "sort": {
+        "newest": "Newest first",
+        "oldest": "Oldest first"
+      },
+      "months": {
+        "january": "January",
+        "february": "February",
+        "march": "March",
+        "april": "April",
+        "may": "May",
+        "june": "June",
+        "july": "July",
+        "august": "August",
+        "september": "September",
+        "october": "October",
+        "november": "November",
+        "december": "December"
+      }
+    },
+    "feed": {
+      "label": "Magazine",
+      "title": "Recent articles"
+    },
+    "card": {
+      "read_more": "Read more",
+      "read_article": "Read the article {title}"
+    },
+    "empty": {
+      "title": "No news found",
+      "text": "Change or reset the filters to display other articles.",
+      "unavailable_title": "News is temporarily unavailable.",
+      "unavailable_text": "Please try again later.",
+      "no_published_title": "No news has been published yet.",
+      "no_published_text": "New articles will be added soon."
+    },
+    "modal": {
+      "close": "Close article"
     }
   }
 }

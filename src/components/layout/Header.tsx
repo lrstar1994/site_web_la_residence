@@ -30,8 +30,10 @@ export async function Header({ locale }: HeaderProps) {
         navItems={navItems}
         reservationUrl={siteConfig.reservationUrl[locale]}
         labels={{
-          brandMain: layout("brand.main"),
-          brandSub: layout("brand.sub"),
+          logoAlt:
+            locale === "fr"
+              ? "Logo officiel La Résidence Ankerana"
+              : "Official logo of La Résidence Ankerana",
           reservation: layout("reservation"),
           languageName: layout(`languages.${locale}`),
           menuOpen: layout("menu.open"),

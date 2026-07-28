@@ -33,7 +33,9 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const requestHeaders = await headers();
-  const locale = resolveLocale(requestHeaders.get("x-locale"));
+  const locale = resolveLocale(
+    requestHeaders.get("x-next-intl-locale") ?? requestHeaders.get("x-locale"),
+  );
 
   return (
     <html

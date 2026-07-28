@@ -38,6 +38,14 @@ export const routing = defineRouting({
       fr: "/boutique/[slug]",
       en: "/shop/[slug]",
     },
+    "/admin": {
+      fr: "/admin",
+      en: "/admin",
+    },
+    "/admin/connexion": {
+      fr: "/admin/connexion",
+      en: "/admin/login",
+    },
   },
 });
 

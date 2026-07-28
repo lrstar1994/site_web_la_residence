@@ -1,80 +1,54 @@
-import { NextRequest, NextResponse } from "next/server";
-import { routing } from "@/lib/i18n/routing";
-import { siteConfig } from "@/data/site";
+import createMiddleware from "next-intl/middleware";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
+import { routing } from "./lib/i18n/routing";
+import { updateSession } from "./lib/supabase/proxy";
 
-const excludedPathPattern = /\.(.*)$/;
+const intlProxy = createMiddleware(routing);
 
-function normalizePathname(pathname: string) {
-  return pathname.replace(/\/+$/, "") || "/";
+function isAdminPath(pathname: string) {
+  return (
+    pathname === "/fr/admin" ||
+    pathname.startsWith("/fr/admin/") ||
+    pathname === "/en/admin" ||
+    pathname.startsWith("/en/admin/")
+  );
 }
 
-function requestHeadersWithLocale(request: NextRequest, locale: string) {
-  const requestHeaders = new Headers(request.headers);
-  requestHeaders.set("x-locale", locale);
-  return requestHeaders;
-}
-
-export function proxy(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
-
-  if (
-    pathname.startsWith("/_next") ||
-    pathname.startsWith("/api") ||
-    pathname === "/favicon.ico" ||
-    excludedPathPattern.test(pathname)
-  ) {
-    return NextResponse.next();
-  }
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-pathname", pathname);
 
   if (pathname === "/") {
-    return NextResponse.redirect(new URL("/fr", request.url));
-  }
-
-  const normalizedPathname = normalizePathname(pathname);
-  const locale = routing.locales.find(
-    (item) =>
-      normalizedPathname === `/${item}` ||
-      normalizedPathname.startsWith(`/${item}/`),
-  );
-
-  if (!locale) {
-    return NextResponse.redirect(new URL(`/fr${normalizedPathname}`, request.url));
-  }
-
-  const localizedPath = normalizedPathname.replace(`/${locale}`, "") || "/";
-  const route = siteConfig.seoRoutes.find(
-    (item) => item.paths[locale] === normalizedPathname,
-  );
-  const internalRoute = siteConfig.primaryRoutes.find(
-    (item) => item.internalPath === localizedPath,
-  );
-
-  if (locale === "en" && internalRoute) {
-    return NextResponse.redirect(
-      new URL(internalRoute.paths.en, request.url),
-      308,
+    return updateSession(
+      request,
+      NextResponse.redirect(new URL("/fr", request.url)),
     );
   }
 
-  const requestHeaders = requestHeadersWithLocale(request, locale);
+  if (isAdminPath(pathname)) {
+    const response =
+      pathname === "/en/admin/login"
+        ? NextResponse.rewrite(new URL("/en/admin/connexion", request.url), {
+            request: {
+              headers: requestHeaders,
+            },
+          })
+        : NextResponse.next({
+            request: {
+              headers: requestHeaders,
+            },
+          });
 
-  if (route && route.internalPath !== localizedPath) {
-    const rewriteUrl = request.nextUrl.clone();
-    rewriteUrl.pathname = `/${locale}${route.internalPath}`;
-    return NextResponse.rewrite(rewriteUrl, {
-      request: {
-        headers: requestHeaders,
-      },
-    });
+    return updateSession(request, response);
   }
 
-  return NextResponse.next({
-    request: {
-      headers: requestHeaders,
-    },
-  });
+  const response = intlProxy(request);
+
+  return updateSession(request, response);
 }
 
 export const config = {
-  matcher: ["/((?!_next|.*\\..*).*)"],
+  matcher: ["/((?!api|_next|_vercel|.*\\..*).*)"],
 };

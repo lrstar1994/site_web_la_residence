@@ -1,12 +1,16 @@
 import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
-import { Button } from "@/components/ui/Button";
-import { Container } from "@/components/ui/Container";
-import { SectionTitle } from "@/components/ui/SectionTitle";
-import { siteConfig } from "@/data/site";
-import { Link } from "@/lib/i18n/navigation";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { HomeAccommodation } from "@/components/home/HomeAccommodation";
+import { HomeEvents } from "@/components/home/HomeEvents";
+import { HomeHero } from "@/components/home/HomeHero";
+import { HomeRestaurant } from "@/components/home/HomeRestaurant";
+import { HomeServices } from "@/components/home/HomeServices";
+import { HomeVenues } from "@/components/home/HomeVenues";
+import { SHOP_ENABLED } from "@/config/features";
 import type { Locale } from "@/lib/i18n/routing";
-import { getHomeMetadata } from "@/lib/seo/metadata";
+import { getBaseUrl, getHomeMetadata } from "@/lib/seo/metadata";
+import { buildHomepageSchema } from "@/lib/seo/schema";
 
 type HomePageProps = {
   params: Promise<{ locale: Locale }>;
@@ -22,44 +26,27 @@ export async function generateMetadata({
 export default async function HomePage({ params }: HomePageProps) {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "home" });
-  const common = await getTranslations({ locale, namespace: "common" });
+  const baseUrl = getBaseUrl();
+  const HomeShop = SHOP_ENABLED
+    ? (await import("@/components/home/HomeShop")).HomeShop
+    : null;
 
   return (
-    <Container className="py-16 sm:py-24">
-      <section className="mx-auto max-w-4xl text-center">
-        <p className="mb-4 text-sm font-medium uppercase tracking-[0.2em] text-muted">
-          {t("eyebrow")}
-        </p>
-        <h1 className="text-4xl font-semibold tracking-normal sm:text-6xl">
-          {t("title")}
-        </h1>
-        <p className="mx-auto mt-5 max-w-2xl text-lg text-muted sm:text-xl">
-          {t("subtitle")}
-        </p>
-        <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-          <Button asChild>
-            <Link href="/">{common("book_now")}</Link>
-          </Button>
-          <Button asChild variant="secondary">
-            <Link href="/hebergement">{common("discover_rooms")}</Link>
-          </Button>
-        </div>
-      </section>
-
-      <section className="mt-16">
-        <SectionTitle title={t("navigation_title")} />
-        <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {siteConfig.primaryRoutes.map((route) => (
-            <Link
-              key={route.key}
-              href={route.internalPath}
-              className="rounded-lg border border-border bg-white/70 p-5 font-medium transition hover:border-accent hover:text-accent"
-            >
-              {common(`routes.${route.key}`)}
-            </Link>
-          ))}
-        </div>
-      </section>
-    </Container>
+    <>
+      <HomeHero
+        eyebrow={t("hero.eyebrow")}
+        title={t("hero.title")}
+        description={t("hero.description")}
+        cta={t("hero.cta")}
+        imageAlt={t("hero.image_alt")}
+      />
+      <HomeServices locale={locale} />
+      <HomeRestaurant locale={locale} />
+      <HomeAccommodation locale={locale} />
+      <HomeVenues locale={locale} />
+      <HomeEvents locale={locale} />
+      {HomeShop ? <HomeShop locale={locale} /> : null}
+      <JsonLd data={buildHomepageSchema(baseUrl, locale)} />
+    </>
   );
 }

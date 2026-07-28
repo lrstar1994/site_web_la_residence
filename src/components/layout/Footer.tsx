@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
+import { SHOP_ENABLED } from "@/config/features";
 import { siteConfig } from "@/data/site";
 import type { Locale } from "@/lib/i18n/routing";
 
@@ -11,7 +12,7 @@ export async function Footer({ locale }: FooterProps) {
   const t = await getTranslations({ locale, namespace: "common" });
   const layout = await getTranslations({ locale, namespace: "layout" });
   const navigationRoutes = siteConfig.primaryRoutes.filter(
-    (route) => route.key !== "boutique",
+    (route) => SHOP_ENABLED || route.key !== "boutique",
   );
   const legalLinks = ["legal", "privacy", "terms"] as const;
 
@@ -98,13 +99,13 @@ export async function Footer({ locale }: FooterProps) {
       <div className="footer-bottom">
         <div className="container">
           <p className="copyright">{layout("footer.copyright")}</p>
-          <div className="legal-links">
+          {/* <div className="legal-links">
             {legalLinks.map((item) => (
               <Link key={item} href={siteConfig.homeRoute.paths[locale]}>
                 {layout(`footer.legal.${item}`)}
               </Link>
             ))}
-          </div>
+          </div> */}
         </div>
       </div>
     </footer>

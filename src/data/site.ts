@@ -1,4 +1,5 @@
 import type { Locale, RouteKey } from "@/lib/i18n/routing";
+import { SHOP_ENABLED } from "@/config/features";
 
 type StaticRouteKey = Exclude<RouteKey, "home">;
 export type InternalPath =
@@ -29,6 +30,14 @@ const homeRoute = {
   },
   priority: 1,
   changeFrequency: "weekly" as const,
+};
+
+const boutiqueRoute: SiteRoute = {
+  key: "boutique",
+  internalPath: "/boutique",
+  paths: { fr: "/fr/boutique", en: "/en/shop" },
+  priority: 0.7,
+  changeFrequency: "weekly",
 };
 
 const primaryRoutes: SiteRoute[] = [
@@ -67,13 +76,7 @@ const primaryRoutes: SiteRoute[] = [
     priority: 0.7,
     changeFrequency: "daily",
   },
-  {
-    key: "boutique",
-    internalPath: "/boutique",
-    paths: { fr: "/fr/boutique", en: "/en/shop" },
-    priority: 0.7,
-    changeFrequency: "weekly",
-  },
+  ...(SHOP_ENABLED ? [boutiqueRoute] : []),
 ];
 
 export const siteConfig = {
