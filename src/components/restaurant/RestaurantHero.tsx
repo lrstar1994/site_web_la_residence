@@ -9,7 +9,7 @@ type RestaurantHeroProps = {
 const timingItems = [
   {
     key: "breakfast",
-    image: "/breakfast.jpg",
+    image: "/petit_dejeuner_la_residence_ankerana.png",
   },
   {
     key: "dinner",

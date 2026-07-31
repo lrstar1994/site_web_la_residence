@@ -394,11 +394,9 @@ set capacity = excluded.capacity, sort_order = excluded.sort_order, is_active = 
 
 insert into site.restaurant_menu_categories (code, name_fr, name_en, sort_order, is_active)
 values
-  ('entrees', 'Entrées', 'Starters', 20, true),
-  ('plats', 'Plats', 'Main courses', 30, true),
-  ('desserts', 'Desserts', 'Desserts', 50, true),
-  ('petit-dejeuner', 'Petit-déjeuner', 'Breakfast', 60, true),
-  ('pizzas', 'Pizzas', 'Pizzas', 70, true),
+  ('pizza', 'Pizza', 'Pizza', 50, true),
+  ('cartepiscine', 'Carte piscine', 'Swimming pool card', 60, true),
+  ('carteresto', 'Carte restaurant', 'restaurant card', 70, true),
   ('boissons', 'Boissons', 'Drinks', 80, true)
 on conflict (code) do update
 set name_fr = excluded.name_fr, name_en = excluded.name_en, sort_order = excluded.sort_order, is_active = excluded.is_active, updated_at = now();

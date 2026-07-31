@@ -34,7 +34,7 @@ export async function AccommodationHero({ locale }: AccommodationHeroProps) {
           <div className="lux-img-container">
             <Image
               className="lux-img"
-              src="/30-08-24 72.jpg"
+              src="/hebergement_la_residence_ankerana.png"
               alt={t("image_alt")}
               width={900}
               height={650}
