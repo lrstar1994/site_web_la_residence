@@ -40,7 +40,7 @@ export async function HomeRestaurant({ locale }: HomeRestaurantProps) {
       <div className="menu-illustration">
         <div className="image-wrapper">
           <Image
-            src="/accueil privilege.jpg"
+            src="/30-08-24 288.jpg"
             alt={t("image_alt")}
             width={720}
             height={520}
