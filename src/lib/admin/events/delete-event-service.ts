@@ -22,6 +22,20 @@ type EventServiceImageDeleteRow = {
   image_path: string;
 };
 
+function logSupabaseError(
+  step: string,
+  error: { code?: string; message?: string; details?: string; hint?: string },
+  context: Record<string, unknown>,
+) {
+  console.error(`[event-admin-delete] ${step}`, {
+    ...context,
+    code: error.code,
+    message: error.message,
+    details: error.details,
+    hint: error.hint,
+  });
+}
+
 export async function deleteEventService(serviceId: string): Promise<DeleteEventServiceResult> {
   await requireAdmin("fr");
 
@@ -51,17 +65,47 @@ export async function deleteEventService(serviceId: string): Promise<DeleteEvent
   }
 
   const row = service as EventServiceDeleteRow;
+
+  const { count: quoteRequestCount, error: quoteRequestsError } = await supabase
+    .from("event_quote_requests")
+    .select("id", { count: "exact", head: true })
+    .eq("event_type_id", serviceId);
+
+  if (quoteRequestsError) {
+    logSupabaseError("Quote request dependency check failed", quoteRequestsError, { serviceId });
+    return { ok: false, message: "Impossible de verifier les demandes de devis associees a cette prestation." };
+  }
+
+  if ((quoteRequestCount ?? 0) > 0) {
+    console.warn("[event-admin-delete] Deletion blocked by quote requests", {
+      serviceId,
+      quoteRequestCount,
+    });
+    return {
+      ok: false,
+      message:
+        "Cette prestation possede des demandes de devis associees. Elle ne peut pas etre supprimee definitivement. Desactivez-la pour la retirer du site public.",
+    };
+  }
+
   const { data: images, error: imagesError } = await supabase
     .from("event_service_images")
     .select("id,image_path")
     .eq("event_service_id", serviceId);
 
   if (imagesError) {
-    console.error("[event-admin-delete] Image rows load failed:", {
-      serviceId,
-      message: imagesError.message,
-    });
+    logSupabaseError("Image rows load failed", imagesError, { serviceId });
     return { ok: false, message: "Impossible de supprimer les images de cette prestation." };
+  }
+
+  const { error: deleteFieldsError } = await supabase
+    .from("event_quote_fields")
+    .delete()
+    .eq("event_type_id", serviceId);
+
+  if (deleteFieldsError) {
+    logSupabaseError("Quote fields deletion failed", deleteFieldsError, { serviceId });
+    return { ok: false, message: "Impossible de supprimer les champs de devis associes a cette prestation." };
   }
 
   const imageRows = (images ?? []) as EventServiceImageDeleteRow[];
@@ -88,11 +132,7 @@ export async function deleteEventService(serviceId: string): Promise<DeleteEvent
       .remove(storagePaths);
 
     if (storageError) {
-      console.error("[event-admin-delete] Storage deletion failed:", {
-        serviceId,
-        paths: storagePaths,
-        message: storageError.message,
-      });
+      logSupabaseError("Storage deletion failed", storageError, { serviceId, paths: storagePaths });
       return { ok: false, message: "Impossible de supprimer les fichiers associes a cette prestation." };
     }
   }
@@ -105,11 +145,10 @@ export async function deleteEventService(serviceId: string): Promise<DeleteEvent
       .in("id", imageRows.map((image) => image.id));
 
     if (deleteImagesError) {
-      console.error("[event-admin-delete] Image row deletion failed:", {
+      logSupabaseError("Image row deletion failed", deleteImagesError, {
         serviceId,
         imageIds: imageRows.map((image) => image.id),
         paths: storagePaths,
-        message: deleteImagesError.message,
       });
       return {
         ok: false,
@@ -124,10 +163,9 @@ export async function deleteEventService(serviceId: string): Promise<DeleteEvent
     .eq("id", serviceId);
 
   if (deleteError) {
-    console.error("[event-admin-delete] Row deletion failed:", {
+    logSupabaseError("Event row deletion failed", deleteError, {
       serviceId,
       paths: storagePaths,
-      message: deleteError.message,
     });
     return { ok: false, message: "Les images ont ete supprimees, mais la prestation n'a pas pu etre supprimee." };
   }
