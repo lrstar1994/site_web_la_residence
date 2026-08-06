@@ -196,6 +196,13 @@ export function AdminVenueForm({ mode, venue, setups, useTypes = [] }: Props) {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const form = event.currentTarget;
+
+    if (!(form instanceof HTMLFormElement)) {
+      setImageError("Impossible de preparer le formulaire.");
+      return;
+    }
+
     if (isSaving) return;
 
     setImageError(null);
@@ -203,7 +210,7 @@ export function AdminVenueForm({ mode, venue, setups, useTypes = [] }: Props) {
     const uploadedStoragePaths: string[] = [];
 
     try {
-      const formData = new FormData(event.currentTarget);
+      const formData = new FormData(form);
       const uploadedImagePaths: string[] = [];
       const supabase = createSupabaseBrowserClient();
 
@@ -224,6 +231,7 @@ export function AdminVenueForm({ mode, venue, setups, useTypes = [] }: Props) {
       }
 
       formData.delete("image_files");
+      formData.delete("image_file");
       formData.delete("uploaded_image_paths");
       uploadedImagePaths.forEach((imagePath) => formData.append("uploaded_image_paths", imagePath));
 

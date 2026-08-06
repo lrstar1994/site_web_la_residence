@@ -254,6 +254,12 @@ export function AdminRestaurantMenuForm({ mode, menu, categories }: Props) {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const form = event.currentTarget;
+
+    if (!(form instanceof HTMLFormElement)) {
+      setImageError("Impossible de preparer le formulaire.");
+      return;
+    }
 
     if (isProcessingImages || isSaving) return;
 
@@ -276,8 +282,9 @@ export function AdminRestaurantMenuForm({ mode, menu, categories }: Props) {
         uploadedStoragePaths.push(upload.storagePath);
       }
 
-      const formData = new FormData(event.currentTarget);
+      const formData = new FormData(form);
       formData.delete("image_files");
+      formData.delete("image_file");
       formData.delete("uploaded_image_paths");
       uploadedImagePaths.forEach((imagePath) => formData.append("uploaded_image_paths", imagePath));
 

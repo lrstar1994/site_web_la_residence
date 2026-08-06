@@ -265,6 +265,13 @@ export function AdminAccommodationForm({ mode, accommodation, groups, features }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const form = event.currentTarget;
+
+    if (!(form instanceof HTMLFormElement)) {
+      setImageError("Impossible de preparer le formulaire.");
+      return;
+    }
+
     if (isSaving) return;
 
     setImageError(null);
@@ -272,7 +279,7 @@ export function AdminAccommodationForm({ mode, accommodation, groups, features }
     const uploadedStoragePaths: string[] = [];
 
     try {
-      const formData = new FormData(event.currentTarget);
+      const formData = new FormData(form);
       const uploadedImagePaths: string[] = [];
       const supabase = createSupabaseBrowserClient();
 
@@ -293,6 +300,7 @@ export function AdminAccommodationForm({ mode, accommodation, groups, features }
       }
 
       formData.delete("image_files");
+      formData.delete("image_file");
       formData.delete("uploaded_image_paths");
       uploadedImagePaths.forEach((imagePath) => formData.append("uploaded_image_paths", imagePath));
 

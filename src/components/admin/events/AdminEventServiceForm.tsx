@@ -144,6 +144,13 @@ export function AdminEventServiceForm({ mode, service }: Props) {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const form = event.currentTarget;
+
+    if (!(form instanceof HTMLFormElement)) {
+      setImageSubmitError("Impossible de preparer le formulaire.");
+      return;
+    }
+
     if (isSaving) return;
 
     setImageSubmitError(null);
@@ -151,7 +158,7 @@ export function AdminEventServiceForm({ mode, service }: Props) {
     const uploadedPaths: string[] = [];
 
     try {
-      const formData = new FormData(event.currentTarget);
+      const formData = new FormData(form);
 
       const supabase = createSupabaseBrowserClient();
       const uploadedImagePaths: string[] = [];
@@ -174,6 +181,8 @@ export function AdminEventServiceForm({ mode, service }: Props) {
 
       formData.delete("uploaded_image_path");
       formData.delete("uploaded_image_paths");
+      formData.delete("image_file");
+      formData.delete("image_files");
       uploadedImagePaths.forEach((imagePath) => formData.append("uploaded_image_paths", imagePath));
 
       startSavingTransition(() => {

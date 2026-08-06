@@ -143,6 +143,13 @@ export function AdminNewsForm({ mode, categories, article }: AdminNewsFormProps)
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const form = event.currentTarget;
+
+    if (!(form instanceof HTMLFormElement)) {
+      setImageSubmitError("Impossible de preparer le formulaire.");
+      return;
+    }
+
     if (isSaving) return;
 
     setImageSubmitError(null);
@@ -150,7 +157,7 @@ export function AdminNewsForm({ mode, categories, article }: AdminNewsFormProps)
     const uploadedPaths: string[] = [];
 
     try {
-      const formData = new FormData(event.currentTarget);
+      const formData = new FormData(form);
       const submitter = (event.nativeEvent as SubmitEvent).submitter;
       if (submitter instanceof HTMLButtonElement && submitter.name) {
         formData.set(submitter.name, submitter.value);
@@ -177,6 +184,8 @@ export function AdminNewsForm({ mode, categories, article }: AdminNewsFormProps)
 
       formData.delete("uploaded_image_path");
       formData.delete("uploaded_image_paths");
+      formData.delete("image_file");
+      formData.delete("image_files");
       uploadedImagePaths.forEach((imagePath) => formData.append("uploaded_image_paths", imagePath));
 
       startSavingTransition(() => {
