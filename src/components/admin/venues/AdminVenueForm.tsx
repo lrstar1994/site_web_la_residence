@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useActionState, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import type { FormEvent } from "react";
 import { createVenueAction, deleteVenueAction, updateVenueAction } from "@/app/[locale]/admin/(protected)/salles/actions";
@@ -14,13 +15,14 @@ import {
   type AdminVenueFormState,
   type AdminVenueFormValues,
   type AdminVenueSetup,
+  type AdminVenueUseType,
 } from "@/lib/admin/venues/admin-venue-types";
 import { compressImage, formatImageSize, validateOriginalImage } from "@/lib/images/compress-image";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { removeUploadedImages } from "@/lib/storage/remove-uploaded-images";
 import { uploadOptimizedImage } from "@/lib/storage/upload-optimized-image";
 
-type Props = { mode: "create" | "edit"; venue?: AdminVenueDetail; setups: AdminVenueSetup[] };
+type Props = { mode: "create" | "edit"; venue?: AdminVenueDetail; setups: AdminVenueSetup[]; useTypes?: AdminVenueUseType[] };
 
 type PendingVenueImage = {
   clientId: string;
@@ -60,7 +62,7 @@ function TextArea({ name, label, value, error, rows = 5, onChange }: { name: str
   return <label className="admin-news-form-field"><span>{label}</span><textarea name={name} value={value} rows={rows} required onChange={(event) => onChange(event.target.value)} />{error ? <strong className="admin-news-form-error">{error}</strong> : null}</label>;
 }
 
-export function AdminVenueForm({ mode, venue, setups }: Props) {
+export function AdminVenueForm({ mode, venue, setups, useTypes = [] }: Props) {
   const values = useMemo(() => initialValues(venue), [venue]);
   const initialState = useMemo<AdminVenueFormState>(() => ({ ok: false, message: "", fieldErrors: {}, values }), [values]);
   const action = mode === "create" ? createVenueAction : updateVenueAction.bind(null, venue?.id ?? "");
@@ -83,6 +85,8 @@ export function AdminVenueForm({ mode, venue, setups }: Props) {
   const activeExistingImages = existingImages.filter((image) => image.isActive && !deletedImageIds.includes(image.id));
   const deleteCandidate = existingImages.find((image) => image.id === deleteCandidateId) ?? null;
   const visibleImageCount = activeExistingImages.length + pendingImages.length;
+  const configuredUseTypeIds = new Set(venue?.usePresentations.map((presentation) => presentation.useTypeId) ?? []);
+  const availableUseTypes = useTypes.filter((useType) => useType.isActive && !configuredUseTypeIds.has(useType.id));
 
   useEffect(() => {
     return () => {
@@ -334,6 +338,50 @@ export function AdminVenueForm({ mode, venue, setups }: Props) {
           <section className="admin-news-form-card"><div className="admin-news-form-section-heading"><p>Contenu francais</p><h2>Version francaise</h2></div><TextArea name="short_description_fr" label="Courte description francaise" rows={3} value={formValues.shortDescriptionFr} error={state.fieldErrors.shortDescriptionFr} onChange={(value) => update("shortDescriptionFr", value)} /></section>
           <section className="admin-news-form-card"><div className="admin-news-form-section-heading"><p>Contenu anglais</p><h2>Version anglaise</h2></div><TextArea name="short_description_en" label="Courte description anglaise" rows={3} value={formValues.shortDescriptionEn} error={state.fieldErrors.shortDescriptionEn} onChange={(value) => update("shortDescriptionEn", value)} /></section>
           <section className="admin-news-form-card"><div className="admin-news-form-section-heading"><p>Configurations possibles</p><h2>Configurations</h2></div><div className="admin-feature-checkboxes">{setups.map((setup) => <label key={setup.id} className="admin-checkbox-field"><input name="setup_ids" type="checkbox" value={setup.id} checked={selectedSetups.has(setup.id)} onChange={(event) => setSelectedSetups((current) => { const next = new Set(current); if (event.target.checked) next.add(setup.id); else next.delete(setup.id); return next; })} /><span className="admin-feature-option-label"><VenueSetupIcon iconKey={setup.iconKey} className="admin-feature-icon" /><span>{setup.nameFr}{setup.isActive ? "" : " - inactive"}</span></span></label>)}</div></section>
+          {mode === "edit" && venue ? (
+            <section className="admin-news-form-card">
+              <div className="admin-news-form-section-heading">
+                <p>Usages de la salle</p>
+                <h2>Presentations dediees</h2>
+              </div>
+              <p className="admin-news-form-note">
+                Chaque usage peut avoir son propre titre, sa description, son statut et sa galerie.
+              </p>
+              {venue.usePresentations.length > 0 ? (
+                <div className="admin-venue-use-list">
+                  {venue.usePresentations.map((presentation) => (
+                    <article className="admin-venue-use-item" key={presentation.id}>
+                      <div>
+                        <strong>{presentation.useTypeNameFr}</strong>
+                        <span>{presentation.titleFr}</span>
+                        <small>{presentation.imageCount} images · {presentation.isActive ? "Actif" : "Inactif"}</small>
+                      </div>
+                      <Link className="admin-news-action" href={`/fr/admin/salles/${venue.id}/usages/${presentation.id}/modifier`}>
+                        Modifier
+                      </Link>
+                    </article>
+                  ))}
+                </div>
+              ) : (
+                <p className="admin-news-form-note">Aucun usage specifique n&apos;est encore configure. Le site utilise la presentation generale.</p>
+              )}
+              {availableUseTypes.length > 0 ? (
+                <div className="admin-venue-use-add-grid">
+                  {availableUseTypes.map((useType) => (
+                    <Link
+                      className="admin-news-new admin-news-secondary"
+                      href={`/fr/admin/salles/${venue.id}/usages/nouveau?useTypeId=${useType.id}`}
+                      key={useType.id}
+                    >
+                      + Ajouter : {useType.nameFr}
+                    </Link>
+                  ))}
+                </div>
+              ) : (
+                <p className="admin-news-form-note">Tous les types d&apos;usage actifs sont deja configures pour cette salle.</p>
+              )}
+            </section>
+          ) : null}
         </div>
         <div className="admin-news-form-sticky">
           <section className="admin-news-form-card">

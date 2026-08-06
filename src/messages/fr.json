@@ -285,7 +285,13 @@
     },
     "showcase": {
       "label": "Nos prestations",
-      "title": "Événements que nous préparons"
+      "title": "Événements que nous préparons",
+      "viewDetails": "Voir les détails",
+      "requestQuote": "Demander un devis",
+      "closeDetails": "Fermer les détails",
+      "previousImage": "Image précédente",
+      "nextImage": "Image suivante",
+      "thumbnail": "Afficher l'image"
     }
   },
   "accommodationPage": {

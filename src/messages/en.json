@@ -285,7 +285,13 @@
     },
     "showcase": {
       "label": "Our services",
-      "title": "Events we help you organize"
+      "title": "Events we help you organize",
+      "viewDetails": "View details",
+      "requestQuote": "Request a quote",
+      "closeDetails": "Close details",
+      "previousImage": "Previous image",
+      "nextImage": "Next image",
+      "thumbnail": "Show image"
     }
   },
   "accommodationPage": {

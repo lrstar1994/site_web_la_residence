@@ -12,6 +12,9 @@ export function AdminVenuesHeader() {
         <Link className="admin-news-new admin-news-secondary" href="/fr/admin/salles/configurations">
           Configurations
         </Link>
+        <Link className="admin-news-new admin-news-secondary" href="/fr/admin/salles/usages">
+          Types d&apos;usage
+        </Link>
         <Link className="admin-news-new admin-news-primary" href="/fr/admin/salles/nouveau">
           <span aria-hidden="true">+</span>
           Nouvelle salle

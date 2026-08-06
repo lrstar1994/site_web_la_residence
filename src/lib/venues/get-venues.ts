@@ -1,7 +1,7 @@
 import "server-only";
 
 import { getSupabaseServerClient } from "@/lib/supabase/server";
-import type { Venue, VenueCardModel, VenueSetup } from "@/types/venue";
+import type { Venue, VenueCardModel, VenueSetup, VenueUsePresentation } from "@/types/venue";
 
 type VenueRow = {
   id: string;
@@ -48,6 +48,37 @@ type SetupLinkRow = {
   } | null;
 };
 
+type UsePresentationRow = {
+  id: string;
+  venue_id: string;
+  use_type_id: string;
+  title_fr: string;
+  title_en: string;
+  description_fr: string;
+  description_en: string;
+  sort_order: number;
+  is_active: boolean;
+  use_type: {
+    id: string;
+    code: string;
+    name_fr: string;
+    name_en: string;
+    sort_order: number;
+    is_active: boolean;
+  } | null;
+};
+
+type UseImageRow = {
+  id: string;
+  venue_use_presentation_id: string;
+  image_path: string;
+  alt_fr: string | null;
+  alt_en: string | null;
+  sort_order: number;
+  is_cover: boolean;
+  is_active: boolean;
+};
+
 export type VenuesResult =
   | { ok: true; venues: Venue[]; cards: VenueCardModel[] }
   | { ok: false; venues: Venue[]; cards: VenueCardModel[]; error: string };
@@ -80,6 +111,20 @@ function toCards(venues: Venue[]): VenueCardModel[] {
         src: image.imagePath,
         alt: image.alt,
       })),
+      uses: venue.uses.map((use) => {
+        const sortedUseImages = [...use.images].sort((a, b) => Number(b.isCover) - Number(a.isCover) || a.sortOrder - b.sortOrder);
+        return {
+          id: use.id,
+          useTypeCode: use.useTypeCode,
+          useTypeName: use.useTypeName,
+          title: use.title,
+          description: use.description,
+          images: sortedUseImages.map((image) => ({
+            src: image.imagePath,
+            alt: image.alt,
+          })),
+        };
+      }),
     };
   });
 }
@@ -87,7 +132,7 @@ function toCards(venues: Venue[]): VenueCardModel[] {
 export async function getVenues(): Promise<VenuesResult> {
   try {
     const supabase = (await getSupabaseServerClient()).schema("site");
-    const [venuesResult, imagesResult, setupResult] = await Promise.all([
+    const [venuesResult, imagesResult, setupResult, usesResult, useImagesResult] = await Promise.all([
       supabase
         .from("venues")
         .select("*")
@@ -106,12 +151,24 @@ export async function getVenues(): Promise<VenuesResult> {
         .eq("is_active", true)
         .order("sort_order", { ascending: true })
         .order("created_at", { ascending: true }),
+      supabase
+        .from("venue_use_presentations")
+        .select("id,venue_id,use_type_id,title_fr,title_en,description_fr,description_en,sort_order,is_active,use_type:use_type_id(id,code,name_fr,name_en,sort_order,is_active)")
+        .eq("is_active", true)
+        .order("sort_order", { ascending: true })
+        .order("created_at", { ascending: true }),
+      supabase
+        .from("venue_use_images")
+        .select("*")
+        .eq("is_active", true)
+        .order("sort_order", { ascending: true })
+        .order("created_at", { ascending: true }),
     ]);
 
-    if (venuesResult.error || imagesResult.error || setupResult.error) {
+    if (venuesResult.error || imagesResult.error || setupResult.error || usesResult.error || useImagesResult.error) {
       console.error(
         "[venues] Unable to load data:",
-        venuesResult.error?.message ?? imagesResult.error?.message ?? setupResult.error?.message,
+        venuesResult.error?.message ?? imagesResult.error?.message ?? setupResult.error?.message ?? usesResult.error?.message ?? useImagesResult.error?.message,
       );
       return { ok: false, venues: [], cards: [], error: "venues_unavailable" };
     }
@@ -139,9 +196,48 @@ export async function getVenues(): Promise<VenuesResult> {
       setupsByVenue.set(link.venue_id, current);
     }
 
+    const useImagesByPresentation = new Map<string, UseImageRow[]>();
+    for (const image of (useImagesResult.data ?? []) as unknown as UseImageRow[]) {
+      const current = useImagesByPresentation.get(image.venue_use_presentation_id) ?? [];
+      current.push(image);
+      useImagesByPresentation.set(image.venue_use_presentation_id, current);
+    }
+
+    const usesByVenue = new Map<string, VenueUsePresentation[]>();
+    for (const use of (usesResult.data ?? []) as unknown as UsePresentationRow[]) {
+      if (!use.use_type?.is_active) continue;
+      const images = (useImagesByPresentation.get(use.id) ?? []).sort((a, b) => Number(b.is_cover) - Number(a.is_cover) || a.sort_order - b.sort_order);
+      const mappedImages = images.map((image) => ({
+        id: image.id,
+        imagePath: image.image_path,
+        alt: {
+          fr: image.alt_fr ?? use.title_fr,
+          en: image.alt_en ?? use.title_en,
+        },
+        sortOrder: image.sort_order,
+        isCover: image.is_cover,
+        isActive: image.is_active,
+      }));
+      const current = usesByVenue.get(use.venue_id) ?? [];
+      current.push({
+        id: use.id,
+        useTypeId: use.use_type_id,
+        useTypeCode: use.use_type.code,
+        useTypeName: { fr: use.use_type.name_fr, en: use.use_type.name_en },
+        title: { fr: use.title_fr, en: use.title_en },
+        description: { fr: use.description_fr, en: use.description_en },
+        images: mappedImages,
+        coverImage: mappedImages[0] ?? null,
+        sortOrder: use.sort_order || use.use_type.sort_order,
+        isActive: use.is_active,
+      });
+      usesByVenue.set(use.venue_id, current);
+    }
+
     const venues = ((venuesResult.data ?? []) as unknown as VenueRow[]).map((row) => {
       const images = (imagesByVenue.get(row.id) ?? []).sort((a, b) => Number(b.is_cover) - Number(a.is_cover) || a.sort_order - b.sort_order);
       const setups = (setupsByVenue.get(row.id) ?? []).sort((a, b) => a.sortOrder - b.sortOrder);
+      const uses = (usesByVenue.get(row.id) ?? []).sort((a, b) => a.sortOrder - b.sortOrder);
 
       return {
         id: row.id,
@@ -163,6 +259,7 @@ export async function getVenues(): Promise<VenuesResult> {
           isActive: image.is_active,
         })),
         setups,
+        uses,
         createdAt: row.created_at,
         updatedAt: row.updated_at,
       } satisfies Venue;

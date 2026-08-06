@@ -37,13 +37,20 @@ function getFocusableElements(container: HTMLElement | null) {
 
 export function VenueModal({ venue, locale, labels, onClose }: VenueModalProps) {
   const t = useTranslations("venuesPage.modal");
+  const generalTab = { id: "general", label: locale === "fr" ? "Presentation generale" : "General presentation" };
+  const tabs = venue.uses.length > 0 ? [generalTab, ...venue.uses.map((use) => ({ id: use.id, label: use.useTypeName[locale] }))] : [];
+  const [activeTabId, setActiveTabId] = useState(tabs[0]?.id ?? "general");
   const [currentIndex, setCurrentIndex] = useState(0);
   const modalRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
-  const images = venue.images.length ? venue.images : [venue.coverImage];
+  const activeUse = venue.uses.find((use) => use.id === activeTabId) ?? null;
+  const activeImages = activeUse?.images.length ? activeUse.images : venue.images;
+  const images = activeImages.length ? activeImages : [venue.coverImage];
   const currentImage = images[currentIndex] ?? images[0];
   const hasMultipleImages = images.length > 1;
   const titleId = `venue-modal-${venue.id}`;
+  const modalTitle = activeUse?.title[locale] ?? venue.name[locale];
+  const modalDescription = activeUse?.description[locale] ?? venue.fullDescription[locale];
 
   const navigate = useCallback(
     (direction: number) => {
@@ -201,9 +208,28 @@ export function VenueModal({ venue, locale, labels, onClose }: VenueModalProps) 
           </div>
           <div className="modal-details">
             <span className="modal-location">{venue.location[locale]}</span>
-            <h2 id={titleId}>{venue.name[locale]}</h2>
+            <h2 id={titleId}>{modalTitle}</h2>
+            {tabs.length > 0 ? (
+              <div className="venue-use-tabs" role="tablist" aria-label={locale === "fr" ? "Presentations de la salle" : "Venue presentations"}>
+                {tabs.map((tab) => (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={activeTabId === tab.id}
+                    className={activeTabId === tab.id ? "active" : undefined}
+                    onClick={() => {
+                      setActiveTabId(tab.id);
+                      setCurrentIndex(0);
+                    }}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+            ) : null}
             <div className="modal-separator" aria-hidden="true" />
-            <p>{venue.fullDescription[locale]}</p>
+            <p>{modalDescription}</p>
             <div className="setup-section">
               <h3>{labels.setupsTitle}</h3>
               <div className="modal-setups">

@@ -3813,6 +3813,42 @@ a {
   background: var(--dore-prestige);
 }
 
+.page-venues .venue-use-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-top: 1rem;
+}
+
+.page-venues .venue-use-tabs button {
+  border: 1px solid rgba(0, 92, 75, 0.18);
+  border-radius: 999px;
+  background: #ffffff;
+  color: var(--vert-residence);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 0.5rem 0.85rem;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease;
+}
+
+.page-venues .venue-use-tabs button.active,
+.page-venues .venue-use-tabs button:hover,
+.page-venues .venue-use-tabs button:focus-visible {
+  background: var(--vert-residence);
+  border-color: var(--vert-residence);
+  color: #ffffff;
+}
+
+.page-venues .venue-use-tabs button:focus-visible {
+  outline: 3px solid rgba(200, 169, 81, 0.32);
+  outline-offset: 2px;
+}
+
 .page-venues .modal-details p {
   margin-bottom: 30px;
   color: var(--gris-elegant);
@@ -4132,46 +4168,6 @@ a {
   transform: scale(1.05);
 }
 
-.page-evenement .event-card-gallery-count {
-  position: absolute;
-  right: 12px;
-  bottom: 12px;
-  z-index: 2;
-  padding: 5px 9px;
-  border-radius: 999px;
-  background: rgba(0, 92, 75, 0.82);
-  color: #fff;
-  font-size: 0.78rem;
-  font-weight: 700;
-}
-
-.page-evenement .event-card-gallery-controls {
-  position: absolute;
-  left: 12px;
-  bottom: 14px;
-  z-index: 2;
-  display: flex;
-  gap: 7px;
-}
-
-.page-evenement .event-card-gallery-controls button {
-  width: 9px;
-  height: 9px;
-  padding: 0;
-  border: 1px solid rgba(255, 255, 255, 0.9);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.55);
-  cursor: pointer;
-}
-
-.page-evenement .event-card-gallery-controls button.is-active,
-.page-evenement .event-card-gallery-controls button:focus-visible {
-  background: var(--dore-prestige);
-  border-color: var(--dore-prestige);
-  outline: 2px solid rgba(255, 255, 255, 0.9);
-  outline-offset: 2px;
-}
-
 .page-evenement .event-card-content {
   display: flex;
   flex: 1;
@@ -4192,6 +4188,233 @@ a {
   color: var(--gris-elegant);
   font-size: 0.95rem;
   line-height: 1.6;
+}
+
+.page-evenement .event-card-details {
+  align-self: flex-start;
+  min-height: 42px;
+  padding: 0.65rem 1rem;
+  border: 1px solid var(--vert-residence);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--vert-residence);
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition:
+    background-color 0.18s ease,
+    color 0.18s ease,
+    border-color 0.18s ease,
+    transform 0.18s ease;
+}
+
+.page-evenement .event-card-details:hover {
+  border-color: var(--vert-residence);
+  background: var(--vert-residence);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.page-evenement .event-card-details:focus-visible {
+  outline: 3px solid rgba(200, 169, 81, 0.28);
+  outline-offset: 3px;
+}
+
+.page-evenement .event-service-modal-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 5000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.page-evenement .event-service-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgba(8, 17, 14, 0.76);
+  cursor: pointer;
+}
+
+.page-evenement .event-service-modal {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 56%) minmax(300px, 44%);
+  width: min(92vw, 980px);
+  max-height: 88vh;
+  overflow: hidden;
+  border: 1px solid rgba(200, 169, 81, 0.28);
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 28px 80px rgba(0, 40, 33, 0.28);
+}
+
+.page-evenement .event-service-modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 4;
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border: 1px solid rgba(0, 92, 75, 0.12);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.94);
+  color: var(--vert-residence);
+  font-size: 1.5rem;
+  cursor: pointer;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
+}
+
+.page-evenement .event-service-modal-close:focus-visible {
+  outline: 3px solid rgba(200, 169, 81, 0.35);
+  outline-offset: 3px;
+}
+
+.page-evenement .event-service-modal-gallery {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  min-height: 0;
+  background: #f7f6f1;
+}
+
+.page-evenement .event-service-modal-main-image {
+  position: relative;
+  min-height: clamp(320px, 58vh, 560px);
+  overflow: hidden;
+}
+
+.page-evenement .event-service-modal-main-image img,
+.page-evenement .event-service-modal-thumbnails img {
+  object-fit: cover;
+}
+
+.page-evenement .event-service-modal-main-image > span:not(.event-service-modal-counter) {
+  display: grid;
+  height: 100%;
+  min-height: 320px;
+  place-items: center;
+  color: var(--gris-elegant);
+  font-weight: 700;
+}
+
+.page-evenement .event-service-modal-counter {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  z-index: 2;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(0, 92, 75, 0.86);
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.page-evenement .event-service-modal-arrow {
+  position: absolute;
+  top: 50%;
+  z-index: 2;
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.78);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.86);
+  color: var(--vert-residence);
+  font-size: 2rem;
+  cursor: pointer;
+  transform: translateY(-50%);
+}
+
+.page-evenement .event-service-modal-arrow.previous {
+  left: 16px;
+}
+
+.page-evenement .event-service-modal-arrow.next {
+  right: 16px;
+}
+
+.page-evenement .event-service-modal-arrow:focus-visible {
+  outline: 3px solid rgba(200, 169, 81, 0.35);
+  outline-offset: 3px;
+}
+
+.page-evenement .event-service-modal-thumbnails {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(62px, 1fr));
+  gap: 9px;
+  padding: 12px;
+}
+
+.page-evenement .event-service-modal-thumbnails button {
+  position: relative;
+  aspect-ratio: 1;
+  overflow: hidden;
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.page-evenement .event-service-modal-thumbnails button.is-active,
+.page-evenement .event-service-modal-thumbnails button:focus-visible {
+  border-color: var(--dore-prestige);
+  outline: 3px solid rgba(200, 169, 81, 0.2);
+  outline-offset: 2px;
+}
+
+.page-evenement .event-service-modal-content {
+  display: grid;
+  align-content: start;
+  gap: 22px;
+  min-height: 0;
+  overflow-y: auto;
+  padding: clamp(28px, 4vw, 42px);
+}
+
+.page-evenement .event-service-modal-content h2 {
+  margin: 0;
+  color: var(--vert-residence);
+  font-family: var(--font-titre);
+  font-size: clamp(2rem, 4vw, 3rem);
+  line-height: 1.08;
+}
+
+.page-evenement .event-service-modal-content p {
+  margin: 0;
+  color: var(--gris-elegant);
+  font-size: 1rem;
+  line-height: 1.75;
+}
+
+.page-evenement .event-service-modal-quote {
+  align-self: end;
+  min-height: 48px;
+  padding: 0.8rem 1.15rem;
+  border: 1px solid var(--vert-residence);
+  border-radius: 9px;
+  background: var(--vert-residence);
+  color: #fff;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.page-evenement .event-service-modal-quote:hover {
+  background: #004a3d;
+}
+
+.page-evenement .event-service-modal-quote:focus-visible {
+  outline: 3px solid rgba(200, 169, 81, 0.36);
+  outline-offset: 3px;
 }
 
 @keyframes eventSlowZoom {
@@ -4254,6 +4477,35 @@ a {
 
   .page-evenement .events-grid {
     grid-template-columns: 1fr;
+  }
+
+  .page-evenement .event-service-modal-layer {
+    align-items: flex-start;
+    padding: 10px;
+  }
+
+  .page-evenement .event-service-modal {
+    grid-template-columns: 1fr;
+    width: min(96vw, 560px);
+    max-height: calc(100vh - 20px);
+    overflow-y: auto;
+  }
+
+  .page-evenement .event-service-modal-gallery {
+    grid-template-rows: auto auto;
+  }
+
+  .page-evenement .event-service-modal-main-image {
+    min-height: 260px;
+  }
+
+  .page-evenement .event-service-modal-content {
+    overflow: visible;
+    padding: 24px;
+  }
+
+  .page-evenement .event-service-modal-quote {
+    width: 100%;
   }
 }
 

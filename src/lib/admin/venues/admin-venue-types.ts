@@ -14,6 +14,7 @@ export type AdminVenue = {
   coverImage: string | null;
   imageCount: number;
   setupCount: number;
+  useCount: number;
 };
 
 export type AdminVenueImage = {
@@ -31,6 +32,7 @@ export type AdminVenueDetail = Omit<AdminVenue, "coverImage" | "imageCount" | "s
   sortOrder: string;
   images: AdminVenueImage[];
   selectedSetupIds: string[];
+  usePresentations: AdminVenueUsePresentationSummary[];
 };
 
 export type AdminVenueSetup = {
@@ -43,6 +45,41 @@ export type AdminVenueSetup = {
   isActive: boolean;
   updatedAt: string;
   usageCount: number;
+};
+
+export type AdminVenueUseType = {
+  id: string;
+  code: string;
+  nameFr: string;
+  nameEn: string;
+  sortOrder: number;
+  isActive: boolean;
+  updatedAt: string;
+  usageCount: number;
+};
+
+export type AdminVenueUsePresentationSummary = {
+  id: string;
+  venueId: string;
+  useTypeId: string;
+  useTypeCode: string;
+  useTypeNameFr: string;
+  useTypeNameEn: string;
+  titleFr: string;
+  titleEn: string;
+  sortOrder: number;
+  isActive: boolean;
+  imageCount: number;
+  coverImage: string | null;
+  updatedAt: string;
+};
+
+export type AdminVenueUsePresentation = AdminVenueUsePresentationSummary & {
+  venueCode: string;
+  venueName: string;
+  descriptionFr: string;
+  descriptionEn: string;
+  images: AdminVenueImage[];
 };
 
 export type AdminVenueFormValues = {
@@ -83,6 +120,40 @@ export type AdminVenueSetupFormState = {
   values: AdminVenueSetupFormValues;
 };
 
+export type AdminVenueUseTypeFormValues = {
+  code: string;
+  nameFr: string;
+  nameEn: string;
+  sortOrder: string;
+  isActive: boolean;
+};
+
+export type AdminVenueUseTypeFormState = {
+  ok: boolean;
+  message: string;
+  fieldErrors: Record<string, string>;
+  values: AdminVenueUseTypeFormValues;
+};
+
+export type AdminVenueUsePresentationFormValues = {
+  venueId: string;
+  useTypeId: string;
+  titleFr: string;
+  titleEn: string;
+  descriptionFr: string;
+  descriptionEn: string;
+  sortOrder: string;
+  isActive: boolean;
+  coverImageValue: string;
+};
+
+export type AdminVenueUsePresentationFormState = {
+  ok: boolean;
+  message: string;
+  fieldErrors: Record<string, string>;
+  values: AdminVenueUsePresentationFormValues;
+};
+
 export const emptyVenueFormValues: AdminVenueFormValues = {
   code: "",
   name: "",
@@ -105,4 +176,24 @@ export const emptyVenueSetupFormValues: AdminVenueSetupFormValues = {
   iconKey: "",
   sortOrder: "0",
   isActive: true,
+};
+
+export const emptyVenueUseTypeFormValues: AdminVenueUseTypeFormValues = {
+  code: "",
+  nameFr: "",
+  nameEn: "",
+  sortOrder: "0",
+  isActive: true,
+};
+
+export const emptyVenueUsePresentationFormValues: AdminVenueUsePresentationFormValues = {
+  venueId: "",
+  useTypeId: "",
+  titleFr: "",
+  titleEn: "",
+  descriptionFr: "",
+  descriptionEn: "",
+  sortOrder: "0",
+  isActive: true,
+  coverImageValue: "",
 };

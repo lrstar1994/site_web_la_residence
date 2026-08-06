@@ -86,6 +86,7 @@ function SectionHeading({
 
 export function EventQuoteForm({ locale, services, fields }: EventQuoteFormProps) {
   const formRef = useRef<HTMLFormElement>(null);
+  const eventTypeSelectRef = useRef<HTMLSelectElement>(null);
   const [state, formAction, isPending] = useActionState(
     submitEventQuoteRequestAction.bind(null, locale),
     initialState,
@@ -180,6 +181,27 @@ export function EventQuoteForm({ locale, services, fields }: EventQuoteFormProps
       formRef.current?.reset();
     }
   }, [state.ok]);
+
+  useEffect(() => {
+    function handleQuoteSelection(event: Event) {
+      const customEvent = event as CustomEvent<{ serviceId?: string }>;
+      const serviceId = customEvent.detail?.serviceId;
+
+      if (!serviceId || !services.some((service) => service.id === serviceId)) {
+        return;
+      }
+
+      setEventTypeId(serviceId);
+      setAnswers({});
+      window.setTimeout(() => {
+        formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+        eventTypeSelectRef.current?.focus({ preventScroll: true });
+      }, 0);
+    }
+
+    window.addEventListener("event-quote-select", handleQuoteSelection);
+    return () => window.removeEventListener("event-quote-select", handleQuoteSelection);
+  }, [services]);
 
   function updateAnswer(field: EventQuoteField, value: unknown) {
     setAnswers((current) => ({ ...current, [field.fieldKey]: value }));
@@ -293,6 +315,7 @@ export function EventQuoteForm({ locale, services, fields }: EventQuoteFormProps
               <label className="event-quote-field event-quote-featured-field">
                 <span className="event-quote-label">{t.eventType} <RequiredMark /></span>
                 <select
+                  ref={eventTypeSelectRef}
                   className="event-quote-control"
                   name="event_type_id"
                   value={eventTypeId}

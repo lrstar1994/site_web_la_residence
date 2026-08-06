@@ -21,6 +21,19 @@ export type VenueSetup = {
   isActive: boolean;
 };
 
+export type VenueUsePresentation = {
+  id: string;
+  useTypeId: string;
+  useTypeCode: string;
+  useTypeName: LocalizedText;
+  title: LocalizedText;
+  description: LocalizedText;
+  images: VenueImage[];
+  coverImage: VenueImage | null;
+  sortOrder: number;
+  isActive: boolean;
+};
+
 export type Venue = {
   id: string;
   code: string;
@@ -34,6 +47,7 @@ export type Venue = {
   isActive: boolean;
   images: VenueImage[];
   setups: VenueSetup[];
+  uses: VenueUsePresentation[];
   createdAt: string;
   updatedAt: string;
 };
@@ -56,5 +70,16 @@ export type VenueCardModel = {
   images: Array<{
     src: string;
     alt: LocalizedText;
+  }>;
+  uses: Array<{
+    id: string;
+    useTypeCode: string;
+    useTypeName: LocalizedText;
+    title: LocalizedText;
+    description: LocalizedText;
+    images: Array<{
+      src: string;
+      alt: LocalizedText;
+    }>;
   }>;
 };

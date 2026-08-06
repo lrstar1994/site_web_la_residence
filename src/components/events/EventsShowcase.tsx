@@ -1,5 +1,5 @@
 import { getTranslations } from "next-intl/server";
-import { EventCard } from "@/components/events/EventCard";
+import { EventServicesGrid } from "@/components/events/EventServicesGrid";
 import type { Locale } from "@/lib/i18n/routing";
 import type { EventService } from "@/types/event-service";
 
@@ -39,11 +39,18 @@ export async function EventsShowcase({
           <div className="title-separator" aria-hidden="true" />
         </div>
         {state === "ready" ? (
-          <div className="events-grid">
-            {services.map((service) => (
-              <EventCard key={service.id} service={service} locale={locale} />
-            ))}
-          </div>
+          <EventServicesGrid
+            locale={locale}
+            services={services}
+            labels={{
+              viewDetails: t("viewDetails"),
+              requestQuote: t("requestQuote"),
+              closeDetails: t("closeDetails"),
+              previousImage: t("previousImage"),
+              nextImage: t("nextImage"),
+              thumbnail: t("thumbnail"),
+            }}
+          />
         ) : (
           <div className="events-grid" role={state === "error" ? "alert" : "status"}>
             <article className="event-card">
