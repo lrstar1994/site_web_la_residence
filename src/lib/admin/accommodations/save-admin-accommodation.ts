@@ -9,11 +9,11 @@ import {
   type AdminFeatureFormValues,
 } from "@/lib/admin/accommodations/admin-accommodation-types";
 import { getAccommodationStoragePath } from "@/lib/admin/accommodations/get-accommodation-storage-path";
-import { uploadAccommodationImage } from "@/lib/admin/accommodations/upload-accommodation-image";
 import { generateAccommodationImageAlt } from "@/lib/admin/generate-image-alt";
 import { generateUniqueCode } from "@/lib/admin/generate-unique-code";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { validateUploadedStoragePath } from "@/lib/storage/validate-uploaded-storage-path";
 
 const MAX_ACCOMMODATION_IMAGES = 15;
 
@@ -112,6 +112,24 @@ type ExistingAccommodationImage = {
   is_active: boolean;
 };
 
+async function cleanupUploadedAccommodationImages(imagePaths: string[]) {
+  const storagePaths = imagePaths
+    .map((imagePath) => getAccommodationStoragePath(imagePath))
+    .filter((path): path is string => Boolean(path));
+
+  if (storagePaths.length === 0) return;
+
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.storage.from("site-news").remove(storagePaths);
+
+  if (error) {
+    console.error("[admin-accommodations] Uploaded image cleanup failed:", {
+      paths: storagePaths,
+      message: error.message,
+    });
+  }
+}
+
 async function getCurrentAccommodation(
   supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
   accommodationId: string,
@@ -135,14 +153,14 @@ export async function saveAccommodation({
   mode,
   accommodationId,
   values,
-  imageFiles,
+  imagePaths,
   deletedImageIds,
   featureIds,
 }: {
   mode: "create" | "update";
   accommodationId?: string;
   values: AdminAccommodationFormValues;
-  imageFiles: File[];
+  imagePaths: string[];
   deletedImageIds: string[];
   featureIds: string[];
 }): Promise<AdminAccommodationFormState> {
@@ -153,6 +171,21 @@ export async function saveAccommodation({
   let code = values.code;
   let existingImages: ExistingAccommodationImage[] = [];
   const uniqueDeletedImageIds = [...new Set(deletedImageIds)];
+  const uploadedImagePaths = [
+    ...new Set(
+      imagePaths.filter((imagePath) =>
+        validateUploadedStoragePath({
+          value: imagePath,
+          bucket: "site-news",
+          allowedPrefix: "accommodations/",
+        }),
+      ),
+    ),
+  ];
+
+  if (uploadedImagePaths.length !== imagePaths.length) {
+    validation.errors.imagePath = "Une image envoyée n'est pas valide.";
+  }
 
   if (mode === "create") {
     try {
@@ -192,8 +225,8 @@ export async function saveAccommodation({
   const remainingActiveExistingImages = remainingExistingImages.filter((image) => image.is_active);
   const existingActiveCount = existingImages.filter((image) => image.is_active).length;
   const deletedActiveCount = imagesToDelete.filter((image) => image.is_active).length;
-  const totalImages = remainingExistingImages.length + imageFiles.length;
-  const totalActiveImages = existingActiveCount - deletedActiveCount + imageFiles.length;
+  const totalImages = remainingExistingImages.length + uploadedImagePaths.length;
+  const totalActiveImages = existingActiveCount - deletedActiveCount + uploadedImagePaths.length;
 
   if (totalImages > MAX_ACCOMMODATION_IMAGES) {
     validation.errors.imagePath = "Un hebergement peut contenir au maximum 15 images.";
@@ -204,6 +237,7 @@ export async function saveAccommodation({
   }
 
   if (Object.keys(validation.errors).length > 0) {
+    await cleanupUploadedAccommodationImages(uploadedImagePaths);
     return { ok: false, message: "Certains champs doivent etre corriges.", fieldErrors: validation.errors, values };
   }
 
@@ -231,6 +265,7 @@ export async function saveAccommodation({
 
   if (saveResult.error || !saveResult.data) {
     console.error("[admin-accommodations] Save failed:", saveResult.error?.message ?? "No row returned");
+    await cleanupUploadedAccommodationImages(uploadedImagePaths);
     return { ok: false, message: "Impossible d'enregistrer l'hebergement.", fieldErrors: {}, values };
   }
 
@@ -248,9 +283,9 @@ export async function saveAccommodation({
     : -1;
   const hasActiveCover = remainingActiveExistingImages.some((image) => image.is_cover);
   const pendingCoverIndex =
-    requestedPendingCoverIndex >= 0 && requestedPendingCoverIndex < imageFiles.length
+    requestedPendingCoverIndex >= 0 && requestedPendingCoverIndex < uploadedImagePaths.length
       ? requestedPendingCoverIndex
-      : !usableExistingCoverId && !hasActiveCover && imageFiles.length > 0
+      : !usableExistingCoverId && !hasActiveCover && uploadedImagePaths.length > 0
         ? 0
         : -1;
   const uploadedImageIds: string[] = [];
@@ -272,16 +307,13 @@ export async function saveAccommodation({
     await supabase.from("accommodation_images").update({ is_cover: false }).eq("accommodation_id", id).eq("is_cover", true);
   }
 
-  for (const [index, file] of imageFiles.entries()) {
-    const upload = await uploadAccommodationImage(file, code);
-    if (!upload.ok) return { ok: false, message: upload.message, fieldErrors: { imagePath: upload.message }, values };
-
+  for (const [index, imagePath] of uploadedImagePaths.entries()) {
     const imageNumber = remainingActiveExistingImages.length + index + 1;
     const imageSave = await supabase
       .from("accommodation_images")
       .insert({
         accommodation_id: id,
-        image_path: upload.imagePath,
+        image_path: imagePath,
         alt_fr: `${generatedAlt.fr} - image ${imageNumber}`,
         alt_en: `${generatedAlt.en} - image ${imageNumber}`,
         is_cover: pendingCoverIndex === index,
@@ -292,15 +324,8 @@ export async function saveAccommodation({
 
     if (imageSave.error) {
       console.error("[admin-accommodations] Image save failed:", imageSave.error.message);
-      const { error: cleanupError } = await serverClient.storage.from("site-news").remove([upload.objectPath]);
-      if (cleanupError) {
-        console.error("[admin-accommodations] Uploaded image cleanup failed:", {
-          accommodationId: id,
-          path: upload.objectPath,
-          message: cleanupError.message,
-        });
-      }
-      return { ok: false, message: `L'hebergement est enregistre, mais l'image "${file.name}" n'a pas ete ajoutee.`, fieldErrors: {}, values };
+      await cleanupUploadedAccommodationImages(uploadedImagePaths.slice(index));
+      return { ok: false, message: "L'hebergement est enregistre, mais une image optimisée n'a pas ete ajoutee.", fieldErrors: {}, values };
     }
 
     uploadedImageIds.push((imageSave.data as { id: string }).id);

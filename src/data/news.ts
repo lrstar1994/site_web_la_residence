@@ -20,6 +20,13 @@ export type NewsArticle = {
   publishedAt: string;
   image: string;
   alt: LocalizedText;
+  images: {
+    id: string;
+    imagePath: string;
+    alt: LocalizedText;
+    sortOrder: number;
+    isCover: boolean;
+  }[];
 };
 
 export const newsCategories: NewsCategoryItem[] = [
@@ -87,6 +94,7 @@ export const newsArticles: NewsArticle[] = [
       fr: "Brunch au restaurant Le Privilège à La Résidence Ankerana",
       en: "Brunch at Le Privilège restaurant at La Résidence Ankerana",
     },
+    images: [],
   },
   {
     id: "restaurant-menu",
@@ -109,6 +117,7 @@ export const newsArticles: NewsArticle[] = [
       fr: "Nouvelle carte du restaurant Le Privilège à Ankerana",
       en: "New menu at Le Privilège restaurant in Ankerana",
     },
+    images: [],
   },
   {
     id: "seminar",
@@ -131,5 +140,6 @@ export const newsArticles: NewsArticle[] = [
       fr: "Salle de séminaire à La Résidence Ankerana à Antananarivo",
       en: "Seminar venue at La Résidence Ankerana in Antananarivo",
     },
+    images: [],
   },
 ];

@@ -11,9 +11,9 @@ import {
   type AdminVenueSetupFormValues,
 } from "@/lib/admin/venues/admin-venue-types";
 import { getVenueStoragePath } from "@/lib/admin/venues/get-venue-storage-path";
-import { uploadVenueImage } from "@/lib/admin/venues/upload-venue-image";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { validateUploadedStoragePath } from "@/lib/storage/validate-uploaded-storage-path";
 
 const MAX_VENUE_IMAGES = 15;
 
@@ -98,18 +98,36 @@ type ExistingVenueImage = {
   is_active: boolean;
 };
 
+async function cleanupUploadedVenueImages(imagePaths: string[]) {
+  const storagePaths = imagePaths
+    .map((imagePath) => getVenueStoragePath(imagePath))
+    .filter((path): path is string => Boolean(path));
+
+  if (storagePaths.length === 0) return;
+
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.storage.from("site-news").remove(storagePaths);
+
+  if (error) {
+    console.error("[admin-venues] Uploaded image cleanup failed:", {
+      paths: storagePaths,
+      message: error.message,
+    });
+  }
+}
+
 export async function saveVenue({
   mode,
   venueId,
   values,
-  imageFiles,
+  imagePaths,
   deletedImageIds,
   setupIds,
 }: {
   mode: "create" | "update";
   venueId?: string;
   values: AdminVenueFormValues;
-  imageFiles: File[];
+  imagePaths: string[];
   deletedImageIds: string[];
   setupIds: string[];
 }): Promise<AdminVenueFormState> {
@@ -120,6 +138,21 @@ export async function saveVenue({
   let code = values.code;
   let existingImages: ExistingVenueImage[] = [];
   const uniqueDeletedImageIds = [...new Set(deletedImageIds)];
+  const uploadedImagePaths = [
+    ...new Set(
+      imagePaths.filter((imagePath) =>
+        validateUploadedStoragePath({
+          value: imagePath,
+          bucket: "site-news",
+          allowedPrefix: "venues/",
+        }),
+      ),
+    ),
+  ];
+
+  if (uploadedImagePaths.length !== imagePaths.length) {
+    validation.errors.imagePath = "Une image envoyée n'est pas valide.";
+  }
 
   if (mode === "create") {
     try {
@@ -166,8 +199,8 @@ export async function saveVenue({
   const remainingActiveExistingImages = remainingExistingImages.filter((image) => image.is_active);
   const existingActiveCount = existingImages.filter((image) => image.is_active).length;
   const deletedActiveCount = imagesToDelete.filter((image) => image.is_active).length;
-  const totalImages = remainingExistingImages.length + imageFiles.length;
-  const totalActiveImages = existingActiveCount - deletedActiveCount + imageFiles.length;
+  const totalImages = remainingExistingImages.length + uploadedImagePaths.length;
+  const totalActiveImages = existingActiveCount - deletedActiveCount + uploadedImagePaths.length;
 
   if (totalImages > MAX_VENUE_IMAGES) {
     validation.errors.imagePath = "Une salle peut contenir au maximum 15 images.";
@@ -178,6 +211,7 @@ export async function saveVenue({
   }
 
   if (Object.keys(validation.errors).length) {
+    await cleanupUploadedVenueImages(uploadedImagePaths);
     return { ok: false, message: "Certains champs doivent etre corriges.", fieldErrors: validation.errors, values };
   }
 
@@ -202,6 +236,7 @@ export async function saveVenue({
 
   if (saved.error || !saved.data) {
     console.error("[admin-venues] Save failed:", saved.error?.message ?? "No row returned");
+    await cleanupUploadedVenueImages(uploadedImagePaths);
     return { ok: false, message: "Impossible d'enregistrer la salle.", fieldErrors: {}, values };
   }
 
@@ -219,9 +254,9 @@ export async function saveVenue({
     : -1;
   const hasActiveCover = remainingActiveExistingImages.some((image) => image.is_cover);
   const pendingCoverIndex =
-    requestedPendingCoverIndex >= 0 && requestedPendingCoverIndex < imageFiles.length
+    requestedPendingCoverIndex >= 0 && requestedPendingCoverIndex < uploadedImagePaths.length
       ? requestedPendingCoverIndex
-      : !hasActiveCover && imageFiles.length > 0
+      : !hasActiveCover && uploadedImagePaths.length > 0
         ? 0
         : -1;
   const uploadedImageIds: string[] = [];
@@ -243,16 +278,13 @@ export async function saveVenue({
     await supabase.from("venue_images").update({ is_cover: false }).eq("venue_id", id).eq("is_cover", true);
   }
 
-  for (const [index, file] of imageFiles.entries()) {
-    const upload = await uploadVenueImage(file, code);
-    if (!upload.ok) return { ok: false, message: upload.message, fieldErrors: { imagePath: upload.message }, values };
-
+  for (const [index, imagePath] of uploadedImagePaths.entries()) {
     const imageNumber = remainingActiveExistingImages.length + index + 1;
     const imageSave = await supabase
       .from("venue_images")
       .insert({
         venue_id: id,
-        image_path: upload.imagePath,
+        image_path: imagePath,
         alt_fr: `${generatedAlt.fr} - image ${imageNumber}`,
         alt_en: `${generatedAlt.en} - image ${imageNumber}`,
         is_cover: pendingCoverIndex === index,
@@ -263,7 +295,8 @@ export async function saveVenue({
 
     if (imageSave.error) {
       console.error("[admin-venues] Image save failed:", imageSave.error.message);
-      return { ok: false, message: `La salle est enregistree, mais l'image "${file.name}" n'a pas ete ajoutee.`, fieldErrors: {}, values };
+      await cleanupUploadedVenueImages(uploadedImagePaths.slice(index));
+      return { ok: false, message: "La salle est enregistree, mais une image optimisée n'a pas ete ajoutee.", fieldErrors: {}, values };
     }
     uploadedImageIds.push((imageSave.data as { id: string }).id);
   }

@@ -10,7 +10,6 @@ import {
   type AdminRestaurantMenuFormValues,
 } from "@/lib/admin/restaurant/admin-restaurant-types";
 import { getRestaurantStoragePath } from "@/lib/admin/restaurant/get-restaurant-storage-path";
-import { uploadRestaurantMenuImage } from "@/lib/admin/restaurant/upload-restaurant-menu-image";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -69,17 +68,37 @@ type ExistingRestaurantImage = {
   is_active: boolean;
 };
 
+async function cleanupUploadedRestaurantImages(imagePaths: string[]) {
+  if (imagePaths.length === 0) return;
+
+  const storagePaths = imagePaths
+    .map((imagePath) => getRestaurantStoragePath(imagePath))
+    .filter((path): path is string => Boolean(path));
+
+  if (storagePaths.length === 0) return;
+
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.storage.from("site-news").remove(storagePaths);
+
+  if (error) {
+    console.error("[admin-restaurant] Uploaded image cleanup failed:", {
+      paths: storagePaths,
+      message: error.message,
+    });
+  }
+}
+
 export async function saveRestaurantMenu({
   mode,
   menuId,
   values,
-  imageFiles,
+  imagePaths,
   deletedImageIds,
 }: {
   mode: "create" | "update";
   menuId?: string;
   values: AdminRestaurantMenuFormValues;
-  imageFiles: File[];
+  imagePaths: string[];
   deletedImageIds: string[];
 }): Promise<AdminRestaurantFormState<AdminRestaurantMenuFormValues>> {
   await requireAdmin("fr");
@@ -96,6 +115,11 @@ export async function saveRestaurantMenu({
   let code = values.code;
   let existingImages: ExistingRestaurantImage[] = [];
   const uniqueDeletedImageIds = [...new Set(deletedImageIds)];
+  const uploadedImagePaths = [...new Set(imagePaths)].filter((imagePath) => getRestaurantStoragePath(imagePath));
+
+  if (uploadedImagePaths.length !== imagePaths.length) {
+    errors.imagePath = "Une image envoyée n'est pas valide.";
+  }
 
   if (mode === "create") {
     try {
@@ -142,8 +166,8 @@ export async function saveRestaurantMenu({
   const remainingActiveExistingImages = remainingExistingImages.filter((image) => image.is_active);
   const existingActiveCount = existingImages.filter((image) => image.is_active).length;
   const deletedActiveCount = imagesToDelete.filter((image) => image.is_active).length;
-  const totalImages = remainingExistingImages.length + imageFiles.length;
-  const totalActiveImages = existingActiveCount - deletedActiveCount + imageFiles.length;
+  const totalImages = remainingExistingImages.length + uploadedImagePaths.length;
+  const totalActiveImages = existingActiveCount - deletedActiveCount + uploadedImagePaths.length;
 
   if (totalImages > MAX_RESTAURANT_MENU_IMAGES) {
     errors.imagePath = "Une carte peut contenir au maximum 15 images.";
@@ -154,6 +178,7 @@ export async function saveRestaurantMenu({
   }
 
   if (Object.keys(errors).length) {
+    await cleanupUploadedRestaurantImages(uploadedImagePaths);
     return { ok: false, message: "Certains champs doivent etre corriges.", fieldErrors: errors, values };
   }
 
@@ -173,6 +198,7 @@ export async function saveRestaurantMenu({
       : await supabase.from("restaurant_menus").update(payload).eq("id", menuId).select("id").single();
 
   if (saved.error || !saved.data) {
+    await cleanupUploadedRestaurantImages(uploadedImagePaths);
     return { ok: false, message: "Impossible d'enregistrer la carte.", fieldErrors: {}, values };
   }
 
@@ -190,9 +216,9 @@ export async function saveRestaurantMenu({
     : -1;
   const hasActiveCover = remainingActiveExistingImages.some((image) => image.is_cover);
   const pendingCoverIndex =
-    requestedPendingCoverIndex >= 0 && requestedPendingCoverIndex < imageFiles.length
+    requestedPendingCoverIndex >= 0 && requestedPendingCoverIndex < uploadedImagePaths.length
       ? requestedPendingCoverIndex
-      : !hasActiveCover && imageFiles.length > 0
+      : !hasActiveCover && uploadedImagePaths.length > 0
         ? 0
         : -1;
   const uploadedImageIds: string[] = [];
@@ -214,18 +240,13 @@ export async function saveRestaurantMenu({
     await supabase.from("restaurant_menu_images").update({ is_cover: false }).eq("menu_id", id).eq("is_cover", true);
   }
 
-  for (const [index, file] of imageFiles.entries()) {
-    const upload = await uploadRestaurantMenuImage(file, code);
-    if (!upload.ok) {
-      return { ok: false, message: upload.message, fieldErrors: { imagePath: upload.message }, values };
-    }
-
+  for (const [index, imagePath] of uploadedImagePaths.entries()) {
     const imageNumber = remainingActiveExistingImages.length + index + 1;
     const imageSave = await supabase
       .from("restaurant_menu_images")
       .insert({
         menu_id: id,
-        image_path: upload.imagePath,
+        image_path: imagePath,
         alt_fr: `${generatedAlt.fr} - image ${imageNumber}`,
         alt_en: `${generatedAlt.en} - image ${imageNumber}`,
         is_cover: pendingCoverIndex === index,
@@ -236,9 +257,10 @@ export async function saveRestaurantMenu({
 
     if (imageSave.error) {
       console.error("[admin-restaurant] Gallery image save failed:", imageSave.error.message);
+      await cleanupUploadedRestaurantImages(uploadedImagePaths.slice(index));
       return {
         ok: false,
-        message: `La carte est enregistree, mais l'image "${file.name}" n'a pas ete ajoutee.`,
+        message: "La carte est enregistree, mais une image optimisée n'a pas ete ajoutee.",
         fieldErrors: {},
         values,
       };

@@ -145,7 +145,9 @@ export async function getAdminEventQuoteConfig(): Promise<AdminEventQuoteConfig>
   }
 
   return {
-    services: ((servicesResult.data ?? []) as unknown as EventServiceRow[]).map(mapEventService),
+    services: ((servicesResult.data ?? []) as unknown as EventServiceRow[]).map((service) =>
+      mapEventService(service),
+    ),
     fields: ((fieldsResult.data ?? []) as unknown as EventQuoteFieldRow[]).map(mapEventQuoteField),
   };
 }

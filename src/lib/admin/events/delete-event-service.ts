@@ -17,6 +17,11 @@ type EventServiceDeleteRow = {
   image_path: string;
 };
 
+type EventServiceImageDeleteRow = {
+  id: string;
+  image_path: string;
+};
+
 export async function deleteEventService(serviceId: string): Promise<DeleteEventServiceResult> {
   await requireAdmin("fr");
 
@@ -46,20 +51,70 @@ export async function deleteEventService(serviceId: string): Promise<DeleteEvent
   }
 
   const row = service as EventServiceDeleteRow;
-  const storagePath = getEventServiceStoragePath(row.image_path);
+  const { data: images, error: imagesError } = await supabase
+    .from("event_service_images")
+    .select("id,image_path")
+    .eq("event_service_id", serviceId);
 
-  if (storagePath) {
+  if (imagesError) {
+    console.error("[event-admin-delete] Image rows load failed:", {
+      serviceId,
+      message: imagesError.message,
+    });
+    return { ok: false, message: "Impossible de supprimer les images de cette prestation." };
+  }
+
+  const imageRows = (images ?? []) as EventServiceImageDeleteRow[];
+  const storagePaths = [
+    ...new Set(
+      imageRows
+        .map((image) => getEventServiceStoragePath(image.image_path))
+        .filter((path): path is string => Boolean(path)),
+    ),
+  ];
+  const legacyStoragePath = getEventServiceStoragePath(row.image_path);
+
+  if (
+    legacyStoragePath &&
+    !storagePaths.includes(legacyStoragePath) &&
+    imageRows.length === 0
+  ) {
+    storagePaths.push(legacyStoragePath);
+  }
+
+  if (storagePaths.length > 0) {
     const { error: storageError } = await supabaseClient.storage
       .from("site-news")
-      .remove([storagePath]);
+      .remove(storagePaths);
 
     if (storageError) {
       console.error("[event-admin-delete] Storage deletion failed:", {
         serviceId,
-        path: storagePath,
+        paths: storagePaths,
         message: storageError.message,
       });
-      return { ok: false, message: "Impossible de supprimer le fichier associe a cette prestation." };
+      return { ok: false, message: "Impossible de supprimer les fichiers associes a cette prestation." };
+    }
+  }
+
+  if (imageRows.length > 0) {
+    const { error: deleteImagesError } = await supabase
+      .from("event_service_images")
+      .delete()
+      .eq("event_service_id", serviceId)
+      .in("id", imageRows.map((image) => image.id));
+
+    if (deleteImagesError) {
+      console.error("[event-admin-delete] Image row deletion failed:", {
+        serviceId,
+        imageIds: imageRows.map((image) => image.id),
+        paths: storagePaths,
+        message: deleteImagesError.message,
+      });
+      return {
+        ok: false,
+        message: "Les fichiers ont ete supprimes, mais les references des images n'ont pas pu etre supprimees.",
+      };
     }
   }
 
@@ -71,10 +126,10 @@ export async function deleteEventService(serviceId: string): Promise<DeleteEvent
   if (deleteError) {
     console.error("[event-admin-delete] Row deletion failed:", {
       serviceId,
-      path: storagePath,
+      paths: storagePaths,
       message: deleteError.message,
     });
-    return { ok: false, message: "L'image a ete supprimee, mais la prestation n'a pas pu etre supprimee." };
+    return { ok: false, message: "Les images ont ete supprimees, mais la prestation n'a pas pu etre supprimee." };
   }
 
   return { ok: true, message: "La prestation a ete supprimee definitivement." };

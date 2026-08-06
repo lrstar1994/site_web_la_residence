@@ -8,7 +8,7 @@ import type { Locale } from "@/lib/i18n/routing";
 
 type PageProps = {
   params: Promise<{ locale: string }>;
-  searchParams?: Promise<{ notice?: string }>;
+  searchParams?: Promise<{ notice?: string; deleted?: string }>;
 };
 
 export const dynamic = "force-dynamic";
@@ -45,6 +45,11 @@ export default async function AdminNewsPage({ params, searchParams }: PageProps)
           {query.notice === "updated" ? (
             <section className="admin-news-success" role="status">
               Article mis à jour avec succès.
+            </section>
+          ) : null}
+          {query.deleted === "1" ? (
+            <section className="admin-news-success" role="status">
+              Article supprime definitivement.
             </section>
           ) : null}
           <AdminNewsHeader />

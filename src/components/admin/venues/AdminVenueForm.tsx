@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useActionState, useEffect, useMemo, useRef, useState, useTransition } from "react";
+import type { FormEvent } from "react";
 import { createVenueAction, deleteVenueAction, updateVenueAction } from "@/app/[locale]/admin/(protected)/salles/actions";
 import { AdminBackButton } from "@/components/admin/common/AdminBackButton";
 import { AdminConfirmDialog } from "@/components/admin/common/AdminConfirmDialog";
@@ -14,6 +15,10 @@ import {
   type AdminVenueFormValues,
   type AdminVenueSetup,
 } from "@/lib/admin/venues/admin-venue-types";
+import { compressImage, formatImageSize, validateOriginalImage } from "@/lib/images/compress-image";
+import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { removeUploadedImages } from "@/lib/storage/remove-uploaded-images";
+import { uploadOptimizedImage } from "@/lib/storage/upload-optimized-image";
 
 type Props = { mode: "create" | "edit"; venue?: AdminVenueDetail; setups: AdminVenueSetup[] };
 
@@ -22,11 +27,11 @@ type PendingVenueImage = {
   file: File;
   previewUrl: string;
   isCover: boolean;
+  originalSize: number;
+  compressedSize: number;
 };
 
 const MAX_IMAGES = 15;
-const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
-const ACCEPTED_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 
 function initialValues(venue?: AdminVenueDetail): AdminVenueFormValues {
   if (!venue) return emptyVenueFormValues;
@@ -47,10 +52,6 @@ function initialValues(venue?: AdminVenueDetail): AdminVenueFormValues {
   };
 }
 
-function formatSize(size: number) {
-  return `${(size / 1024 / 1024).toFixed(1)} Mo`;
-}
-
 function Field({ name, label, value, error, type = "text", onChange, required = true }: { name: string; label: string; value: string; error?: string; type?: "text" | "number"; required?: boolean; onChange: (value: string) => void }) {
   return <label className="admin-news-form-field"><span>{label}</span><input name={name} type={type} value={value} required={required} onChange={(event) => onChange(event.target.value)} />{error ? <strong className="admin-news-form-error">{error}</strong> : null}</label>;
 }
@@ -68,12 +69,14 @@ export function AdminVenueForm({ mode, venue, setups }: Props) {
   const [selectedSetups, setSelectedSetups] = useState<Set<string>>(() => new Set(venue?.selectedSetupIds ?? []));
   const [pendingImages, setPendingImages] = useState<PendingVenueImage[]>([]);
   const [imageError, setImageError] = useState<string | null>(null);
+  const [imageStatus, setImageStatus] = useState<string | null>(null);
   const [deletedImageIds, setDeletedImageIds] = useState<string[]>([]);
   const [deleteCandidateId, setDeleteCandidateId] = useState<string | null>(null);
   const [deleteVenueDialogOpen, setDeleteVenueDialogOpen] = useState(false);
   const [deleteVenueConfirmation, setDeleteVenueConfirmation] = useState("");
   const [deleteVenueError, setDeleteVenueError] = useState<string | null>(null);
   const [isDeletingVenue, startDeleteVenueTransition] = useTransition();
+  const [isSaving, startSavingTransition] = useTransition();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const pendingImagesRef = useRef<PendingVenueImage[]>([]);
   const existingImages = venue?.images ?? [];
@@ -135,8 +138,9 @@ export function AdminVenueForm({ mode, venue, setups }: Props) {
     setDeletedImageIds((current) => current.filter((id) => id !== imageId));
   }
 
-  function handleFiles(files: File[]) {
+  async function handleFiles(files: File[]) {
     setImageError(null);
+    setImageStatus(null);
     const total = activeExistingImages.length + pendingImages.length + files.length;
     if (total > MAX_IMAGES) {
       setImageError("Une salle peut contenir au maximum 15 images.");
@@ -145,23 +149,33 @@ export function AdminVenueForm({ mode, venue, setups }: Props) {
     }
 
     const accepted: PendingVenueImage[] = [];
-    for (const file of files) {
-      if (!ACCEPTED_IMAGE_TYPES.has(file.type)) {
-        setImageError(`Le fichier "${file.name}" n'est pas une image valide.`);
-        syncFileInput(pendingImages);
-        return;
+    setImageStatus("Optimisation de l'image...");
+
+    try {
+      for (const file of files) {
+        const validation = validateOriginalImage(file);
+        if (!validation.ok) {
+          setImageError(validation.message);
+          syncFileInput(pendingImages);
+          return;
+        }
+
+        const compressed = await compressImage(file);
+        accepted.push({
+          clientId: `${compressed.file.name}-${compressed.file.size}-${crypto.randomUUID()}`,
+          file: compressed.file,
+          previewUrl: URL.createObjectURL(compressed.file),
+          isCover: false,
+          originalSize: compressed.originalSize,
+          compressedSize: compressed.compressedSize,
+        });
       }
-      if (file.size > MAX_IMAGE_SIZE) {
-        setImageError(`L'image "${file.name}" depasse 5 Mo.`);
-        syncFileInput(pendingImages);
-        return;
-      }
-      accepted.push({
-        clientId: `${file.name}-${file.size}-${crypto.randomUUID()}`,
-        file,
-        previewUrl: URL.createObjectURL(file),
-        isCover: false,
-      });
+    } catch (error) {
+      setImageError(error instanceof Error ? error.message : "Impossible d'optimiser l'image.");
+      syncFileInput(pendingImages);
+      return;
+    } finally {
+      setImageStatus(null);
     }
 
     setPendingImages((current) => {
@@ -176,6 +190,56 @@ export function AdminVenueForm({ mode, venue, setups }: Props) {
     });
   }
 
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (isSaving) return;
+
+    setImageError(null);
+    setImageStatus(null);
+    const uploadedStoragePaths: string[] = [];
+
+    try {
+      const formData = new FormData(event.currentTarget);
+      const uploadedImagePaths: string[] = [];
+      const supabase = createSupabaseBrowserClient();
+
+      for (const image of pendingImages) {
+        setImageStatus(`Envoi de l'image "${image.file.name}"...`);
+        const upload = await uploadOptimizedImage({
+          file: image.file,
+          bucket: "site-news",
+          folder: `venues/${formValues.code || formValues.name || "salle"}`,
+          supabaseClient: supabase,
+          alreadyOptimized: true,
+        });
+
+        if (!upload.ok) throw new Error(upload.message);
+
+        uploadedImagePaths.push(upload.publicUrl);
+        uploadedStoragePaths.push(upload.storagePath);
+      }
+
+      formData.delete("image_files");
+      formData.delete("uploaded_image_paths");
+      uploadedImagePaths.forEach((imagePath) => formData.append("uploaded_image_paths", imagePath));
+
+      startSavingTransition(() => {
+        formAction(formData);
+      });
+    } catch (error) {
+      if (uploadedStoragePaths.length > 0) {
+        await removeUploadedImages({
+          supabaseClient: createSupabaseBrowserClient(),
+          bucket: "site-news",
+          storagePaths: uploadedStoragePaths,
+        });
+      }
+      setImageError(error instanceof Error ? error.message : "Impossible d'envoyer les images.");
+    } finally {
+      setImageStatus(null);
+    }
+  }
+
   function handleDeleteVenue() {
     if (!venue || deleteVenueConfirmation.trim() !== "SUPPRIMER") return;
     setDeleteVenueError(null);
@@ -186,7 +250,7 @@ export function AdminVenueForm({ mode, venue, setups }: Props) {
   }
 
   return (
-    <form className="admin-news-form" action={formAction}>
+    <form className="admin-news-form" onSubmit={handleSubmit}>
       <header className="admin-news-form-header">
         <AdminBackButton fallbackHref="/fr/admin/salles" />
         <div>
@@ -202,6 +266,7 @@ export function AdminVenueForm({ mode, venue, setups }: Props) {
             <div className="admin-news-form-section-heading"><p>Images</p><h2>Galerie</h2></div>
             <p className="admin-section-kicker">{visibleImageCount} / {MAX_IMAGES} images</p>
             {imageError ? <strong className="admin-news-form-error">{imageError}</strong> : null}
+            {imageStatus ? <p className="admin-news-form-note" role="status">{imageStatus}</p> : null}
             {state.fieldErrors.imagePath ? <strong className="admin-news-form-error">{state.fieldErrors.imagePath}</strong> : null}
             <div className="admin-restaurant-images-grid">
               {existingImages.map((image) => (
@@ -229,7 +294,11 @@ export function AdminVenueForm({ mode, venue, setups }: Props) {
                     <span className="admin-restaurant-image-origin">Nouvelle</span>
                   </div>
                   <p>{image.file.name}</p>
-                  <small>{formatSize(image.file.size)}</small>
+                  <small>
+                    Taille originale : {formatImageSize(image.originalSize)}
+                    <br />
+                    Image optimisée : {formatImageSize(image.compressedSize)}
+                  </small>
                   <label className="admin-restaurant-cover-choice">
                     <input type="radio" name="cover_choice" checked={formValues.coverImageValue === `pending:${index}`} onChange={() => setCover(`pending:${index}`)} />
                     {formValues.coverImageValue === `pending:${index}` ? <span className="admin-restaurant-cover-badge">Couverture</span> : <span>Definir comme couverture</span>}
@@ -240,8 +309,14 @@ export function AdminVenueForm({ mode, venue, setups }: Props) {
             </div>
             <label className="admin-restaurant-image-dropzone">
               <span>+ Ajouter des images</span>
-              <small>JPEG - PNG - WebP<br />5 Mo maximum - 15 images maximum</small>
-              <input ref={fileInputRef} name="image_files" type="file" multiple accept="image/jpeg,image/png,image/webp" onChange={(event) => handleFiles(Array.from(event.target.files ?? []))} />
+              <small>
+                Formats acceptés : JPG, PNG ou WebP.
+                <br />
+                Taille originale maximale : 5 Mo.
+                <br />
+                L&apos;image sera automatiquement optimisée avant l&apos;envoi.
+              </small>
+              <input ref={fileInputRef} type="file" multiple accept="image/jpeg,image/png,image/webp" disabled={isSaving} onChange={(event) => { void handleFiles(Array.from(event.target.files ?? [])); }} />
             </label>
             <input type="hidden" name="cover_image_value" value={formValues.coverImageValue} />
             {deletedImageIds.map((id) => <input key={id} type="hidden" name="deleted_image_ids" value={id} />)}
@@ -274,7 +349,7 @@ export function AdminVenueForm({ mode, venue, setups }: Props) {
               <button className="admin-danger-zone-button" type="button" aria-haspopup="dialog" disabled={isDeletingVenue} onClick={() => setDeleteVenueDialogOpen(true)}>{isDeletingVenue ? "Suppression en cours..." : "Supprimer cette salle"}</button>
             </section>
           ) : null}
-          <div className="admin-news-form-actions"><button className="admin-news-form-button primary" type="submit">{mode === "create" ? "Creer la salle" : "Enregistrer les modifications"}</button></div>
+          <div className="admin-news-form-actions"><button className="admin-news-form-button primary" type="submit" disabled={isSaving}>{isSaving ? "Enregistrement..." : mode === "create" ? "Creer la salle" : "Enregistrer les modifications"}</button></div>
         </div>
       </div>
       {deleteCandidate ? (

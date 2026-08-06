@@ -6,6 +6,7 @@ import { useFormStatus } from "react-dom";
 type AdminNewsFormActionsProps = {
   mode: "create" | "edit";
   onIntentChange: (intent: string) => void;
+  disabled?: boolean;
 };
 
 function SubmitButton({
@@ -13,11 +14,13 @@ function SubmitButton({
   children,
   tone = "secondary",
   onIntentChange,
+  disabled = false,
 }: {
   value: string;
   children: string;
   tone?: "primary" | "secondary" | "danger";
   onIntentChange: (intent: string) => void;
+  disabled?: boolean;
 }) {
   const { pending } = useFormStatus();
 
@@ -27,7 +30,7 @@ function SubmitButton({
       type="submit"
       name="intent"
       value={value}
-      disabled={pending}
+      disabled={pending || disabled}
       onClick={() => onIntentChange(value)}
     >
       {pending ? "Enregistrement..." : children}
@@ -35,7 +38,7 @@ function SubmitButton({
   );
 }
 
-export function AdminNewsFormActions({ mode, onIntentChange }: AdminNewsFormActionsProps) {
+export function AdminNewsFormActions({ mode, onIntentChange, disabled = false }: AdminNewsFormActionsProps) {
   const [archiveOpen, setArchiveOpen] = useState(false);
   const cancelRef = useRef<HTMLButtonElement>(null);
   const { pending } = useFormStatus();
@@ -48,31 +51,31 @@ export function AdminNewsFormActions({ mode, onIntentChange }: AdminNewsFormActi
     <div className="admin-news-form-actions">
       {mode === "create" ? (
         <>
-          <SubmitButton value="draft" onIntentChange={onIntentChange}>
+          <SubmitButton value="draft" onIntentChange={onIntentChange} disabled={disabled}>
             Enregistrer comme brouillon
           </SubmitButton>
-          <SubmitButton value="publish" tone="primary" onIntentChange={onIntentChange}>
+          <SubmitButton value="publish" tone="primary" onIntentChange={onIntentChange} disabled={disabled}>
             Publier maintenant
           </SubmitButton>
-          <SubmitButton value="schedule" onIntentChange={onIntentChange}>
+          <SubmitButton value="schedule" onIntentChange={onIntentChange} disabled={disabled}>
             Programmer
           </SubmitButton>
         </>
       ) : (
         <>
-          <SubmitButton value="save" tone="primary" onIntentChange={onIntentChange}>
+          <SubmitButton value="save" tone="primary" onIntentChange={onIntentChange} disabled={disabled}>
             Enregistrer les modifications
           </SubmitButton>
-          <SubmitButton value="publish" onIntentChange={onIntentChange}>
+          <SubmitButton value="publish" onIntentChange={onIntentChange} disabled={disabled}>
             Publier maintenant
           </SubmitButton>
-          <SubmitButton value="schedule" onIntentChange={onIntentChange}>
+          <SubmitButton value="schedule" onIntentChange={onIntentChange} disabled={disabled}>
             Programmer
           </SubmitButton>
           <button
             className="admin-news-form-button danger"
             type="button"
-            disabled={pending}
+            disabled={pending || disabled}
             onClick={() => setArchiveOpen(true)}
           >
             Archiver

@@ -1,6 +1,35 @@
-import type { EventService } from "@/types/event-service";
+export type AdminEventServiceImage = {
+  id: string;
+  imagePath: string;
+  altFr: string;
+  altEn: string;
+  sortOrder: number;
+  isCover: boolean;
+  isActive: boolean;
+};
 
-export type AdminEventService = EventService;
+export type AdminEventService = {
+  id: string;
+  code: string;
+  title: {
+    fr: string;
+    en: string;
+  };
+  description: {
+    fr: string;
+    en: string;
+  };
+  imagePath: string;
+  imageAlt: {
+    fr: string;
+    en: string;
+  };
+  images: AdminEventServiceImage[];
+  sortOrder: number;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
 
 export type AdminEventServiceFormValues = {
   code: string;
@@ -13,6 +42,8 @@ export type AdminEventServiceFormValues = {
   imageAltEn: string;
   sortOrder: string;
   isActive: boolean;
+  coverImageValue: string;
+  deletedImageIds: string[];
 };
 
 export type AdminEventServiceFormState = {
@@ -33,4 +64,6 @@ export const emptyAdminEventServiceFormValues: AdminEventServiceFormValues = {
   imageAltEn: "",
   sortOrder: "0",
   isActive: true,
+  coverImageValue: "",
+  deletedImageIds: [],
 };

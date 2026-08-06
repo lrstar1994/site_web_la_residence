@@ -11,7 +11,7 @@ import {
   saveVenueSetup,
 } from "@/lib/admin/venues/save-admin-venue";
 import { deleteAdminVenue } from "@/lib/admin/venues/delete-admin-venue";
-import { getVenueImageFilesFromFormData } from "@/lib/admin/venues/upload-venue-image";
+import { getVenueUploadedImagePathsFromFormData } from "@/lib/admin/venues/upload-venue-image";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -42,7 +42,7 @@ export async function createVenueAction(previousState = getDefaultVenueFormState
   const result = await saveVenue({
     mode: "create",
     values: getVenueFormValues(formData),
-    imageFiles: getVenueImageFilesFromFormData(formData),
+    imagePaths: getVenueUploadedImagePathsFromFormData(formData),
     deletedImageIds: [],
     setupIds: setupIds(formData),
   });
@@ -61,7 +61,7 @@ export async function updateVenueAction(
     mode: "update",
     venueId,
     values: getVenueFormValues(formData),
-    imageFiles: getVenueImageFilesFromFormData(formData),
+    imagePaths: getVenueUploadedImagePathsFromFormData(formData),
     deletedImageIds: deletedImageIds(formData),
     setupIds: setupIds(formData),
   });

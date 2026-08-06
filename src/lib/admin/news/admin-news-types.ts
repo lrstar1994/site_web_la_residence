@@ -21,12 +21,23 @@ export type AdminNewsArticle = {
   imagePath: string;
   imageAltFr: string;
   imageAltEn: string;
+  images: AdminNewsArticleImage[];
   status: AdminNewsStatus;
   publishedAt: string | null;
   createdAt: string;
   updatedAt: string;
   categoryId: string;
   category: AdminNewsCategory | null;
+};
+
+export type AdminNewsArticleImage = {
+  id: string;
+  imagePath: string;
+  altFr: string;
+  altEn: string;
+  sortOrder: number;
+  isCover: boolean;
+  isActive: boolean;
 };
 
 export type AdminNewsFormIntent = "draft" | "publish" | "schedule" | "save" | "archive";
@@ -44,6 +55,8 @@ export type AdminNewsFormValues = {
   contentFr: string;
   contentEn: string;
   scheduledAt: string;
+  coverImageValue: string;
+  deletedImageIds: string[];
 };
 
 export type AdminNewsFormState = {
@@ -66,4 +79,6 @@ export const emptyAdminNewsFormValues: AdminNewsFormValues = {
   contentFr: "",
   contentEn: "",
   scheduledAt: "",
+  coverImageValue: "",
+  deletedImageIds: [],
 };

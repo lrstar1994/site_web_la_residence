@@ -989,6 +989,20 @@
   object-fit: cover;
 }
 
+.admin-confirm-dialog-media {
+  position: relative;
+  width: 96px;
+  height: 96px;
+  overflow: hidden;
+  border: 1px solid rgba(0, 92, 75, 0.14);
+  border-radius: 12px;
+  background: #f4f6f3;
+}
+
+.admin-confirm-dialog-media img {
+  object-fit: cover;
+}
+
 .admin-confirm-dialog-field {
   display: grid;
   gap: 7px;

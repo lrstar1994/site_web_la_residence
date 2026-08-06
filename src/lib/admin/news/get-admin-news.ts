@@ -49,6 +49,17 @@ type AdminNewsArticleRow = {
   category: AdminNewsCategoryRow | AdminNewsCategoryRow[] | null;
 };
 
+type AdminNewsArticleImageRow = {
+  id: string;
+  news_article_id: string;
+  image_path: string;
+  alt_fr: string | null;
+  alt_en: string | null;
+  sort_order: number;
+  is_cover: boolean;
+  is_active: boolean;
+};
+
 function normalizeRelation<T>(relation: T | T[] | null) {
   return Array.isArray(relation) ? (relation[0] ?? null) : relation;
 }
@@ -64,8 +75,13 @@ export function mapAdminNewsCategory(row: AdminNewsCategoryRow): AdminNewsCatego
   };
 }
 
-export function mapAdminNewsArticle(row: AdminNewsArticleRow): AdminNewsArticle {
+export function mapAdminNewsArticle(
+  row: AdminNewsArticleRow,
+  images: AdminNewsArticleImageRow[] = [],
+): AdminNewsArticle {
   const category = normalizeRelation(row.category);
+  const activeImages = images.filter((image) => image.is_active);
+  const cover = activeImages.find((image) => image.is_cover) ?? activeImages[0] ?? null;
 
   return {
     id: row.id,
@@ -76,9 +92,18 @@ export function mapAdminNewsArticle(row: AdminNewsArticleRow): AdminNewsArticle 
     excerptEn: row.excerpt_en,
     contentFr: row.content_fr,
     contentEn: row.content_en,
-    imagePath: row.image_path,
-    imageAltFr: row.image_alt_fr,
-    imageAltEn: row.image_alt_en,
+    imagePath: cover?.image_path ?? row.image_path,
+    imageAltFr: cover?.alt_fr || row.image_alt_fr,
+    imageAltEn: cover?.alt_en || row.image_alt_en,
+    images: images.map((image) => ({
+      id: image.id,
+      imagePath: image.image_path,
+      altFr: image.alt_fr || row.image_alt_fr,
+      altEn: image.alt_en || row.image_alt_en,
+      sortOrder: image.sort_order,
+      isCover: image.is_cover,
+      isActive: image.is_active,
+    })),
     status: row.status,
     publishedAt: row.published_at,
     createdAt: row.created_at,
@@ -146,11 +171,34 @@ export async function getAdminNews(): Promise<AdminNewsResult> {
       };
     }
 
+    const rows = (articlesData ?? []) as unknown as AdminNewsArticleRow[];
+    const articleIds = rows.map((article) => article.id);
+    const imagesByArticle = new Map<string, AdminNewsArticleImageRow[]>();
+
+    if (articleIds.length > 0) {
+      const { data: imagesData, error: imagesError } = await supabase
+        .from("news_article_images")
+        .select("id,news_article_id,image_path,alt_fr,alt_en,sort_order,is_cover,is_active")
+        .in("news_article_id", articleIds)
+        .order("sort_order", { ascending: true })
+        .order("created_at", { ascending: true });
+
+      if (imagesError) {
+        console.error("[admin-news] Unable to load article images:", imagesError.message);
+      } else {
+        ((imagesData ?? []) as unknown as AdminNewsArticleImageRow[]).forEach((image) => {
+          const list = imagesByArticle.get(image.news_article_id) ?? [];
+          list.push(image);
+          imagesByArticle.set(image.news_article_id, list);
+        });
+      }
+    }
+
     return {
       ok: true,
       categories,
-      articles: ((articlesData ?? []) as unknown as AdminNewsArticleRow[]).map(
-        mapAdminNewsArticle,
+      articles: rows.map((article) =>
+        mapAdminNewsArticle(article, imagesByArticle.get(article.id) ?? []),
       ),
     };
   } catch (error) {

@@ -11,7 +11,7 @@ import {
   saveRestaurantMenu,
 } from "@/lib/admin/restaurant/save-admin-restaurant";
 import { deleteAdminRestaurantMenu } from "@/lib/admin/restaurant/delete-admin-restaurant";
-import { getRestaurantMenuImageFilesFromFormData } from "@/lib/admin/restaurant/upload-restaurant-menu-image";
+import { getRestaurantMenuUploadedImagePathsFromFormData } from "@/lib/admin/restaurant/upload-restaurant-menu-image";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -38,7 +38,7 @@ export async function createRestaurantMenuAction(previousState = getDefaultResta
   const result = await saveRestaurantMenu({
     mode: "create",
     values: getRestaurantMenuFormValues(formData),
-    imageFiles: getRestaurantMenuImageFilesFromFormData(formData),
+    imagePaths: getRestaurantMenuUploadedImagePathsFromFormData(formData),
     deletedImageIds: [],
   });
   if (!result.ok) return result;
@@ -52,7 +52,7 @@ export async function updateRestaurantMenuAction(menuId: string, previousState =
     mode: "update",
     menuId,
     values: getRestaurantMenuFormValues(formData),
-    imageFiles: getRestaurantMenuImageFilesFromFormData(formData),
+    imagePaths: getRestaurantMenuUploadedImagePathsFromFormData(formData),
     deletedImageIds: getDeletedRestaurantImageIds(formData),
   });
   if (!result.ok) return result;

@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useActionState, useEffect, useMemo, useRef, useState, useTransition } from "react";
+import type { FormEvent } from "react";
 import {
   createAccommodationAction,
   deleteAccommodationAction,
@@ -19,6 +20,10 @@ import {
   type AdminAccommodationFormState,
   type AdminAccommodationFormValues,
 } from "@/lib/admin/accommodations/admin-accommodation-types";
+import { compressImage, formatImageSize, validateOriginalImage } from "@/lib/images/compress-image";
+import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { removeUploadedImages } from "@/lib/storage/remove-uploaded-images";
+import { uploadOptimizedImage } from "@/lib/storage/upload-optimized-image";
 
 type Props = {
   mode: "create" | "edit";
@@ -32,11 +37,11 @@ type PendingAccommodationImage = {
   file: File;
   previewUrl: string;
   isCover: boolean;
+  originalSize: number;
+  compressedSize: number;
 };
 
 const MAX_IMAGES = 15;
-const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
-const ACCEPTED_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 
 function initialValues(accommodation?: AdminAccommodationDetail): AdminAccommodationFormValues {
   if (!accommodation) return emptyAccommodationFormValues;
@@ -58,10 +63,6 @@ function initialValues(accommodation?: AdminAccommodationDetail): AdminAccommoda
     coverImageValue: cover ? `existing:${cover.id}` : "",
     deletedImageIds: [],
   };
-}
-
-function formatSize(size: number) {
-  return `${(size / 1024 / 1024).toFixed(1)} Mo`;
 }
 
 function inputName(name: keyof AdminAccommodationFormValues) {
@@ -142,12 +143,14 @@ export function AdminAccommodationForm({ mode, accommodation, groups, features }
   const [selectedFeatures, setSelectedFeatures] = useState<Set<string>>(() => new Set(accommodation?.selectedFeatureIds ?? []));
   const [pendingImages, setPendingImages] = useState<PendingAccommodationImage[]>([]);
   const [imageError, setImageError] = useState<string | null>(null);
+  const [imageStatus, setImageStatus] = useState<string | null>(null);
   const [deletedImageIds, setDeletedImageIds] = useState<string[]>([]);
   const [deleteCandidateId, setDeleteCandidateId] = useState<string | null>(null);
   const [deleteAccommodationDialogOpen, setDeleteAccommodationDialogOpen] = useState(false);
   const [deleteAccommodationConfirmation, setDeleteAccommodationConfirmation] = useState("");
   const [deleteAccommodationError, setDeleteAccommodationError] = useState<string | null>(null);
   const [isDeletingAccommodation, startDeleteAccommodationTransition] = useTransition();
+  const [isSaving, startSavingTransition] = useTransition();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const pendingImagesRef = useRef<PendingAccommodationImage[]>([]);
   const existingImages = accommodation?.images ?? [];
@@ -211,8 +214,9 @@ export function AdminAccommodationForm({ mode, accommodation, groups, features }
     setDeletedImageIds((current) => current.filter((id) => id !== imageId));
   }
 
-  function handleFiles(files: File[]) {
+  async function handleFiles(files: File[]) {
     setImageError(null);
+    setImageStatus(null);
     const total = activeExistingImages.length + pendingImages.length + files.length;
     if (total > MAX_IMAGES) {
       setImageError("Un hebergement peut contenir au maximum 15 images.");
@@ -221,23 +225,33 @@ export function AdminAccommodationForm({ mode, accommodation, groups, features }
     }
 
     const accepted: PendingAccommodationImage[] = [];
-    for (const file of files) {
-      if (!ACCEPTED_IMAGE_TYPES.has(file.type)) {
-        setImageError(`Le fichier "${file.name}" n'est pas une image valide.`);
-        syncFileInput(pendingImages);
-        return;
+    setImageStatus("Optimisation de l'image...");
+
+    try {
+      for (const file of files) {
+        const validation = validateOriginalImage(file);
+        if (!validation.ok) {
+          setImageError(validation.message);
+          syncFileInput(pendingImages);
+          return;
+        }
+
+        const compressed = await compressImage(file);
+        accepted.push({
+          clientId: `${compressed.file.name}-${compressed.file.size}-${crypto.randomUUID()}`,
+          file: compressed.file,
+          previewUrl: URL.createObjectURL(compressed.file),
+          isCover: false,
+          originalSize: compressed.originalSize,
+          compressedSize: compressed.compressedSize,
+        });
       }
-      if (file.size > MAX_IMAGE_SIZE) {
-        setImageError(`L'image "${file.name}" depasse 5 Mo.`);
-        syncFileInput(pendingImages);
-        return;
-      }
-      accepted.push({
-        clientId: `${file.name}-${file.size}-${crypto.randomUUID()}`,
-        file,
-        previewUrl: URL.createObjectURL(file),
-        isCover: false,
-      });
+    } catch (error) {
+      setImageError(error instanceof Error ? error.message : "Impossible d'optimiser l'image.");
+      syncFileInput(pendingImages);
+      return;
+    } finally {
+      setImageStatus(null);
     }
 
     setPendingImages((current) => {
@@ -247,6 +261,56 @@ export function AdminAccommodationForm({ mode, accommodation, groups, features }
       syncFileInput(next);
       return next;
     });
+  }
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (isSaving) return;
+
+    setImageError(null);
+    setImageStatus(null);
+    const uploadedStoragePaths: string[] = [];
+
+    try {
+      const formData = new FormData(event.currentTarget);
+      const uploadedImagePaths: string[] = [];
+      const supabase = createSupabaseBrowserClient();
+
+      for (const image of pendingImages) {
+        setImageStatus(`Envoi de l'image "${image.file.name}"...`);
+        const upload = await uploadOptimizedImage({
+          file: image.file,
+          bucket: "site-news",
+          folder: `accommodations/${formValues.code || formValues.nameFr || "hebergement"}`,
+          supabaseClient: supabase,
+          alreadyOptimized: true,
+        });
+
+        if (!upload.ok) throw new Error(upload.message);
+
+        uploadedImagePaths.push(upload.publicUrl);
+        uploadedStoragePaths.push(upload.storagePath);
+      }
+
+      formData.delete("image_files");
+      formData.delete("uploaded_image_paths");
+      uploadedImagePaths.forEach((imagePath) => formData.append("uploaded_image_paths", imagePath));
+
+      startSavingTransition(() => {
+        formAction(formData);
+      });
+    } catch (error) {
+      if (uploadedStoragePaths.length > 0) {
+        await removeUploadedImages({
+          supabaseClient: createSupabaseBrowserClient(),
+          bucket: "site-news",
+          storagePaths: uploadedStoragePaths,
+        });
+      }
+      setImageError(error instanceof Error ? error.message : "Impossible d'envoyer les images.");
+    } finally {
+      setImageStatus(null);
+    }
   }
 
   function handleDeleteAccommodation() {
@@ -259,7 +323,7 @@ export function AdminAccommodationForm({ mode, accommodation, groups, features }
   }
 
   return (
-    <form className="admin-news-form" action={formAction}>
+    <form className="admin-news-form" onSubmit={handleSubmit}>
       <header className="admin-news-form-header">
         <AdminBackButton fallbackHref="/fr/admin/hebergements" />
         <div>
@@ -280,6 +344,7 @@ export function AdminAccommodationForm({ mode, accommodation, groups, features }
             </div>
             <p className="admin-section-kicker">{visibleImageCount} / {MAX_IMAGES} images</p>
             {imageError ? <strong className="admin-news-form-error">{imageError}</strong> : null}
+            {imageStatus ? <p className="admin-news-form-note" role="status">{imageStatus}</p> : null}
             {state.fieldErrors.imagePath ? <strong className="admin-news-form-error">{state.fieldErrors.imagePath}</strong> : null}
             <div className="admin-restaurant-images-grid">
               {existingImages.map((image) => (
@@ -307,7 +372,11 @@ export function AdminAccommodationForm({ mode, accommodation, groups, features }
                     <span className="admin-restaurant-image-origin">Nouvelle</span>
                   </div>
                   <p>{image.file.name}</p>
-                  <small>{formatSize(image.file.size)}</small>
+                  <small>
+                    Taille originale : {formatImageSize(image.originalSize)}
+                    <br />
+                    Image optimisée : {formatImageSize(image.compressedSize)}
+                  </small>
                   <label className="admin-restaurant-cover-choice">
                     <input type="radio" name="cover_choice" checked={formValues.coverImageValue === `pending:${index}`} onChange={() => setCover(`pending:${index}`)} />
                     {formValues.coverImageValue === `pending:${index}` ? <span className="admin-restaurant-cover-badge">Couverture</span> : <span>Definir comme couverture</span>}
@@ -318,8 +387,14 @@ export function AdminAccommodationForm({ mode, accommodation, groups, features }
             </div>
             <label className="admin-restaurant-image-dropzone">
               <span>+ Ajouter des images</span>
-              <small>JPEG - PNG - WebP<br />5 Mo maximum - 15 images maximum</small>
-              <input ref={fileInputRef} name="image_files" type="file" multiple accept="image/*" onChange={(event) => handleFiles(Array.from(event.target.files ?? []))} />
+              <small>
+                Formats acceptés : JPG, PNG ou WebP.
+                <br />
+                Taille originale maximale : 5 Mo.
+                <br />
+                L&apos;image sera automatiquement optimisée avant l&apos;envoi.
+              </small>
+              <input ref={fileInputRef} type="file" multiple accept="image/jpeg,image/png,image/webp" disabled={isSaving} onChange={(event) => { void handleFiles(Array.from(event.target.files ?? [])); }} />
             </label>
             <input type="hidden" name="cover_image_value" value={formValues.coverImageValue} />
             {deletedImageIds.map((id) => <input key={id} type="hidden" name="deleted_image_ids" value={id} />)}
@@ -379,7 +454,7 @@ export function AdminAccommodationForm({ mode, accommodation, groups, features }
             </section>
           ) : null}
           <div className="admin-news-form-actions">
-            <button className="admin-news-form-button primary" type="submit">{mode === "create" ? "Creer l'hebergement" : "Enregistrer les modifications"}</button>
+            <button className="admin-news-form-button primary" type="submit" disabled={isSaving}>{isSaving ? "Enregistrement..." : mode === "create" ? "Creer l'hebergement" : "Enregistrer les modifications"}</button>
           </div>
         </div>
       </div>

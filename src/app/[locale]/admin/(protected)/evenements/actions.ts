@@ -8,7 +8,6 @@ import {
   getEventServiceFormValues,
   saveEventService,
 } from "@/lib/admin/events/save-event-service";
-import { getEventServiceImageFileFromFormData } from "@/lib/admin/events/upload-event-service-image";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -22,6 +21,28 @@ function revalidateEventServicePaths(id?: string) {
   }
 }
 
+function getUploadedEventServiceImagePaths(formData: FormData) {
+  return [
+    ...new Set(
+      formData
+        .getAll("uploaded_image_paths")
+        .filter((value): value is string => typeof value === "string" && value.trim().length > 0)
+        .map((value) => value.trim()),
+    ),
+  ];
+}
+
+function getDeletedEventServiceImageIds(formData: FormData) {
+  return [
+    ...new Set(
+      formData
+        .getAll("deleted_image_ids")
+        .filter((value): value is string => typeof value === "string" && value.trim().length > 0)
+        .map((value) => value.trim()),
+    ),
+  ];
+}
+
 export async function createEventServiceAction(
   previousState = getDefaultEventServiceFormState(),
   formData: FormData,
@@ -31,7 +52,8 @@ export async function createEventServiceAction(
   const result = await saveEventService({
     mode: "create",
     values: getEventServiceFormValues(formData),
-    imageFile: getEventServiceImageFileFromFormData(formData),
+    imagePaths: getUploadedEventServiceImagePaths(formData),
+    deletedImageIds: getDeletedEventServiceImageIds(formData),
   });
 
   if (!result.ok) {
@@ -53,7 +75,8 @@ export async function updateEventServiceAction(
     mode: "update",
     serviceId,
     values: getEventServiceFormValues(formData),
-    imageFile: getEventServiceImageFileFromFormData(formData),
+    imagePaths: getUploadedEventServiceImagePaths(formData),
+    deletedImageIds: getDeletedEventServiceImageIds(formData),
   });
 
   if (!result.ok) {

@@ -86,11 +86,23 @@ export async function getAdminNewsArticle(
     }
 
     if (data) {
+      const { data: imagesData, error: imagesError } = await supabase
+        .from("news_article_images")
+        .select("id,news_article_id,image_path,alt_fr,alt_en,sort_order,is_cover,is_active")
+        .eq("news_article_id", articleId)
+        .order("sort_order", { ascending: true })
+        .order("created_at", { ascending: true });
+
+      if (imagesError) {
+        console.error("[admin-news] Unable to load article images:", imagesError.message);
+      }
+
       return {
         ok: true,
         categories,
         article: mapAdminNewsArticle(
           data as unknown as Parameters<typeof mapAdminNewsArticle>[0],
+          (imagesData ?? []) as unknown as Parameters<typeof mapAdminNewsArticle>[1],
         ),
       };
     }

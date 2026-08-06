@@ -6,6 +6,7 @@ import {
   emptyAdminNewsFormValues,
   type AdminNewsFormState,
 } from "@/lib/admin/news/admin-news-types";
+import { deleteAdminNewsArticle } from "@/lib/admin/news/delete-admin-news";
 import {
   getAdminNewsFormIntent,
   getAdminNewsFormValues,
@@ -15,7 +16,6 @@ import {
   updateNewsQuickStatus,
   type AdminNewsQuickActionResult,
 } from "@/lib/admin/news/update-news-status";
-import { getNewsImageFileFromFormData } from "@/lib/admin/news/upload-news-image";
 
 const defaultState: AdminNewsFormState = {
   ok: false,
@@ -35,6 +35,28 @@ function revalidateNewsArticlePaths(articleId: string) {
   revalidatePath(`/fr/admin/actualites/${articleId}/modifier`);
 }
 
+function getUploadedNewsImagePaths(formData: FormData) {
+  return [
+    ...new Set(
+      formData
+        .getAll("uploaded_image_paths")
+        .filter((value): value is string => typeof value === "string" && value.trim().length > 0)
+        .map((value) => value.trim()),
+    ),
+  ];
+}
+
+function getDeletedNewsImageIds(formData: FormData) {
+  return [
+    ...new Set(
+      formData
+        .getAll("deleted_image_ids")
+        .filter((value): value is string => typeof value === "string" && value.trim().length > 0)
+        .map((value) => value.trim()),
+    ),
+  ];
+}
+
 export async function createAdminNewsArticle(
   previousState: AdminNewsFormState = defaultState,
   formData: FormData,
@@ -45,7 +67,8 @@ export async function createAdminNewsArticle(
     mode: "create",
     intent: getAdminNewsFormIntent(formData),
     values: getAdminNewsFormValues(formData),
-    imageFile: getNewsImageFileFromFormData(formData),
+    imagePaths: getUploadedNewsImagePaths(formData),
+    deletedImageIds: getDeletedNewsImageIds(formData),
   });
 
   if (!result.ok) {
@@ -68,7 +91,8 @@ export async function updateAdminNewsArticle(
     articleId,
     intent: getAdminNewsFormIntent(formData),
     values: getAdminNewsFormValues(formData),
-    imageFile: getNewsImageFileFromFormData(formData),
+    imagePaths: getUploadedNewsImagePaths(formData),
+    deletedImageIds: getDeletedNewsImageIds(formData),
   });
 
   if (!result.ok) {
@@ -125,4 +149,15 @@ export async function republishNewsAction(
   }
 
   return result;
+}
+
+export async function deleteAdminNewsArticleAction(articleId: string) {
+  const result = await deleteAdminNewsArticle(articleId);
+
+  if (!result.ok) {
+    return result;
+  }
+
+  revalidateNewsArticlePaths(articleId);
+  redirect("/fr/admin/actualites?deleted=1");
 }

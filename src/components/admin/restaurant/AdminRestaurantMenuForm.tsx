@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useActionState, useEffect, useMemo, useRef, useState, useTransition } from "react";
+import type { FormEvent } from "react";
 import {
   createRestaurantMenuAction,
   deleteRestaurantMenuAction,
@@ -11,12 +12,21 @@ import { AdminBackButton } from "@/components/admin/common/AdminBackButton";
 import { AdminConfirmDialog } from "@/components/admin/common/AdminConfirmDialog";
 import { AdminVisibilityField } from "@/components/admin/common/AdminVisibilityField";
 import {
+  formatImageSize,
+  compressRestaurantImage,
+  validateOriginalRestaurantImage,
+} from "@/lib/images/compress-image";
+import {
   emptyRestaurantMenuFormValues,
   type AdminRestaurantCategory,
   type AdminRestaurantFormState,
   type AdminRestaurantMenuDetail,
   type AdminRestaurantMenuFormValues,
 } from "@/lib/admin/restaurant/admin-restaurant-types";
+import {
+  removeRestaurantMenuImagesFromBrowser,
+  uploadRestaurantMenuImageFromBrowser,
+} from "@/lib/admin/restaurant/upload-restaurant-menu-image-client";
 
 type Props = {
   mode: "create" | "edit";
@@ -29,11 +39,11 @@ type PendingRestaurantImage = {
   file: File;
   previewUrl: string;
   isCover: boolean;
+  originalSize: number;
+  compressedSize: number;
 };
 
 const MAX_IMAGES = 15;
-const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
-const ACCEPTED_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 
 function initialValues(menu?: AdminRestaurantMenuDetail): AdminRestaurantMenuFormValues {
   if (!menu) return emptyRestaurantMenuFormValues;
@@ -50,10 +60,6 @@ function initialValues(menu?: AdminRestaurantMenuDetail): AdminRestaurantMenuFor
     coverImageValue: cover ? `existing:${cover.id}` : "",
     deletedImageIds: [],
   };
-}
-
-function formatSize(size: number) {
-  return `${(size / 1024 / 1024).toFixed(1)} Mo`;
 }
 
 function Field({
@@ -117,12 +123,15 @@ export function AdminRestaurantMenuForm({ mode, menu, categories }: Props) {
   const [formValues, setFormValues] = useState<AdminRestaurantMenuFormValues>(state.values);
   const [pendingImages, setPendingImages] = useState<PendingRestaurantImage[]>([]);
   const [imageError, setImageError] = useState<string | null>(null);
+  const [imageStatus, setImageStatus] = useState<string | null>(null);
   const [deletedImageIds, setDeletedImageIds] = useState<string[]>([]);
   const [deleteCandidateId, setDeleteCandidateId] = useState<string | null>(null);
   const [deleteMenuDialogOpen, setDeleteMenuDialogOpen] = useState(false);
   const [deleteMenuConfirmation, setDeleteMenuConfirmation] = useState("");
   const [deleteMenuError, setDeleteMenuError] = useState<string | null>(null);
   const [isDeletingMenu, startDeleteMenuTransition] = useTransition();
+  const [isSaving, startSavingTransition] = useTransition();
+  const [isProcessingImages, setIsProcessingImages] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const pendingImagesRef = useRef<PendingRestaurantImage[]>([]);
   const existingImages = menu?.images ?? [];
@@ -140,10 +149,7 @@ export function AdminRestaurantMenuForm({ mode, menu, categories }: Props) {
 
   function syncFileInput(images: PendingRestaurantImage[]) {
     pendingImagesRef.current = images;
-    if (!fileInputRef.current) return;
-    const transfer = new DataTransfer();
-    images.forEach((image) => transfer.items.add(image.file));
-    fileInputRef.current.files = transfer.files;
+    if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
   function setCover(value: string) {
@@ -187,8 +193,9 @@ export function AdminRestaurantMenuForm({ mode, menu, categories }: Props) {
     setDeletedImageIds((current) => current.filter((id) => id !== imageId));
   }
 
-  function handleFiles(files: File[]) {
+  async function handleFiles(files: File[]) {
     setImageError(null);
+    setImageStatus(null);
     const total = activeExistingImages.length + pendingImages.length + files.length;
     if (total > MAX_IMAGES) {
       setImageError("Une carte peut contenir au maximum 15 images.");
@@ -197,23 +204,35 @@ export function AdminRestaurantMenuForm({ mode, menu, categories }: Props) {
     }
 
     const accepted: PendingRestaurantImage[] = [];
-    for (const file of files) {
-      if (!ACCEPTED_IMAGE_TYPES.has(file.type)) {
-        setImageError(`Le fichier "${file.name}" n'est pas une image valide.`);
-        syncFileInput(pendingImages);
-        return;
+    setIsProcessingImages(true);
+    setImageStatus("Optimisation de l'image...");
+
+    try {
+      for (const file of files) {
+        const validation = validateOriginalRestaurantImage(file);
+        if (!validation.ok) {
+          setImageError(validation.message);
+          syncFileInput(pendingImages);
+          return;
+        }
+
+        const compressed = await compressRestaurantImage(file);
+        accepted.push({
+          clientId: `${compressed.file.name}-${compressed.file.size}-${crypto.randomUUID()}`,
+          file: compressed.file,
+          previewUrl: URL.createObjectURL(compressed.file),
+          isCover: false,
+          originalSize: compressed.originalSize,
+          compressedSize: compressed.compressedSize,
+        });
       }
-      if (file.size > MAX_IMAGE_SIZE) {
-        setImageError(`L'image "${file.name}" depasse 5 Mo.`);
-        syncFileInput(pendingImages);
-        return;
-      }
-      accepted.push({
-        clientId: `${file.name}-${file.size}-${crypto.randomUUID()}`,
-        file,
-        previewUrl: URL.createObjectURL(file),
-        isCover: false,
-      });
+    } catch (error) {
+      setImageError(error instanceof Error ? error.message : "Impossible d'optimiser l'image.");
+      syncFileInput(pendingImages);
+      return;
+    } finally {
+      setIsProcessingImages(false);
+      setImageStatus(null);
     }
 
     setPendingImages((current) => {
@@ -233,6 +252,49 @@ export function AdminRestaurantMenuForm({ mode, menu, categories }: Props) {
     });
   }
 
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (isProcessingImages || isSaving) return;
+
+    setImageError(null);
+    setImageStatus(null);
+    setIsProcessingImages(true);
+    const uploadedStoragePaths: string[] = [];
+
+    try {
+      const uploadedImagePaths: string[] = [];
+      const folderHint = formValues.code || formValues.titleFr || "carte";
+
+      for (const image of pendingImages) {
+        setImageStatus(`Envoi de l'image "${image.file.name}"...`);
+        const upload = await uploadRestaurantMenuImageFromBrowser(image.file, folderHint);
+        if (!upload.ok) {
+          throw new Error(upload.message);
+        }
+        uploadedImagePaths.push(upload.imagePath);
+        uploadedStoragePaths.push(upload.storagePath);
+      }
+
+      const formData = new FormData(event.currentTarget);
+      formData.delete("image_files");
+      formData.delete("uploaded_image_paths");
+      uploadedImagePaths.forEach((imagePath) => formData.append("uploaded_image_paths", imagePath));
+
+      startSavingTransition(() => {
+        formAction(formData);
+      });
+    } catch (error) {
+      if (uploadedStoragePaths.length > 0) {
+        await removeRestaurantMenuImagesFromBrowser(uploadedStoragePaths);
+      }
+      setImageError(error instanceof Error ? error.message : "Impossible d'envoyer l'image optimisée.");
+    } finally {
+      setImageStatus(null);
+      setIsProcessingImages(false);
+    }
+  }
+
   function handleDeleteMenu() {
     if (!menu || deleteMenuConfirmation.trim() !== "SUPPRIMER") return;
     setDeleteMenuError(null);
@@ -243,7 +305,7 @@ export function AdminRestaurantMenuForm({ mode, menu, categories }: Props) {
   }
 
   return (
-    <form className="admin-news-form" action={formAction}>
+    <form className="admin-news-form" onSubmit={handleSubmit}>
       <header className="admin-news-form-header">
         <AdminBackButton fallbackHref="/fr/admin/restaurant" />
         <div>
@@ -261,6 +323,7 @@ export function AdminRestaurantMenuForm({ mode, menu, categories }: Props) {
               <h2>Galerie</h2>
             </div>
             {imageError ? <strong className="admin-news-form-error">{imageError}</strong> : null}
+            {imageStatus ? <p className="admin-news-form-note" role="status">{imageStatus}</p> : null}
             {state.fieldErrors.imagePath ? <strong className="admin-news-form-error">{state.fieldErrors.imagePath}</strong> : null}
 
             <div className="admin-restaurant-images-grid">
@@ -308,7 +371,11 @@ export function AdminRestaurantMenuForm({ mode, menu, categories }: Props) {
                     <span className="admin-restaurant-image-origin">Nouvelle</span>
                   </div>
                   <p>{image.file.name}</p>
-                  <small>{formatSize(image.file.size)}</small>
+                  <small>
+                    Taille originale : {formatImageSize(image.originalSize)}
+                    <br />
+                    Image optimisée : {formatImageSize(image.compressedSize)}
+                  </small>
                   <label className="admin-restaurant-cover-choice">
                     <input
                       type="radio"
@@ -331,13 +398,19 @@ export function AdminRestaurantMenuForm({ mode, menu, categories }: Props) {
 
             <label className="admin-restaurant-image-dropzone">
               <span>+ Ajouter des images</span>
-              <small>JPEG - PNG - WebP<br />5 Mo maximum - 15 images maximum</small>
+              <small>
+                Formats acceptés : JPG, PNG ou WebP.
+                <br />
+                Taille originale maximale : 5 Mo.
+                <br />
+                L&apos;image sera automatiquement optimisée avant l&apos;envoi.
+              </small>
               <input
                 ref={fileInputRef}
-                name="image_files"
                 type="file"
                 multiple
                 accept="image/jpeg,image/png,image/webp"
+                disabled={isProcessingImages || isSaving}
                 onChange={(event) => handleFiles(Array.from(event.target.files ?? []))}
               />
             </label>
@@ -414,7 +487,15 @@ export function AdminRestaurantMenuForm({ mode, menu, categories }: Props) {
             </section>
           ) : null}
           <div className="admin-news-form-actions">
-            <button className="admin-news-form-button primary" type="submit">{mode === "create" ? "Creer la carte" : "Enregistrer les modifications"}</button>
+            <button className="admin-news-form-button primary" type="submit" disabled={isProcessingImages || isSaving}>
+              {isProcessingImages
+                ? "Traitement des images..."
+                : isSaving
+                  ? "Enregistrement..."
+                  : mode === "create"
+                    ? "Creer la carte"
+                    : "Enregistrer les modifications"}
+            </button>
           </div>
         </div>
       </div>

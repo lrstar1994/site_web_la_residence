@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useMemo, useState, useTransition } from "react";
+import type { FormEvent } from "react";
 import {
   createEventServiceAction,
   deleteEventServiceAction,
@@ -8,6 +9,7 @@ import {
 } from "@/app/[locale]/admin/(protected)/evenements/actions";
 import { AdminBackButton } from "@/components/admin/common/AdminBackButton";
 import { AdminConfirmDialog } from "@/components/admin/common/AdminConfirmDialog";
+import type { PendingAdminGalleryImage } from "@/components/admin/common/AdminMultiImageField";
 import { AdminVisibilityField } from "@/components/admin/common/AdminVisibilityField";
 import { AdminEventServiceImageField } from "@/components/admin/events/AdminEventServiceImageField";
 import {
@@ -16,6 +18,9 @@ import {
   type AdminEventServiceFormState,
   type AdminEventServiceFormValues,
 } from "@/lib/admin/events/admin-event-service-types";
+import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { removeUploadedImages } from "@/lib/storage/remove-uploaded-images";
+import { uploadOptimizedImage } from "@/lib/storage/upload-optimized-image";
 
 type Props = {
   mode: "create" | "edit";
@@ -24,6 +29,8 @@ type Props = {
 
 function initialValues(service?: AdminEventService): AdminEventServiceFormValues {
   if (!service) return emptyAdminEventServiceFormValues;
+  const cover = service.images.find((image) => image.isCover && image.isActive) ??
+    service.images.find((image) => image.isActive);
 
   return {
     code: service.code,
@@ -36,6 +43,8 @@ function initialValues(service?: AdminEventService): AdminEventServiceFormValues
     imageAltEn: service.imageAlt.en,
     sortOrder: String(service.sortOrder),
     isActive: service.isActive,
+    coverImageValue: cover ? `existing:${cover.id}` : "",
+    deletedImageIds: [],
   };
 }
 
@@ -110,6 +119,10 @@ export function AdminEventServiceForm({ mode, service }: Props) {
   const [deleteConfirmation, setDeleteConfirmation] = useState("");
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [isDeleting, startDeleteTransition] = useTransition();
+  const [pendingImages, setPendingImages] = useState<PendingAdminGalleryImage[]>([]);
+  const [imageSubmitError, setImageSubmitError] = useState<string | null>(null);
+  const [imageSubmitStatus, setImageSubmitStatus] = useState<string | null>(null);
+  const [isSaving, startSavingTransition] = useTransition();
 
   function updateField(field: keyof AdminEventServiceFormValues, value: string) {
     setFormValues((current) => ({ ...current, [field]: value }));
@@ -129,8 +142,59 @@ export function AdminEventServiceForm({ mode, service }: Props) {
     });
   }
 
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (isSaving) return;
+
+    setImageSubmitError(null);
+    setImageSubmitStatus(null);
+    const uploadedPaths: string[] = [];
+
+    try {
+      const formData = new FormData(event.currentTarget);
+
+      const supabase = createSupabaseBrowserClient();
+      const uploadedImagePaths: string[] = [];
+
+      for (const image of pendingImages) {
+        setImageSubmitStatus(`Envoi de l'image "${image.file.name}"...`);
+        const upload = await uploadOptimizedImage({
+          file: image.file,
+          bucket: "site-news",
+          folder: `event-services/${formValues.code || formValues.titleFr || "prestation"}`,
+          supabaseClient: supabase,
+          alreadyOptimized: true,
+        });
+
+        if (!upload.ok) throw new Error(upload.message);
+
+        uploadedPaths.push(upload.storagePath);
+        uploadedImagePaths.push(upload.publicUrl);
+      }
+
+      formData.delete("uploaded_image_path");
+      formData.delete("uploaded_image_paths");
+      uploadedImagePaths.forEach((imagePath) => formData.append("uploaded_image_paths", imagePath));
+
+      startSavingTransition(() => {
+        formAction(formData);
+      });
+    } catch (error) {
+      if (uploadedPaths.length > 0) {
+        await removeUploadedImages({
+          supabaseClient: createSupabaseBrowserClient(),
+          bucket: "site-news",
+          storagePaths: uploadedPaths,
+        });
+      }
+      setImageSubmitError(error instanceof Error ? error.message : "Impossible d'envoyer l'image.");
+    } finally {
+      setImageSubmitStatus(null);
+    }
+  }
+
   return (
-    <form className="admin-news-form" action={formAction}>
+    <form className="admin-news-form" onSubmit={handleSubmit}>
       <header className="admin-news-form-header">
         <AdminBackButton fallbackHref="/fr/admin/evenements" />
         <div>
@@ -144,11 +208,30 @@ export function AdminEventServiceForm({ mode, service }: Props) {
           {state.message}
         </section>
       ) : null}
+      {imageSubmitError ? (
+        <section className="admin-news-form-alert" role="alert">
+          {imageSubmitError}
+        </section>
+      ) : null}
+      {imageSubmitStatus ? (
+        <section className="admin-news-form-alert" role="status">
+          {imageSubmitStatus}
+        </section>
+      ) : null}
       <div className="admin-news-form-grid">
         <div className="admin-news-form-main">
           <AdminEventServiceImageField
+            images={service?.images ?? []}
             values={formValues}
             error={state.fieldErrors.imagePath}
+            disabled={isSaving}
+            onCoverChange={(value) =>
+              setFormValues((current) => ({ ...current, coverImageValue: value }))
+            }
+            onDeletedImageIdsChange={(ids) =>
+              setFormValues((current) => ({ ...current, deletedImageIds: ids }))
+            }
+            onPendingImagesChange={setPendingImages}
           />
           <input type="hidden" name="code" value={formValues.code} />
           <input type="hidden" name="sort_order" value={formValues.sortOrder} />
@@ -231,8 +314,8 @@ export function AdminEventServiceForm({ mode, service }: Props) {
             </section>
           ) : null}
           <div className="admin-news-form-actions">
-            <button className="admin-news-form-button primary" type="submit">
-              {mode === "create" ? "Créer la prestation" : "Enregistrer les modifications"}
+            <button className="admin-news-form-button primary" type="submit" disabled={isSaving}>
+              {isSaving ? "Enregistrement..." : mode === "create" ? "Créer la prestation" : "Enregistrer les modifications"}
             </button>
           </div>
         </div>

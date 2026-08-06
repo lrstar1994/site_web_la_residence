@@ -1,13 +1,20 @@
 import { AdminNewsImageField } from "@/components/admin/news/AdminNewsImageField";
 import type {
+  AdminNewsArticleImage,
   AdminNewsFormState,
   AdminNewsFormValues,
 } from "@/lib/admin/news/admin-news-types";
+import type { PendingAdminGalleryImage } from "@/components/admin/common/AdminMultiImageField";
 
 type AdminNewsFormFieldsProps = {
   values: AdminNewsFormValues;
+  images: AdminNewsArticleImage[];
   errors: AdminNewsFormState["fieldErrors"];
   onChange: (field: keyof AdminNewsFormValues, value: string) => void;
+  disabled?: boolean;
+  onCoverChange: (value: string) => void;
+  onDeletedImageIdsChange: (ids: string[]) => void;
+  onPendingImagesChange: (images: PendingAdminGalleryImage[]) => void;
 };
 
 function fieldErrorId(field: keyof AdminNewsFormValues) {
@@ -28,6 +35,8 @@ function fieldToInputName(field: keyof AdminNewsFormValues) {
     contentFr: "content_fr",
     contentEn: "content_en",
     scheduledAt: "scheduled_at",
+    coverImageValue: "cover_image_value",
+    deletedImageIds: "deleted_image_ids",
   };
 
   return names[field];
@@ -119,12 +128,25 @@ function TextArea({
 
 export function AdminNewsFormFields({
   values,
+  images,
   errors,
   onChange,
+  disabled = false,
+  onCoverChange,
+  onDeletedImageIdsChange,
+  onPendingImagesChange,
 }: AdminNewsFormFieldsProps) {
   return (
     <div className="admin-news-form-main">
-      <AdminNewsImageField values={values} error={errors.imagePath} onChange={onChange} />
+      <AdminNewsImageField
+        images={images}
+        values={values}
+        error={errors.imagePath}
+        disabled={disabled}
+        onCoverChange={onCoverChange}
+        onDeletedImageIdsChange={onDeletedImageIdsChange}
+        onPendingImagesChange={onPendingImagesChange}
+      />
       <input type="hidden" name="image_alt_fr" value={values.imageAltFr} />
       <input type="hidden" name="image_alt_en" value={values.imageAltEn} />
 

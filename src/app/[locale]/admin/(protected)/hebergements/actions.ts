@@ -11,7 +11,7 @@ import {
   saveAccommodation,
   saveAccommodationFeature,
 } from "@/lib/admin/accommodations/save-admin-accommodation";
-import { getAccommodationImageFilesFromFormData } from "@/lib/admin/accommodations/upload-accommodation-image";
+import { getAccommodationUploadedImagePathsFromFormData } from "@/lib/admin/accommodations/upload-accommodation-image";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -48,7 +48,7 @@ export async function createAccommodationAction(
   const result = await saveAccommodation({
     mode: "create",
     values: getAccommodationFormValues(formData),
-    imageFiles: getAccommodationImageFilesFromFormData(formData),
+    imagePaths: getAccommodationUploadedImagePathsFromFormData(formData),
     deletedImageIds: [],
     featureIds: featureIds(formData),
   });
@@ -69,7 +69,7 @@ export async function updateAccommodationAction(
     mode: "update",
     accommodationId,
     values: getAccommodationFormValues(formData),
-    imageFiles: getAccommodationImageFilesFromFormData(formData),
+    imagePaths: getAccommodationUploadedImagePathsFromFormData(formData),
     deletedImageIds: deletedAccommodationImageIds(formData),
     featureIds: featureIds(formData),
   });
