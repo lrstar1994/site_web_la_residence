@@ -19,7 +19,7 @@ export function HomeHero({
     <header className="hero" id="home-hero" role="banner">
       <div className="hero-image-container">
         <Image
-          src="/ChatGPT Image 2 juin 2026, 09_05_48.png"
+          src="/couverture-acceuil.png"
           alt={imageAlt}
           fill
           priority

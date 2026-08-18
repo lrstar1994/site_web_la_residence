@@ -82,7 +82,7 @@
         },
         "salles": {
           "visible_title": "Venues",
-          "seo_title": "Venue rental and seminars",
+          "seo_title": "seminars",
           "description": "Spaces designed for meetings, training sessions, seminars and professional receptions in Antananarivo.",
           "cta": "Explore"
         },
@@ -120,15 +120,15 @@
       "image_alt": "Room at La Résidence Ankerana in Antananarivo"
     },
     "venues": {
-      "label": "Seminars & receptions",
-      "title": "Our venues",
-      "description": "The Residence offers several specially designed, adaptable spaces for your family or professional events. You will enjoy an exceptional setting and service, whatever your needs—whether for a wedding or anniversary celebration, a family banquet, a seminar, a conference, or a meeting.",
+      "label": "Seminars",
+      "title": "Seminar room in Antananarivo",
+      "description": "Comfortable, flexible seminar rooms—suitable for meetings, training sessions, conferences, and corporate events—set in a quiet, pleasant environment.",
       "cta": "View venues",
       "image_alt": "Seminar venue in Antananarivo"
     },
     "events": {
-      "title": "Brunches, celebrations and events in Ankerana",
-      "description": "La Résidence Ankerana welcomes your important moments in Antananarivo in an elegant, peaceful and friendly setting.",
+      "title": "Your events, our expertise",
+      "description": "Bring your most special events to life in a warm, lush setting. Whether for weddings, birthdays, christenings, family gatherings, or private receptions, our spaces adapt to your wishes to create unique and memorable moments.",
       "cta": "Discover events",
       "image_alt": "Private event at La Résidence Ankerana in Antananarivo"
     },
