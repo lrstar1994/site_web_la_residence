@@ -87,14 +87,15 @@ export const siteConfig = {
     en: "https://secure.reservit.com/engine/booking/2/450550/dates?specialMode=default&langcode=EN&m=booking",
   },
   contact: {
-    addressLine1: "Lot II H 40, Ankerana Ankadindramamy",
+    addressLine1: "Lot II H 40 A, Ankerana Ankadindramamy",
     phoneDisplay: "034 01 807 70",
     phoneHref: "+261340180770",
     email: "contact.laresidenceankerana@gmail.com",
   },
   socialLinks: {
-    facebook: "#",
-    instagram: "#",
+    facebook: "https://www.facebook.com/LaResidenceAntananarivo",
+    instagram:
+      "https://www.instagram.com/laresidence_ankerana?igsh=MXFlejd5d3A5eWtncw==",
     whatsapp: "https://wa.me/261340180772",
   },
   footerServices: ["stays", "meals", "meetings", "brunches"] as const,
