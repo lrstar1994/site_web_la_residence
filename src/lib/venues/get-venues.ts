@@ -87,32 +87,136 @@ function formatArea(surfaceM2: number | null) {
   return surfaceM2 ? `${Number(surfaceM2)} m²` : "";
 }
 
+// correction image diaporama
+type CardImage = {
+  src: string;
+  alt: {
+    fr: string;
+    en: string;
+  };
+};
+
+function buildMixedVenueImages(venue: Venue): CardImage[] {
+  const sortedGeneralImages = [...venue.images].sort(
+    (a, b) =>
+      Number(b.isCover) - Number(a.isCover) || a.sortOrder - b.sortOrder,
+  );
+
+  const generalCover =
+    sortedGeneralImages.find((image) => image.isCover) ??
+    sortedGeneralImages[0];
+
+  const generalWithoutCover = sortedGeneralImages
+    .filter((image) => image.id !== generalCover?.id)
+    .map((image) => ({
+      src: image.imagePath,
+      alt: image.alt,
+    }));
+
+  const useSources = venue.uses
+    .filter((use) => use.isActive)
+    .map((use) =>
+      [...use.images]
+        .filter((image) => image.isActive)
+        .sort(
+          (a, b) =>
+            Number(b.isCover) - Number(a.isCover) || a.sortOrder - b.sortOrder,
+        )
+        .map((image) => ({
+          src: image.imagePath,
+          alt: image.alt,
+        })),
+    )
+    .filter((images) => images.length > 0);
+
+  const sources: CardImage[][] = [generalWithoutCover, ...useSources].filter(
+    (source) => source.length > 0,
+  );
+
+  const mixed: CardImage[] = [];
+  let index = 0;
+  let hasRemainingImages = true;
+
+  while (hasRemainingImages) {
+    hasRemainingImages = false;
+
+    for (const source of sources) {
+      const image = source[index];
+
+      if (image) {
+        mixed.push(image);
+        hasRemainingImages = true;
+      }
+    }
+
+    index += 1;
+  }
+
+  const firstImage: CardImage | null = generalCover
+    ? {
+        src: generalCover.imagePath,
+        alt: generalCover.alt,
+      }
+    : (useSources[0]?.[0] ?? null);
+
+  const combined = firstImage ? [firstImage, ...mixed] : mixed;
+
+  // Évite qu'une même image apparaisse plusieurs fois.
+  return Array.from(
+    new Map(combined.map((image) => [image.src, image])).values(),
+  );
+}
+
+// fin
+
 function toCards(venues: Venue[]): VenueCardModel[] {
   return venues.map((venue) => {
-    const sortedImages = [...venue.images].sort((a, b) => Number(b.isCover) - Number(a.isCover) || a.sortOrder - b.sortOrder);
-    const cover = sortedImages[0];
+    // const sortedImages = [...venue.images].sort((a, b) => Number(b.isCover) - Number(a.isCover) || a.sortOrder - b.sortOrder);
+    // const cover = sortedImages[0];
+    const sortedImages = [...venue.images].sort(
+      (a, b) =>
+        Number(b.isCover) - Number(a.isCover) || a.sortOrder - b.sortOrder,
+    );
+
+    const allImages = buildMixedVenueImages(venue);
+
+    const cover = allImages[0];
 
     return {
       id: venue.id,
       code: venue.code,
       name: { fr: venue.name, en: venue.name },
       location: venue.location,
-      capacity: { fr: `${venue.capacity} personnes`, en: `${venue.capacity} guests` },
+      capacity: {
+        fr: `${venue.capacity} personnes`,
+        en: `${venue.capacity} guests`,
+      },
       area: formatArea(venue.surfaceM2),
       shortDescription: venue.shortDescription,
       fullDescription: venue.description,
       setups: venue.setups.map((setup) => setup.name),
       setupItems: venue.setups,
+      // coverImage: {
+      //   src: cover?.imagePath ?? "/salles.jpeg",
+      //   alt: cover?.alt ?? { fr: `Salle ${venue.name}`, en: `${venue.name} venue` },
+      // },
       coverImage: {
-        src: cover?.imagePath ?? "/salles.jpeg",
-        alt: cover?.alt ?? { fr: `Salle ${venue.name}`, en: `${venue.name} venue` },
+        src: cover?.src ?? "/salles.jpeg",
+        alt: cover?.alt ?? {
+          fr: `Salle ${venue.name}`,
+          en: `${venue.name} venue`,
+        },
       },
       images: sortedImages.map((image) => ({
         src: image.imagePath,
         alt: image.alt,
       })),
+      allImages,
       uses: venue.uses.map((use) => {
-        const sortedUseImages = [...use.images].sort((a, b) => Number(b.isCover) - Number(a.isCover) || a.sortOrder - b.sortOrder);
+        const sortedUseImages = [...use.images].sort(
+          (a, b) =>
+            Number(b.isCover) - Number(a.isCover) || a.sortOrder - b.sortOrder,
+        );
         return {
           id: use.id,
           useTypeCode: use.useTypeCode,

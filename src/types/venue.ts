@@ -71,6 +71,10 @@ export type VenueCardModel = {
     src: string;
     alt: LocalizedText;
   }>;
+  allImages: Array<{
+    src: string;
+    alt: LocalizedText;
+  }>;
   uses: Array<{
     id: string;
     useTypeCode: string;
