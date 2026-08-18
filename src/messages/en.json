@@ -60,7 +60,7 @@
     "hero": {
       "eyebrow": "Welcome to La Résidence Ankerana",
       "title": "The village within the city",
-      "description": "Discover La Résidence Ankerana, a peaceful address in Antananarivo for stays, dining, seminars and special events.",
+      "description": "During your stay in Antananarivo, come and recharge while enjoying the peace and fresh air of this leafy, flower-filled setting, located close to the city center. You can make the most of the swimming pool and let your children play freely in a secure environment.",
       "cta": "Discover",
       "image_alt": "La Résidence Ankerana hotel in Antananarivo"
     },
@@ -115,14 +115,14 @@
     },
     "accommodation": {
       "title": "Rooms and stays at La Résidence Ankerana",
-      "description": "For one night, a weekend or a longer stay in Antananarivo, enjoy a peaceful and convenient address in Ankerana.",
+      "description": "The Residence is the ideal setting for a stay in the capital, a getaway far from the noise and pollution, or a celebration or corporate event in an exceptional environment.",
       "cta": "Book now",
       "image_alt": "Room at La Résidence Ankerana in Antananarivo"
     },
     "venues": {
       "label": "Seminars & receptions",
       "title": "Our venues",
-      "description": "Organize your seminars, training sessions, conferences, professional workshops, and corporate events.",
+      "description": "The Residence offers several specially designed, adaptable spaces for your family or professional events. You will enjoy an exceptional setting and service, whatever your needs—whether for a wedding or anniversary celebration, a family banquet, a seminar, a conference, or a meeting.",
       "cta": "View venues",
       "image_alt": "Seminar venue in Antananarivo"
     },
@@ -279,7 +279,7 @@
       "label": "Ankerana Events",
       "title_line_1": "Excellence for",
       "title_line_2": "your events",
-      "description": "An elegant event venue in Antananarivo with attentive service and refined cuisine for seminars, wedding venue needs, reception venue moments and corporate event planning.",
+      "description": "Whether for product launches, corporate events, or exchanging wedding vows, we offer unforgettable settings. Our bar, restaurants, rooms, and suites can be transformed and reserved exclusively to your specifications, creating a truly unique experience.",
       "venues_cta": "Discover our venues",
       "image_alt": "Events at La Résidence Ankerana in Antananarivo"
     },
@@ -305,7 +305,7 @@
     "intro": {
       "label": "The Art of Relaxing",
       "title": "Spaces designed for your comfort",
-      "description": "La Résidence Ankerana offers accommodation in Antananarivo with rooms in Ankerana, studios in Antananarivo and a furnished apartment for short and extended stays or family holidays.",
+      "description": "For your stay in Antananarivo, La Résidence offers accommodation options tailored to your needs. Modern and welcoming, the Cosy rooms can accommodate up to four guests, with a choice of twin or double bed configurations. The Vintage rooms, suites, and apartments offer spacious, comfortable, and authentic living areas.",
       "indicators_label": "Key accommodation indicators",
       "indicators": {
         "options": {
