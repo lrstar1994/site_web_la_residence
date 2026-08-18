@@ -17,7 +17,7 @@ export async function VenuesHero({ locale }: VenuesHeroProps) {
       <div className="hero-image-container" aria-hidden="true">
         <Image
           className="hero-img"
-          src="/salles.jpeg"
+          src="/PISCINE.png"
           alt={t("image_alt")}
           fill
           sizes="100vw"
