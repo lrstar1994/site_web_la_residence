@@ -6613,7 +6613,7 @@ a {
 .event-moments-track {
   display: flex;
   width: max-content;
-  animation: event-moments-scroll 35s linear infinite;
+  animation: event-moments-scroll 55s linear infinite;
   will-change: transform;
 }
 
@@ -6678,7 +6678,7 @@ a {
   }
 
   .event-moments-track {
-    animation-duration: 25s;
+    animation-duration: 45s;
   }
 
   .event-moments-group {
@@ -6705,7 +6705,7 @@ a {
   }
 
   .event-moments-track {
-    animation-duration: 25s;
+    animation-duration: 40s;
   }
 
   .event-moments-group {
