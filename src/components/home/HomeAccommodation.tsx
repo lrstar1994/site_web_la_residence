@@ -22,7 +22,7 @@ export async function HomeAccommodation({ locale }: HomeAccommodationProps) {
       <div className="overlap-container">
         <div className="overlap-image">
           <Image
-            src="/ChatGPT Image 2 août 2026, 14_21_13.PNG"
+            src="/ChatGPT Image 2 août 2026, 14_21_13.png"
             alt={t("image_alt")}
             width={780}
             height={500}
