@@ -122,7 +122,7 @@ export function VenueCard({
       setCurrentImageIndex((current) => {
         return (current + 1) % images.length;
       });
-    }, 4500);
+    }, 2000);
 
     return () => {
       window.clearInterval(interval);
