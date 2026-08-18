@@ -1571,3 +1571,140 @@
   color: #005c4b;
   font-weight: 800;
 }
+
+/* =========================================================
+   Correction position bouton supprimer - Galerie d'ambiance
+   ========================================================= */
+
+.admin-event-moments-manager .admin-restaurant-image-origin {
+  position: static;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 12px 12px;
+}
+
+.admin-event-moments-manager .admin-restaurant-remove-image {
+  position: static;
+  top: auto;
+  right: auto;
+  bottom: auto;
+  left: auto;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 100%;
+  min-height: 38px;
+  margin: 0;
+  padding: 8px 12px;
+
+  border: 1px solid rgba(128, 0, 32, 0.18);
+  border-radius: 9px;
+
+  background: rgba(128, 0, 32, 0.06);
+  color: #800020;
+
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1;
+
+  cursor: pointer;
+
+  transform: none;
+
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.admin-event-moments-manager .admin-restaurant-remove-image:hover:not(:disabled) {
+  border-color: #800020;
+  background: #800020;
+  color: #fff;
+  transform: none;
+}
+
+.admin-event-moments-manager .admin-restaurant-remove-image:focus-visible {
+  outline: 2px solid #c8a951;
+  outline-offset: 2px;
+}
+
+.admin-event-moments-manager .admin-restaurant-remove-image:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* =========================================================
+   Actions header - Administration Événements
+   ========================================================= */
+
+.admin-events-header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* Bouton secondaire : Galerie d'ambiance */
+
+.admin-events-gallery-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 42px;
+  padding: 10px 17px;
+
+  border: 1px solid rgba(0, 92, 75, 0.3);
+  border-radius: 10px;
+
+  background: #ffffff;
+  color: #005c4b;
+
+  font-size: 0.86rem;
+  font-weight: 700;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.admin-events-gallery-button:hover {
+  border-color: #005c4b;
+  background: rgba(0, 92, 75, 0.06);
+  color: #005c4b;
+
+  transform: translateY(-1px);
+
+  box-shadow: 0 4px 12px rgba(0, 92, 75, 0.08);
+}
+
+.admin-events-gallery-button:focus-visible {
+  outline: 2px solid #c8a951;
+  outline-offset: 3px;
+}
+
+/* Mobile */
+
+@media (max-width: 768px) {
+  .admin-events-header-actions {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .admin-events-gallery-button,
+  .admin-events-header-actions .admin-news-new-button {
+    flex: 1 1 100%;
+    width: 100%;
+  }
+}

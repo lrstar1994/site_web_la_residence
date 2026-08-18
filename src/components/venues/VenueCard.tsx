@@ -85,10 +85,6 @@ export function VenueCard({
     useState(false);
 
   useEffect(() => {
-    setCurrentImageIndex(0);
-  }, [venue.id]);
-
-  useEffect(() => {
     const mediaQuery = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
     );
@@ -133,26 +129,33 @@ export function VenueCard({
     prefersReducedMotion,
   ]);
 
-  useEffect(() => {
-    if (currentImageIndex >= images.length) {
-      setCurrentImageIndex(0);
-    }
-  }, [currentImageIndex, images.length]);
+  const safeImageIndex =
+    images.length > 0
+      ? currentImageIndex % images.length
+      : 0;
 
   const currentImage =
-    images[currentImageIndex] ?? venue.coverImage;
+    images[safeImageIndex] ?? venue.coverImage;
 
   const previousImage = () => {
-    setCurrentImageIndex((current) => {
-      if (current === 0) {
-        return images.length - 1;
-      }
+    if (images.length <= 1) {
+      return;
+    }
 
-      return current - 1;
+    setCurrentImageIndex((current) => {
+      const safeCurrent = current % images.length;
+
+      return safeCurrent === 0
+        ? images.length - 1
+        : safeCurrent - 1;
     });
   };
 
   const nextImage = () => {
+    if (images.length <= 1) {
+      return;
+    }
+
     setCurrentImageIndex((current) => {
       return (current + 1) % images.length;
     });
@@ -217,7 +220,7 @@ export function VenueCard({
               className="room-card-slide-counter"
               aria-hidden="true"
             >
-              {currentImageIndex + 1} / {images.length}
+              {safeImageIndex + 1} / {images.length}
             </div>
           </>
         ) : null}

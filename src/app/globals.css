@@ -6544,3 +6544,202 @@ a {
     animation: none;
   }
 }
+
+/* =========================================================
+   Galerie d'ambiance - Page publique Événements
+   ========================================================= */
+
+.event-moments {
+  position: relative;
+  width: 100%;
+  margin: 30px 0 46px;
+  overflow: hidden;
+}
+
+.event-moments-heading {
+  margin-bottom: 18px;
+  text-align: center;
+}
+
+.event-moments-heading p {
+  margin: 0;
+  color: #005c4b;
+  font-family: "Playfair Display", serif;
+  font-size: clamp(1rem, 1.6vw, 1.2rem);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+/* Fenêtre */
+
+.event-moments-viewport {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  padding: 6px 0;
+}
+
+/* Fades gauche / droite */
+
+.event-moments-viewport::before,
+.event-moments-viewport::after {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 5;
+  width: clamp(28px, 5vw, 72px);
+  pointer-events: none;
+  content: "";
+}
+
+.event-moments-viewport::before {
+  left: 0;
+  background: linear-gradient(90deg,
+      #ffffff 0%,
+      rgba(255, 255, 255, 0.92) 18%,
+      rgba(255, 255, 255, 0) 100%);
+}
+
+.event-moments-viewport::after {
+  right: 0;
+  background: linear-gradient(270deg,
+      #ffffff 0%,
+      rgba(255, 255, 255, 0.92) 18%,
+      rgba(255, 255, 255, 0) 100%);
+}
+
+/* Rail */
+
+.event-moments-track {
+  display: flex;
+  width: max-content;
+  animation: event-moments-scroll 35s linear infinite;
+  will-change: transform;
+}
+
+/* Deux groupes strictement identiques */
+
+.event-moments-group {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 16px;
+  padding-right: 16px;
+}
+
+/* Cartes photo */
+
+.event-moments-item {
+  position: relative;
+  flex: 0 0 300px;
+  width: 300px;
+  height: 190px;
+  margin: 0;
+  overflow: hidden;
+  border-radius: 16px;
+  background: #eceeea;
+  box-shadow: 0 7px 20px rgba(20, 40, 35, 0.08);
+}
+
+.event-moments-image {
+  object-fit: cover;
+  transition: transform 0.35s ease;
+}
+
+/* Hover desktop */
+
+@media (hover: hover) and (pointer: fine) {
+  .event-moments:hover .event-moments-track {
+    animation-play-state: paused;
+  }
+
+  .event-moments-item:hover .event-moments-image {
+    transform: scale(1.035);
+  }
+}
+
+/* Boucle infinie */
+
+@keyframes event-moments-scroll {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+/* Tablette */
+
+@media (max-width: 900px) {
+  .event-moments {
+    margin: 26px 0 38px;
+  }
+
+  .event-moments-track {
+    animation-duration: 25s;
+  }
+
+  .event-moments-group {
+    gap: 14px;
+    padding-right: 14px;
+  }
+
+  .event-moments-item {
+    flex-basis: 260px;
+    width: 260px;
+    height: 170px;
+  }
+}
+
+/* Mobile */
+
+@media (max-width: 640px) {
+  .event-moments {
+    margin: 22px 0 32px;
+  }
+
+  .event-moments-heading {
+    margin-bottom: 14px;
+  }
+
+  .event-moments-track {
+    animation-duration: 25s;
+  }
+
+  .event-moments-group {
+    gap: 10px;
+    padding-right: 10px;
+  }
+
+  .event-moments-item {
+    flex-basis: 76vw;
+    width: 76vw;
+    height: 185px;
+    border-radius: 14px;
+  }
+
+  .event-moments-viewport::before,
+  .event-moments-viewport::after {
+    width: 22px;
+  }
+}
+
+/* Réduction des animations */
+
+@media (prefers-reduced-motion: reduce) {
+  .event-moments-viewport {
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scrollbar-width: thin;
+  }
+
+  .event-moments-track {
+    animation: none;
+  }
+
+  .event-moments-image {
+    transition: none;
+  }
+}

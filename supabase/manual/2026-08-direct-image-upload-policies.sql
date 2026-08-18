@@ -23,6 +23,7 @@ with check (
     or name like 'venues/%'
     or name like 'event-services/%'
     or name like 'articles/%'
+    or name like 'event-moments/%'
   )
   and (select site.is_active_admin())
 );
@@ -42,17 +43,9 @@ using (
     or name like 'venues/%'
     or name like 'event-services/%'
     or name like 'articles/%'
+    or name like 'event-moments/%'
   )
   and (select site.is_active_admin())
 );
 
 commit;
-
--- Notes :
--- Les scripts manuels plus specifiques existants restent redondants pour certains prefixes
--- s'ils creent deja des politiques INSERT/DELETE equivalentes :
--- - 2026-07-events-admin-permissions.sql pour event-services/ ;
--- - 2026-07-hebergement-admin-permissions.sql pour accommodations/ ;
--- - 2026-07-salles-admin-permissions.sql pour venues/ ;
--- - 2026-08-restaurant-storage-direct-upload.sql pour restaurant-menus/.
--- Ce fichier regroupe la politique transversale pour les cinq prefixes utilises.
