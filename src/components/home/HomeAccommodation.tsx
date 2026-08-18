@@ -87,7 +87,7 @@ export async function HomeAccommodation({
         </div>
 
         <div className="overlap-card">
-          <p className="category-label">
+          <p className="category-label accommodation-category-label">
             {locale === "fr" ? "Hébergements" : "Accommodation"}
           </p>
 
