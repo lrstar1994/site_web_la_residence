@@ -5,10 +5,10 @@ import {
   type AdminEventServiceFormState,
   type AdminEventServiceFormValues,
 } from "@/lib/admin/events/admin-event-service-types";
-
 import { getEventServiceStoragePath } from "@/lib/admin/events/get-event-service-storage-path";
 import { generateEventServiceImageAlt } from "@/lib/admin/generate-image-alt";
 import { generateUniqueCode } from "@/lib/admin/generate-unique-code";
+import { isValidUuid } from "@/lib/admin/validate-uuid";
 import { isUsableNewsImagePath } from "@/lib/admin/news/news-image-validation";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -43,16 +43,21 @@ type ExistingEventServiceImage = {
 
 const MAX_EVENT_SERVICE_IMAGES = 15;
 
-const uuidPattern =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{12}$/i;
-
 const htmlPattern = /<[^>]+>/;
+
+/* ============================================================
+   Helpers FormData
+   ============================================================ */
 
 function getString(formData: FormData, key: string) {
   const value = formData.get(key);
 
   return typeof value === "string" ? value.trim() : "";
 }
+
+/* ============================================================
+   Lecture des valeurs du formulaire
+   ============================================================ */
 
 export function getEventServiceFormValues(
   formData: FormData,
@@ -84,23 +89,26 @@ export function getEventServiceFormValues(
   };
 }
 
+/* ============================================================
+   État initial
+   ============================================================ */
+
 export function getDefaultEventServiceFormState(): AdminEventServiceFormState {
   return {
     ok: false,
-
     message: "",
-
     fieldErrors: {},
-
     values: emptyAdminEventServiceFormValues,
   };
 }
 
+/* ============================================================
+   Retour d'erreur
+   ============================================================ */
+
 function formError(
   values: AdminEventServiceFormValues,
-
   message: string,
-
   fieldErrors: AdminEventServiceFormState["fieldErrors"] = {},
 ): AdminEventServiceFormState {
   return {
@@ -111,15 +119,15 @@ function formError(
   };
 }
 
+/* ============================================================
+   Validation texte
+   ============================================================ */
+
 function validateText(
   fieldErrors: AdminEventServiceFormState["fieldErrors"],
-
   key: keyof AdminEventServiceFormValues,
-
   value: string,
-
   label: string,
-
   options: {
     min?: number;
     max?: number;
@@ -152,16 +160,10 @@ function validateText(
   }
 }
 
-/*
- * Validation uniquement des champs texte.
- *
- * IMPORTANT :
- * on ne valide PAS encore la présence
- * d'une image ici.
- *
- * Les images existantes doivent d'abord
- * être chargées depuis Supabase.
- */
+/* ============================================================
+   Validation des champs texte
+   ============================================================ */
+
 function validateTextFields(values: AdminEventServiceFormValues) {
   const fieldErrors: AdminEventServiceFormState["fieldErrors"] = {};
 
@@ -224,11 +226,10 @@ function validateTextFields(values: AdminEventServiceFormValues) {
   );
 
   /*
-   * Si imagePath existe encore,
-   * on vérifie simplement son format.
+   * On ne demande PAS forcément imagePath ici.
    *
-   * S'il est vide en édition,
-   * ce n'est PAS encore une erreur.
+   * En édition, la prestation peut déjà avoir
+   * plusieurs images dans event_service_images.
    */
   if (values.imagePath && !isUsableNewsImagePath(values.imagePath)) {
     fieldErrors.imagePath =
@@ -237,6 +238,10 @@ function validateTextFields(values: AdminEventServiceFormValues) {
 
   return fieldErrors;
 }
+
+/* ============================================================
+   Charger la prestation actuelle
+   ============================================================ */
 
 async function loadCurrentService(serviceId: string) {
   const supabase = (await createSupabaseServerClient()).schema("site");
@@ -256,6 +261,10 @@ async function loadCurrentService(serviceId: string) {
   return data as CurrentEventServiceRow | null;
 }
 
+/* ============================================================
+   Nettoyage des nouvelles images après erreur
+   ============================================================ */
+
 async function cleanupUploadedEventImages(imagePaths: string[]) {
   const storagePaths = imagePaths
     .map((imagePath) => getEventServiceStoragePath(imagePath))
@@ -274,11 +283,14 @@ async function cleanupUploadedEventImages(imagePaths: string[]) {
   if (error) {
     console.error("[admin-events] Uploaded image cleanup failed:", {
       paths: storagePaths,
-
       message: error.message,
     });
   }
 }
+
+/* ============================================================
+   Synchronisation de la couverture
+   ============================================================ */
 
 async function syncEventServiceCover({
   supabase,
@@ -291,9 +303,7 @@ async function syncEventServiceCover({
   >;
 
   serviceId: string;
-
   fallbackAltFr: string;
-
   fallbackAltEn: string;
 }) {
   const { data: imagesData, error: imagesError } = await supabase
@@ -319,14 +329,15 @@ async function syncEventServiceCover({
 
   const images = (imagesData ?? []) as ExistingEventServiceImage[];
 
+  /*
+   * Aucune image active.
+   */
   if (images.length === 0) {
     const clear = await supabase
       .from("event_services")
       .update({
         image_path: "",
-
         image_alt_fr: fallbackAltFr,
-
         image_alt_en: fallbackAltEn,
       })
       .eq("id", serviceId);
@@ -343,9 +354,16 @@ async function syncEventServiceCover({
     return true;
   }
 
+  /*
+   * Couverture existante,
+   * sinon première image.
+   */
   const cover = images.find((image) => image.is_cover) ?? images[0];
 
-  const clearCovers = await supabase
+  /*
+   * Remet toutes les couvertures à false.
+   */
+  const resetCovers = await supabase
     .from("event_service_images")
     .update({
       is_cover: false,
@@ -353,20 +371,22 @@ async function syncEventServiceCover({
     .eq("event_service_id", serviceId)
     .eq("is_cover", true);
 
-  if (clearCovers.error) {
+  if (resetCovers.error) {
     console.error(
       "[admin-events] Cover reset failed:",
-      clearCovers.error.message,
+      resetCovers.error.message,
     );
 
     return false;
   }
 
+  /*
+   * Définit la bonne couverture.
+   */
   const coverSave = await supabase
     .from("event_service_images")
     .update({
       is_cover: true,
-
       is_active: true,
     })
     .eq("id", cover.id)
@@ -381,6 +401,10 @@ async function syncEventServiceCover({
     return false;
   }
 
+  /*
+   * Synchronise l'ancienne colonne
+   * event_services.image_path.
+   */
   const mainSave = await supabase
     .from("event_services")
     .update({
@@ -404,20 +428,23 @@ async function syncEventServiceCover({
   return true;
 }
 
+/* ============================================================
+   Sauvegarde principale
+   ============================================================ */
+
 export async function saveEventService(input: SaveInput): Promise<SaveResult> {
   const values = input.values;
 
-  /*
-   * Validation des URLs fraîchement uploadées.
-   */
+  /* =========================================================
+     Nouvelles images validées
+     ========================================================= */
+
   const uploadedImagePaths = [
     ...new Set(
       input.imagePaths.filter((imagePath) =>
         validateUploadedStoragePath({
           value: imagePath,
-
           bucket: "site-news",
-
           allowedPrefix: "event-services/",
         }),
       ),
@@ -430,15 +457,26 @@ export async function saveEventService(input: SaveInput): Promise<SaveResult> {
     fieldErrors.imagePath = "Une image envoyée n'est pas valide.";
   }
 
+  /* =========================================================
+     Validation UUID
+     ========================================================= */
+
   /*
-   * Validation UUID.
+   * IMPORTANT :
+   * On utilise le validateur UUID commun du projet.
+   *
+   * L'ancienne regex locale est supprimée.
    */
   if (
     input.mode === "update" &&
-    (!input.serviceId || !uuidPattern.test(input.serviceId))
+    (!input.serviceId || !isValidUuid(input.serviceId))
   ) {
     fieldErrors.titleFr = "Prestation introuvable.";
   }
+
+  /* =========================================================
+     Authentification
+     ========================================================= */
 
   await requireAdmin("fr");
 
@@ -446,9 +484,10 @@ export async function saveEventService(input: SaveInput): Promise<SaveResult> {
 
   const supabase = supabaseClient.schema("site");
 
-  /*
-   * Chargement de la prestation existante.
-   */
+  /* =========================================================
+     Prestation existante
+     ========================================================= */
+
   const currentService =
     input.mode === "update" && input.serviceId
       ? await loadCurrentService(input.serviceId)
@@ -460,9 +499,10 @@ export async function saveEventService(input: SaveInput): Promise<SaveResult> {
     return formError(values, "Prestation introuvable.");
   }
 
-  /*
-   * Code immutable en édition.
-   */
+  /* =========================================================
+     Code
+     ========================================================= */
+
   let code = currentService?.code ?? values.code;
 
   if (input.mode === "create") {
@@ -485,9 +525,10 @@ export async function saveEventService(input: SaveInput): Promise<SaveResult> {
     }
   }
 
-  /*
-   * Chargement des images déjà enregistrées.
-   */
+  /* =========================================================
+     Images existantes
+     ========================================================= */
+
   let existingImages: ExistingEventServiceImage[] = [];
 
   if (input.mode === "update" && input.serviceId) {
@@ -516,9 +557,10 @@ export async function saveEventService(input: SaveInput): Promise<SaveResult> {
     existingImages = (currentImages ?? []) as ExistingEventServiceImage[];
   }
 
-  /*
-   * Images demandées à la suppression.
-   */
+  /* =========================================================
+     Suppressions demandées
+     ========================================================= */
+
   const uniqueDeletedImageIds = [...new Set(input.deletedImageIds)];
 
   const imagesToDelete =
@@ -544,19 +586,18 @@ export async function saveEventService(input: SaveInput): Promise<SaveResult> {
   const totalActiveImages =
     remainingActiveExistingImages.length + uploadedImagePaths.length;
 
-  /*
-   * Limite galerie.
-   */
+  /* =========================================================
+     Validation galerie
+     ========================================================= */
+
   if (totalImages > MAX_EVENT_SERVICE_IMAGES) {
     fieldErrors.imagePath =
       "Une prestation peut contenir au maximum 15 images.";
   }
 
   /*
-   * CORRECTION PRINCIPALE :
-   *
-   * On vérifie maintenant les vraies images restantes,
-   * et non uniquement values.imagePath.
+   * Une image existante active est suffisante
+   * pour modifier la prestation.
    */
   const hasUsableImage =
     totalActiveImages > 0 ||
@@ -568,27 +609,28 @@ export async function saveEventService(input: SaveInput): Promise<SaveResult> {
   }
 
   /*
-   * Même une prestation inactive doit avoir
-   * une image lors de sa création.
+   * En création, au moins une image
+   * reste obligatoire.
    */
   if (input.mode === "create" && !hasUsableImage) {
     fieldErrors.imagePath = "Ajoutez au moins une image.";
   }
 
-  /*
-   * Logs utiles si une validation échoue.
-   */
+  /* =========================================================
+     Validation finale
+     ========================================================= */
+
   if (Object.keys(fieldErrors).length > 0) {
     console.error("[admin-events] Validation failed:", {
-      serviceId: input.serviceId,
-
       mode: input.mode,
+
+      serviceId: input.serviceId,
 
       fieldErrors,
 
       existingImages: existingImages.length,
 
-      remainingActiveImages: remainingActiveExistingImages.length,
+      remainingActiveExistingImages: remainingActiveExistingImages.length,
 
       uploadedImages: uploadedImagePaths.length,
 
@@ -605,6 +647,10 @@ export async function saveEventService(input: SaveInput): Promise<SaveResult> {
       fieldErrors,
     );
   }
+
+  /* =========================================================
+     ALT générés
+     ========================================================= */
 
   const generatedAlt = generateEventServiceImageAlt({
     titleFr: values.titleFr,
@@ -626,6 +672,10 @@ export async function saveEventService(input: SaveInput): Promise<SaveResult> {
       : currentService?.image_alt_en) ||
     generatedAlt.en;
 
+  /* =========================================================
+     Image principale temporaire
+     ========================================================= */
+
   const initialImagePath =
     uploadedImagePaths[0] ||
     remainingActiveExistingImages.find((image) => image.is_cover)?.image_path ||
@@ -633,6 +683,10 @@ export async function saveEventService(input: SaveInput): Promise<SaveResult> {
     currentService?.image_path ||
     values.imagePath ||
     "";
+
+  /* =========================================================
+     Payload
+     ========================================================= */
 
   const payload = {
     code,
@@ -653,6 +707,10 @@ export async function saveEventService(input: SaveInput): Promise<SaveResult> {
 
     is_active: values.isActive,
   };
+
+  /* =========================================================
+     Sauvegarde prestation
+     ========================================================= */
 
   const result =
     input.mode === "create"
@@ -693,9 +751,10 @@ export async function saveEventService(input: SaveInput): Promise<SaveResult> {
     }
   ).id;
 
-  /*
-   * Détermination de la couverture existante.
-   */
+  /* =========================================================
+     Couverture existante demandée
+     ========================================================= */
+
   const requestedExistingCoverId = values.coverImageValue.startsWith(
     "existing:",
   )
@@ -710,9 +769,10 @@ export async function saveEventService(input: SaveInput): Promise<SaveResult> {
       ? requestedExistingCoverId
       : "";
 
-  /*
-   * Nouvelle image choisie comme couverture.
-   */
+  /* =========================================================
+     Couverture nouvelle image demandée
+     ========================================================= */
+
   const requestedPendingCoverIndex = values.coverImageValue.startsWith(
     "pending:",
   )
@@ -735,8 +795,12 @@ export async function saveEventService(input: SaveInput): Promise<SaveResult> {
 
   const uploadedImageIds: string[] = [];
 
+  /* =========================================================
+     Couverture existante
+     ========================================================= */
+
   if (usableExistingCoverId) {
-    await supabase
+    const reset = await supabase
       .from("event_service_images")
       .update({
         is_cover: false,
@@ -744,11 +808,16 @@ export async function saveEventService(input: SaveInput): Promise<SaveResult> {
       .eq("event_service_id", savedId)
       .eq("is_cover", true);
 
+    if (reset.error) {
+      console.error("[admin-events] Cover reset failed:", reset.error.message);
+
+      return formError(values, "Impossible de définir l'image de couverture.");
+    }
+
     const coverSave = await supabase
       .from("event_service_images")
       .update({
         is_cover: true,
-
         is_active: true,
       })
       .eq("id", usableExistingCoverId)
@@ -764,19 +833,33 @@ export async function saveEventService(input: SaveInput): Promise<SaveResult> {
     }
   }
 
+  /* =========================================================
+     Nouvelle couverture
+     ========================================================= */
+
   if (pendingCoverIndex >= 0) {
-    await supabase
+    const reset = await supabase
       .from("event_service_images")
       .update({
         is_cover: false,
       })
       .eq("event_service_id", savedId)
       .eq("is_cover", true);
+
+    if (reset.error) {
+      console.error(
+        "[admin-events] Pending cover reset failed:",
+        reset.error.message,
+      );
+
+      return formError(values, "Impossible de définir l'image de couverture.");
+    }
   }
 
-  /*
-   * Ajout des nouvelles images.
-   */
+  /* =========================================================
+     Ajout des nouvelles images
+     ========================================================= */
+
   for (const [index, imagePath] of uploadedImagePaths.entries()) {
     const imageNumber = remainingActiveExistingImages.length + index + 1;
 
@@ -823,9 +906,10 @@ export async function saveEventService(input: SaveInput): Promise<SaveResult> {
     );
   }
 
-  /*
-   * Couverture fallback.
-   */
+  /* =========================================================
+     Vérification couverture
+     ========================================================= */
+
   const remainingCoverExists =
     usableExistingCoverId !== "" ||
     pendingCoverIndex >= 0 ||
@@ -836,7 +920,7 @@ export async function saveEventService(input: SaveInput): Promise<SaveResult> {
       remainingActiveExistingImages[0]?.id ?? uploadedImageIds[0] ?? "";
 
     if (fallbackCoverId) {
-      await supabase
+      const reset = await supabase
         .from("event_service_images")
         .update({
           is_cover: false,
@@ -844,11 +928,22 @@ export async function saveEventService(input: SaveInput): Promise<SaveResult> {
         .eq("event_service_id", savedId)
         .eq("is_cover", true);
 
+      if (reset.error) {
+        console.error(
+          "[admin-events] Fallback reset failed:",
+          reset.error.message,
+        );
+
+        return formError(
+          values,
+          "Impossible de définir l'image de couverture.",
+        );
+      }
+
       const fallbackCover = await supabase
         .from("event_service_images")
         .update({
           is_cover: true,
-
           is_active: true,
         })
         .eq("id", fallbackCoverId)
@@ -868,14 +963,18 @@ export async function saveEventService(input: SaveInput): Promise<SaveResult> {
     }
   }
 
-  /*
-   * Suppression Storage + DB.
-   */
+  /* =========================================================
+     Suppression des anciennes images
+     ========================================================= */
+
   if (imagesToDelete.length > 0) {
     const storagePaths = imagesToDelete
       .map((image) => getEventServiceStoragePath(image.image_path))
       .filter((path): path is string => Boolean(path));
 
+    /*
+     * Suppression Storage.
+     */
     if (storagePaths.length > 0) {
       const { error: storageError } = await supabaseClient.storage
         .from("site-news")
@@ -899,6 +998,9 @@ export async function saveEventService(input: SaveInput): Promise<SaveResult> {
       }
     }
 
+    /*
+     * Suppression DB.
+     */
     const deleteRows = await supabase
       .from("event_service_images")
       .delete()
@@ -924,10 +1026,10 @@ export async function saveEventService(input: SaveInput): Promise<SaveResult> {
     }
   }
 
-  /*
-   * Synchronisation finale de image_path
-   * avec la couverture réelle.
-   */
+  /* =========================================================
+     Synchronisation finale couverture
+     ========================================================= */
+
   const synced = await syncEventServiceCover({
     supabase,
 
