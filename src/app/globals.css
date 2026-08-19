@@ -7434,3 +7434,83 @@ a {
     scroll-behavior: auto;
   }
 }
+
+
+/* ============================================================
+   PAGE SALLES - CORRECTION RESPONSIVE MOBILE FINALE
+   ============================================================ */
+
+@media (max-width: 768px) {
+  .page-venues .venue-category-section {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .page-venues .venue-category-section .slider-wrapper {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .page-venues .venue-category-section .rooms-slider {
+    width: calc(100% + 5vw);
+
+    min-width: 0;
+
+    gap: 14px;
+
+    margin-right: -5vw;
+
+    padding:
+      10px 0 22px 2px;
+
+    overflow-x: auto;
+    overflow-y: hidden;
+
+    scroll-padding-left: 2px;
+    scroll-snap-type: x mandatory;
+
+    overscroll-behavior-inline: contain;
+
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .page-venues .venue-category-section .room-card {
+    flex: 0 0 82vw;
+
+    width: 82vw;
+    max-width: 340px;
+
+    min-width: 0;
+
+    scroll-snap-align: start;
+    scroll-snap-stop: normal;
+  }
+
+  .page-venues .venue-category-section .slider-arrow {
+    display: none;
+  }
+
+  .page-venues .venue-category-section .room-card:hover {
+    transform: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-venues .venue-category-section .rooms-slider {
+    gap: 12px;
+  }
+
+  .page-venues .venue-category-section .room-card {
+    flex-basis: 84vw;
+    width: 84vw;
+
+    max-width: none;
+  }
+}
+
+@media (max-width: 360px) {
+  .page-venues .venue-category-section .room-card {
+    flex-basis: 86vw;
+    width: 86vw;
+  }
+}
