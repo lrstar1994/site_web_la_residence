@@ -351,7 +351,7 @@ export function VenuesExplorer({
           eyebrow:
             "Événements professionnels",
           title:
-            "Salles de séminaire",
+            "Salles de réunions et séminaires",
           description:
             "Des espaces adaptés aux réunions, formations, conférences et rencontres professionnelles.",
         }
@@ -359,7 +359,7 @@ export function VenuesExplorer({
           eyebrow:
             "Professional events",
           title:
-            "Seminar venues",
+            "Meeting and seminar rooms",
           description:
             "Flexible spaces for meetings, training sessions, conferences and professional events.",
         };

@@ -66,7 +66,7 @@
     },
     "services": {
       "eyebrow": "La Résidence Ankerana",
-      "title": "Hôtel, restaurant et événements à Antananarivo",
+      "title": "Hotel - Restaurant - Piscine - Espaces - Evénements à Antananarivo",
       "items": {
         "hebergement": {
           "visible_title": "Hébergements",
@@ -104,12 +104,12 @@
       "eyebrow": "Restaurant à Ankerana",
       "visible_title": "Le Privilège",
       "seo_title": "Restaurant gastronomique à Antananarivo",
-      "description": "Découvrez Le Privilège, le restaurant de La Résidence Ankerana, un espace convivial pour déjeuner, dîner, brunchs et événements privés à Antananarivo.",
+      "description": "Notre restaurant gastronomique vous accueille dans un décor de boiseries exceptionnelles où vous pourrez vous détendre et savourer une cuisine authentique à base de produits locaux. Notre personnel sera aux petits soins pour vous et mettra tout en oeuvre pour que vous passiez un très agréable moment à La Résidence.",
       "cta": "Découvrir le restaurant",
       "image_alt": "Restaurant Le Privilège à Antananarivo",
       "features": {
         "feature_1": "Restaurant ouvert aux clients et visiteurs",
-        "feature_2": "Produits locaux et plats de saison",
+        "feature_2": "Ouvert tous les jours de 12h à 21h",
         "feature_3": "Repas de groupe, pause-café et événements"
       }
     },
