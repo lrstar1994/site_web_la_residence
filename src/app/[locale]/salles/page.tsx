@@ -54,10 +54,10 @@ export default async function SallesPage({ params }: PageProps) {
         aria-labelledby="venues-catalog-title"
       >
         <div className="container">
-          <div className="section-header">
+          {/* <div className="section-header">
             <p className="subtitle">{t("eyebrow")}</p>
             <h2 id="venues-catalog-title">{t("title")}</h2>
-          </div>
+          </div> */}
           {stateMessage ? (
             <section className="admin-news-empty" role="status">
               <h2>{stateMessage.title}</h2>

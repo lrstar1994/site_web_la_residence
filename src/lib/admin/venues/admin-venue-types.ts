@@ -1,3 +1,22 @@
+// export type AdminVenue = {
+//   id: string;
+//   code: string;
+//   name: string;
+//   locationFr: string;
+//   locationEn: string;
+//   shortDescriptionFr: string;
+//   shortDescriptionEn: string;
+//   capacity: number;
+//   surfaceM2: number | null;
+//   sortOrder: number;
+//   isActive: boolean;
+//   updatedAt: string;
+//   coverImage: string | null;
+//   imageCount: number;
+//   setupCount: number;
+//   useCount: number;
+// };
+
 export type AdminVenue = {
   id: string;
   code: string;
@@ -15,6 +34,10 @@ export type AdminVenue = {
   imageCount: number;
   setupCount: number;
   useCount: number;
+
+  categoryId: string;
+  categoryNameFr: string;
+  categoryNameEn: string;
 };
 
 export type AdminVenueImage = {
@@ -27,11 +50,24 @@ export type AdminVenueImage = {
   isActive: boolean;
 };
 
-export type AdminVenueDetail = Omit<AdminVenue, "coverImage" | "imageCount" | "setupCount" | "surfaceM2" | "sortOrder"> & {
+export type AdminVenueCategory = {
+  id: string;
+  code: string;
+  nameFr: string;
+  nameEn: string;
+  sortOrder: number;
+  isActive: boolean;
+};
+
+export type AdminVenueDetail = Omit<
+  AdminVenue,
+  "coverImage" | "imageCount" | "setupCount" | "surfaceM2" | "sortOrder"
+> & {
   surfaceM2: string;
   sortOrder: string;
   images: AdminVenueImage[];
   selectedSetupIds: string[];
+  categoryId: string;
   usePresentations: AdminVenueUsePresentationSummary[];
 };
 
@@ -95,6 +131,7 @@ export type AdminVenueFormValues = {
   isActive: boolean;
   coverImageValue: string;
   deletedImageIds: string[];
+  categoryId: string;
 };
 
 export type AdminVenueFormState = {
@@ -167,6 +204,7 @@ export const emptyVenueFormValues: AdminVenueFormValues = {
   isActive: true,
   coverImageValue: "",
   deletedImageIds: [],
+  categoryId: "",
 };
 
 export const emptyVenueSetupFormValues: AdminVenueSetupFormValues = {
@@ -186,14 +224,15 @@ export const emptyVenueUseTypeFormValues: AdminVenueUseTypeFormValues = {
   isActive: true,
 };
 
-export const emptyVenueUsePresentationFormValues: AdminVenueUsePresentationFormValues = {
-  venueId: "",
-  useTypeId: "",
-  titleFr: "",
-  titleEn: "",
-  descriptionFr: "",
-  descriptionEn: "",
-  sortOrder: "0",
-  isActive: true,
-  coverImageValue: "",
-};
+export const emptyVenueUsePresentationFormValues: AdminVenueUsePresentationFormValues =
+  {
+    venueId: "",
+    useTypeId: "",
+    titleFr: "",
+    titleEn: "",
+    descriptionFr: "",
+    descriptionEn: "",
+    sortOrder: "0",
+    isActive: true,
+    coverImageValue: "",
+  };

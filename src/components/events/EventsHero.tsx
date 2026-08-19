@@ -12,10 +12,17 @@ export async function EventsHero({ locale }: EventsHeroProps) {
     locale,
     namespace: "eventsPage.hero",
   });
-  const venuesHref = locale === "fr" ? "/fr/salles" : "/en/venues";
+
+  const venuesHref =
+    locale === "fr"
+      ? "/fr/salles#salles-reception"
+      : "/en/venues#reception-venues";
 
   return (
-    <section className="hero-event" aria-labelledby="events-title">
+    <section
+      className="hero-event"
+      aria-labelledby="events-title"
+    >
       <div className="hero-bg-parallax">
         <Image
           className="hero-img"
@@ -26,16 +33,33 @@ export async function EventsHero({ locale }: EventsHeroProps) {
           priority
         />
       </div>
+
       <div className="hero-overlay" />
+
       <div className="hero-card-content">
-        <p className="lux-label">{t("label")}</p>
+        <p className="lux-label">
+          {t("label")}
+        </p>
+
         <h1 id="events-title">
-          <span>{t("title_line_1")}</span>
-          <span className="gold-script">{t("title_line_2")}</span>
+          <span>
+            {t("title_line_1")}
+          </span>
+
+          <span className="gold-script">
+            {t("title_line_2")}
+          </span>
         </h1>
-        <p>{t("description")}</p>
+
+        <p>
+          {t("description")}
+        </p>
+
         <div className="hero-actions">
-          <Link className="btn-white-outline" href={venuesHref}>
+          <Link
+            className="btn-white-outline"
+            href={venuesHref}
+          >
             {t("venues_cta")}
           </Link>
         </div>

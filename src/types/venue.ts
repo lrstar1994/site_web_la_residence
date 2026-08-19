@@ -34,56 +34,123 @@ export type VenueUsePresentation = {
   isActive: boolean;
 };
 
+/*
+ * Catégorie publique d'une salle.
+ *
+ * Exemple :
+ * - seminar
+ * - reception
+ */
+export type VenueCategory = {
+  id: string;
+  code: string;
+  name: LocalizedText;
+};
+
 export type Venue = {
   id: string;
   code: string;
   name: string;
+
   location: LocalizedText;
+
   shortDescription: LocalizedText;
   description: LocalizedText;
+
   capacity: number;
   surfaceM2: number | null;
+
   sortOrder: number;
   isActive: boolean;
+
+  /*
+   * Relation directe :
+   * site.venues.category_id
+   */
+  categoryId: string;
+
+  /*
+   * Données complètes de la catégorie.
+   * Null pour les anciennes salles qui
+   * n'ont pas encore été classées.
+   */
+  category: VenueCategory | null;
+
   images: VenueImage[];
+
   setups: VenueSetup[];
+
+  /*
+   * Ancien système conservé temporairement
+   * pour compatibilité avec les données
+   * et le diaporama existant.
+   */
   uses: VenueUsePresentation[];
+
   createdAt: string;
   updatedAt: string;
 };
 
+export type VenueCardImage = {
+  src: string;
+  alt: LocalizedText;
+};
+
 export type VenueCardModel = {
   id: string;
+
   code?: string;
+
   name: LocalizedText;
+
   location: LocalizedText;
+
   capacity: LocalizedText;
+
   area: string;
+
   shortDescription: LocalizedText;
+
   fullDescription: LocalizedText;
+
+  /*
+   * Catégorie utilisée pour séparer
+   * l'affichage public.
+   */
+  category: VenueCategory | null;
+
   setups: LocalizedText[];
+
   setupItems?: VenueSetup[];
-  coverImage: {
-    src: string;
-    alt: LocalizedText;
-  };
-  images: Array<{
-    src: string;
-    alt: LocalizedText;
-  }>;
-  allImages: Array<{
-    src: string;
-    alt: LocalizedText;
-  }>;
+
+  coverImage: VenueCardImage;
+
+  /*
+   * Galerie générale de la salle.
+   */
+  images: VenueCardImage[];
+
+  /*
+   * Galerie mélangée utilisée par VenueCard.tsx
+   * pour le diaporama automatique.
+   */
+  allImages?: VenueCardImage[];
+
+  /*
+   * Ancien système des usages.
+   * Conservé temporairement.
+   */
   uses: Array<{
     id: string;
+
     useTypeCode: string;
+
     useTypeName: LocalizedText;
+
     title: LocalizedText;
+
     description: LocalizedText;
-    images: Array<{
-      src: string;
-      alt: LocalizedText;
-    }>;
+
+    images: VenueCardImage[];
   }>;
 };

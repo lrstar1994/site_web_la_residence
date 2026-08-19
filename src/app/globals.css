@@ -6803,3 +6803,634 @@ a {
   letter-spacing: 0.14em;
   text-transform: uppercase;
 }
+
+/* ============================================================
+   PAGE SALLES - CATÉGORIES
+   Séminaire / Réception
+   ============================================================ */
+
+.page-venues .venues-category-groups {
+  display: grid;
+  gap: 72px;
+}
+
+/* ============================================================
+   SECTION D'UNE CATÉGORIE
+   ============================================================ */
+
+.page-venues .venue-category-section {
+  position: relative;
+  padding: 34px 0 54px;
+}
+
+.page-venues .venue-category-section+.venue-category-section {
+  padding-top: 58px;
+
+  border-top: 1px solid rgba(0, 92, 75, 0.1);
+}
+
+/* ============================================================
+   EN-TÊTE DE CATÉGORIE
+   ============================================================ */
+
+.page-venues .section-header.venue-category-heading {
+  position: relative;
+  z-index: 1;
+
+  width: min(100%, 850px);
+
+  margin: 0 auto 32px;
+  padding: 0;
+
+  text-align: center;
+}
+
+/* ============================================================
+   PETIT TITRE
+   Exemple :
+   ÉVÉNEMENTS PROFESSIONNELS
+   RÉCEPTIONS & CÉLÉBRATIONS
+   ============================================================ */
+
+.page-venues .venue-category-heading .venue-category-eyebrow {
+  display: inline-block;
+
+  margin: 0 0 12px;
+
+  color: var(--dore-prestige);
+
+  font-family: var(--font-corps);
+  font-size: 0.74rem;
+  font-weight: 800;
+
+  line-height: 1.35;
+  letter-spacing: 3.2px;
+
+  text-transform: uppercase;
+}
+
+/* ============================================================
+   GRAND TITRE
+   Exemple :
+   Salles de séminaire
+   Salles de réception
+   ============================================================ */
+
+.page-venues .venue-category-heading .venue-category-title {
+  position: relative;
+
+  width: 100%;
+  max-width: 760px;
+
+  margin: 0 auto;
+
+  color: var(--vert-residence);
+
+  font-family: var(--font-titre);
+  font-size: clamp(2rem, 3vw, 2.8rem);
+  font-weight: 700;
+
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+
+  text-align: center;
+  text-wrap: balance;
+}
+
+/* Trait décoratif doré */
+
+.page-venues .venue-category-heading .venue-category-title::after {
+  display: block;
+
+  width: 52px;
+  height: 2px;
+
+  margin: 16px auto 0;
+
+  border-radius: 999px;
+
+  background: var(--dore-prestige);
+
+  content: "";
+}
+
+/* ============================================================
+   DESCRIPTION
+   ============================================================ */
+
+.page-venues .venue-category-description {
+  width: min(100%, 640px);
+
+  margin: 17px auto 0;
+
+  color: rgba(77, 77, 77, 0.88);
+
+  font-family: var(--font-corps);
+  font-size: 0.94rem;
+  font-weight: 400;
+
+  line-height: 1.75;
+
+  text-align: center;
+  text-wrap: balance;
+}
+
+/* ============================================================
+   INDICATION DE DÉFILEMENT
+   ============================================================ */
+
+.page-venues .venue-category-swipe-hint {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 8px;
+
+  margin-top: 17px;
+  padding: 6px 12px;
+
+  border: 1px solid rgba(0, 92, 75, 0.08);
+  border-radius: 999px;
+
+  background: rgba(0, 92, 75, 0.035);
+
+  color: var(--vert-residence);
+
+  font-size: 0.7rem;
+  font-weight: 700;
+
+  letter-spacing: 0.2px;
+  line-height: 1.3;
+}
+
+.page-venues .venue-category-swipe-text {
+  white-space: nowrap;
+}
+
+.page-venues .venue-category-swipe-arrow {
+  display: inline-block;
+
+  color: var(--dore-prestige);
+
+  font-size: 1rem;
+  font-weight: 800;
+
+  line-height: 1;
+}
+
+.page-venues .venue-category-swipe-arrow-left {
+  animation:
+    venue-swipe-left 1.5s ease-in-out infinite;
+}
+
+.page-venues .venue-category-swipe-arrow-right {
+  animation:
+    venue-swipe-right 1.5s ease-in-out infinite;
+}
+
+@keyframes venue-swipe-left {
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  50% {
+    transform: translateX(-4px);
+  }
+}
+
+@keyframes venue-swipe-right {
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  50% {
+    transform: translateX(4px);
+  }
+}
+
+/* ============================================================
+   SLIDER
+   ============================================================ */
+
+.page-venues .venue-category-section .slider-wrapper {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+
+  width: 100%;
+}
+
+.page-venues .venue-category-section .rooms-slider {
+  display: flex;
+
+  width: 100%;
+
+  gap: 28px;
+
+  overflow-x: auto;
+  overflow-y: visible;
+
+  padding:
+    18px 5px 28px;
+
+  scroll-behavior: smooth;
+  scroll-snap-type: x proximity;
+
+  scrollbar-width: none;
+
+  -webkit-overflow-scrolling: touch;
+}
+
+.page-venues .venue-category-section .rooms-slider::-webkit-scrollbar {
+  display: none;
+}
+
+/* ============================================================
+   CARTES
+   ============================================================ */
+
+.page-venues .venue-category-section .room-card {
+  flex: 0 0 350px;
+
+  scroll-snap-align: start;
+}
+
+/* ============================================================
+   AMBIANCE SÉMINAIRE
+   ============================================================ */
+
+.page-venues .venue-category-section:first-child::before {
+  position: absolute;
+
+  inset: 0 -5vw;
+
+  z-index: -1;
+
+  border-radius: 18px;
+
+  background:
+    linear-gradient(180deg,
+      rgba(0, 92, 75, 0.035),
+      rgba(0, 92, 75, 0.01));
+
+  content: "";
+}
+
+/* ============================================================
+   AMBIANCE RÉCEPTION
+   ============================================================ */
+
+.page-venues .venue-category-section:nth-child(2)::before {
+  position: absolute;
+
+  inset: 20px -5vw -10px;
+
+  z-index: -1;
+
+  border-radius: 18px;
+
+  background:
+    linear-gradient(180deg,
+      rgba(200, 169, 81, 0.07),
+      rgba(247, 242, 232, 0.4));
+
+  content: "";
+}
+
+/* ============================================================
+   FLÈCHES DESKTOP
+   ============================================================ */
+
+.page-venues .venue-category-section .slider-arrow {
+  width: 46px;
+  height: 46px;
+
+  border-color: rgba(0, 92, 75, 0.15);
+
+  background: rgba(255, 255, 255, 0.96);
+
+  color: var(--vert-residence);
+
+  box-shadow: 0 8px 24px rgba(0, 92, 75, 0.1);
+}
+
+.page-venues .venue-category-section .slider-arrow:hover {
+  border-color: var(--dore-prestige);
+
+  background: var(--vert-residence);
+
+  color: #fff;
+}
+
+.page-venues .venue-category-section .slider-arrow.prev {
+  left: -22px;
+}
+
+.page-venues .venue-category-section .slider-arrow.next {
+  right: -22px;
+}
+
+/* ============================================================
+   TABLETTE
+   ============================================================ */
+
+@media (max-width: 1024px) {
+  .page-venues .venues-category-groups {
+    gap: 52px;
+  }
+
+  .page-venues .venue-category-section {
+    padding:
+      28px 0 44px;
+  }
+
+  .page-venues .venue-category-section+.venue-category-section {
+    padding-top: 48px;
+  }
+
+  .page-venues .section-header.venue-category-heading {
+    width: min(100%, 720px);
+
+    margin-bottom: 28px;
+  }
+
+  .page-venues .venue-category-heading .venue-category-eyebrow {
+    font-size: 0.7rem;
+
+    letter-spacing: 2.8px;
+  }
+
+  .page-venues .venue-category-heading .venue-category-title {
+    max-width: 650px;
+
+    font-size: clamp(1.9rem,
+        4vw,
+        2.5rem);
+  }
+
+  .page-venues .venue-category-description {
+    max-width: 580px;
+
+    font-size: 0.91rem;
+  }
+
+  .page-venues .venue-category-section .rooms-slider {
+    gap: 22px;
+  }
+
+  .page-venues .venue-category-section .room-card {
+    flex-basis: 320px;
+  }
+}
+
+/* ============================================================
+   MOBILE
+   ============================================================ */
+
+@media (max-width: 768px) {
+  .page-venues .venues-category-groups {
+    gap: 28px;
+  }
+
+  .page-venues .venue-category-section {
+    padding:
+      20px 0 30px;
+  }
+
+  .page-venues .venue-category-section+.venue-category-section {
+    padding-top: 38px;
+  }
+
+  /* Fonds */
+
+  .page-venues .venue-category-section:first-child::before,
+  .page-venues .venue-category-section:nth-child(2)::before {
+    right: -5vw;
+    left: -5vw;
+
+    border-radius: 0;
+  }
+
+  /* ========================================================
+     EN-TÊTE MOBILE
+     ======================================================== */
+
+  .page-venues .section-header.venue-category-heading {
+    width: 100%;
+
+    margin-bottom: 20px;
+
+    padding:
+      0 14px;
+  }
+
+  .page-venues .venue-category-heading .venue-category-eyebrow {
+    margin-bottom: 9px;
+
+    font-size: 0.66rem;
+    font-weight: 800;
+
+    letter-spacing: 2.3px;
+
+    line-height: 1.4;
+  }
+
+  .page-venues .venue-category-heading .venue-category-title {
+    width: 100%;
+    max-width: 520px;
+
+    margin: 0 auto;
+
+    font-size: clamp(1.75rem,
+        7vw,
+        2.1rem);
+
+    line-height: 1.08;
+  }
+
+  .page-venues .venue-category-heading .venue-category-title::after {
+    width: 44px;
+
+    margin-top: 13px;
+  }
+
+  .page-venues .venue-category-description {
+    width: min(100%, 500px);
+
+    margin-top: 14px;
+
+    font-size: 0.87rem;
+
+    line-height: 1.6;
+  }
+
+  /* ========================================================
+     INDICATION DE SWIPE
+     ======================================================== */
+
+  .page-venues .venue-category-swipe-hint {
+    gap: 7px;
+
+    margin-top: 13px;
+
+    padding:
+      7px 11px;
+
+    background: rgba(255, 255, 255, 0.78);
+
+    box-shadow:
+      0 4px 14px rgba(0, 92, 75, 0.05);
+
+    font-size: 0.68rem;
+  }
+
+  /* ========================================================
+     SLIDER MOBILE
+     ======================================================== */
+
+  .page-venues .venue-category-section .rooms-slider {
+    width: calc(100% + 5vw);
+
+    gap: 14px;
+
+    margin-right: -5vw;
+
+    padding:
+      10px 0 22px 2px;
+
+    scroll-padding-left: 2px;
+
+    scroll-snap-type: x mandatory;
+  }
+
+  .page-venues .venue-category-section .room-card {
+    flex:
+      0 0 82vw;
+
+    max-width: 340px;
+
+    scroll-snap-align: start;
+  }
+
+  .page-venues .venue-category-section .room-card:hover {
+    transform: none;
+  }
+
+  .page-venues .venue-category-section .slider-arrow {
+    display: none;
+  }
+}
+
+/* ============================================================
+   PETITS MOBILES
+   ============================================================ */
+
+@media (max-width: 480px) {
+  .page-venues .venues-category-groups {
+    gap: 22px;
+  }
+
+  .page-venues .section-header.venue-category-heading {
+    padding:
+      0 10px;
+  }
+
+  .page-venues .venue-category-heading .venue-category-eyebrow {
+    font-size: 0.62rem;
+
+    letter-spacing: 2px;
+  }
+
+  .page-venues .venue-category-heading .venue-category-title {
+    max-width: 340px;
+
+    font-size: clamp(1.6rem,
+        7.8vw,
+        1.9rem);
+
+    line-height: 1.08;
+  }
+
+  .page-venues .venue-category-description {
+    max-width: 350px;
+
+    font-size: 0.83rem;
+
+    line-height: 1.55;
+  }
+
+  .page-venues .venue-category-section .rooms-slider {
+    gap: 12px;
+
+    padding-bottom: 20px;
+  }
+
+  .page-venues .venue-category-section .room-card {
+    flex-basis: 84vw;
+
+    max-width: none;
+  }
+
+  .page-venues .venue-category-swipe-hint {
+    max-width: 94%;
+
+    font-size: 0.64rem;
+  }
+
+  .page-venues .venue-category-swipe-text {
+    white-space: normal;
+
+    text-align: center;
+  }
+}
+
+/* ============================================================
+   TRÈS PETITS MOBILES
+   ============================================================ */
+
+@media (max-width: 360px) {
+  .page-venues .venue-category-heading .venue-category-eyebrow {
+    font-size: 0.58rem;
+
+    letter-spacing: 1.7px;
+  }
+
+  .page-venues .venue-category-heading .venue-category-title {
+    max-width: 300px;
+
+    font-size: 1.48rem;
+  }
+
+  .page-venues .venue-category-description {
+    max-width: 310px;
+
+    font-size: 0.8rem;
+
+    line-height: 1.5;
+  }
+
+  .page-venues .venue-category-section .room-card {
+    flex-basis: 86vw;
+  }
+}
+
+/* ============================================================
+   ACCESSIBILITÉ
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+
+  .page-venues .venue-category-swipe-arrow-left,
+  .page-venues .venue-category-swipe-arrow-right {
+    animation: none;
+  }
+
+  .page-venues .venue-category-section .rooms-slider {
+    scroll-behavior: auto;
+  }
+}
