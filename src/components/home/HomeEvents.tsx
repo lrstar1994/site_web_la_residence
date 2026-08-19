@@ -18,6 +18,9 @@ export async function HomeEvents({ locale }: HomeEventsProps) {
     <section className="events-loft" aria-labelledby="home-events-title">
       <div className="loft-container">
         <div className="loft-text-side">
+          <p className="category-label accommodation-category-label">
+            {locale === "fr" ? "Réceptions" : "Receptions"}
+          </p>
           <h2 className="loft-title" id="home-events-title">
             <em>{t("title")}</em>
           </h2>
