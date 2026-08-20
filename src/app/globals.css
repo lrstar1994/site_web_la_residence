@@ -1623,7 +1623,7 @@ a {
 }
 
 .menu-features li::before {
-  content: "â†’";
+  content: "◆";
   position: absolute;
   left: 0;
   color: var(--vert-residence);
@@ -6797,7 +6797,7 @@ a {
   color: #c8a951;
 
   font-size: 0.82rem;
-  font-weight: 800;
+  font-weight: 400;
   line-height: 1.2;
 
   letter-spacing: 0.14em;
