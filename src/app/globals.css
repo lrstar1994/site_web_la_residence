@@ -8174,17 +8174,18 @@ a {
 }
 
 .room-quick-specs {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 
   margin-top: 18px;
 }
 
 .room-quick-spec {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+  display: grid;
+  grid-template-columns: minmax(140px, auto) 1fr;
+  align-items: center;
+  column-gap: 16px;
 }
 
 .room-quick-spec-label {
@@ -8195,6 +8196,7 @@ a {
 
   letter-spacing: 0.06em;
   text-transform: uppercase;
+  white-space: nowrap;
 }
 
 .room-quick-spec-value {
@@ -8204,16 +8206,27 @@ a {
   font-weight: 700;
 }
 
+/* =========================
+   MOBILE
+   ========================= */
+
 @media (max-width: 480px) {
   .room-quick-specs {
-    gap: 12px;
+    gap: 7px;
+    margin-top: 16px;
+  }
+
+  .room-quick-spec {
+    grid-template-columns: minmax(125px, auto) 1fr;
+    column-gap: 10px;
   }
 
   .room-quick-spec-label {
-    font-size: 0.62rem;
+    font-size: 0.6rem;
+    letter-spacing: 0.04em;
   }
 
   .room-quick-spec-value {
-    font-size: 0.9rem;
+    font-size: 0.88rem;
   }
 }
