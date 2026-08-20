@@ -1708,3 +1708,399 @@
     width: 100%;
   }
 }
+
+/* ============================================================
+   ADMIN RESTAURANT - ACTIONS DU HEADER
+   ============================================================ */
+
+.admin-restaurant-header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+  .admin-restaurant-header-actions {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .admin-restaurant-header-actions .admin-news-new {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 520px) {
+  .admin-restaurant-header-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .admin-restaurant-header-actions .admin-news-new {
+    width: 100%;
+  }
+}
+
+/* ============================================================
+   ADMIN RESTAURANT - GALERIE CARROUSEL
+   ============================================================ */
+
+.admin-restaurant-gallery-panel {
+  position: relative;
+
+  margin-top: 24px;
+  padding: 26px;
+
+  overflow: hidden;
+
+  border: 1px solid rgba(0, 92, 75, 0.1);
+  border-radius: 18px;
+
+  background: #ffffff;
+
+  box-shadow: 0 8px 26px rgba(20, 40, 35, 0.045);
+}
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+
+.admin-restaurant-gallery-panel-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+
+  gap: 20px;
+
+  margin-bottom: 22px;
+}
+
+.admin-restaurant-gallery-panel-header h2 {
+  margin: 3px 0 5px;
+
+  color: var(--vert-residence);
+
+  font-family: var(--font-titre);
+
+  font-size: 1.45rem;
+}
+
+.admin-restaurant-gallery-panel-header>div:first-child>p:last-child {
+  margin: 0;
+
+  color: var(--gris-elegant);
+
+  font-size: 0.82rem;
+}
+
+/* ============================================================
+   NAVIGATION
+   ============================================================ */
+
+.admin-restaurant-gallery-navigation {
+  display: flex;
+  gap: 8px;
+}
+
+.admin-restaurant-gallery-navigation button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 40px;
+  height: 40px;
+
+  padding: 0;
+
+  border: 1px solid rgba(0, 92, 75, 0.14);
+  border-radius: 50%;
+
+  background: #ffffff;
+
+  color: var(--vert-residence);
+
+  font-size: 1.6rem;
+  line-height: 1;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.admin-restaurant-gallery-navigation button:hover {
+  border-color: var(--dore-prestige);
+
+  background: var(--vert-residence);
+
+  color: #ffffff;
+}
+
+/* ============================================================
+   CARROUSEL
+   ============================================================ */
+
+.admin-restaurant-gallery-carousel {
+  display: flex;
+
+  gap: 18px;
+
+  width: 100%;
+
+  overflow-x: auto;
+
+  padding: 4px 2px 18px;
+
+  scroll-behavior: smooth;
+  scroll-snap-type: x proximity;
+
+  scrollbar-width: thin;
+
+  overscroll-behavior-inline: contain;
+
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ============================================================
+   CARTE
+   ============================================================ */
+
+.admin-restaurant-gallery-card {
+  position: relative;
+
+  flex: 0 0 300px;
+
+  width: 300px;
+
+  overflow: hidden;
+
+  border-radius: 15px;
+
+  background: #f5f5f2;
+
+  scroll-snap-align: start;
+
+  box-shadow: 0 5px 16px rgba(20, 40, 35, 0.07);
+}
+
+.admin-restaurant-gallery-card-image {
+  position: relative;
+
+  width: 100%;
+  height: 215px;
+
+  overflow: hidden;
+}
+
+.admin-restaurant-gallery-card-image>img {
+  object-fit: cover;
+
+  transition: transform 0.35s ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .admin-restaurant-gallery-card:hover .admin-restaurant-gallery-card-image>img {
+    transform: scale(1.035);
+  }
+}
+
+/* ============================================================
+   NUMÉRO
+   ============================================================ */
+
+.admin-restaurant-gallery-number {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 30px;
+  height: 30px;
+
+  padding-inline: 8px;
+
+  border-radius: 999px;
+
+  background: rgba(0, 0, 0, 0.58);
+
+  color: #ffffff;
+
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+/* ============================================================
+   MISE EN AVANT
+   ============================================================ */
+
+.admin-restaurant-gallery-featured {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+
+  padding: 6px 9px;
+
+  border-radius: 999px;
+
+  background: rgba(200, 169, 81, 0.94);
+
+  color: #ffffff;
+
+  font-size: 0.64rem;
+  font-weight: 800;
+
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* ============================================================
+   SUPPRESSION
+   ============================================================ */
+
+.admin-restaurant-gallery-delete {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 36px;
+  height: 36px;
+
+  padding: 0;
+
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+
+  background: rgba(95, 20, 30, 0.88);
+
+  color: #ffffff;
+
+  cursor: pointer;
+
+  backdrop-filter: blur(6px);
+
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease;
+}
+
+.admin-restaurant-gallery-delete svg {
+  width: 17px;
+  height: 17px;
+
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.admin-restaurant-gallery-delete:hover {
+  background: #800020;
+
+  transform: scale(1.06);
+}
+
+/* ============================================================
+   INDICATION MOBILE
+   ============================================================ */
+
+.admin-restaurant-gallery-swipe-hint {
+  display: none;
+}
+
+/* ============================================================
+   MOBILE
+   ============================================================ */
+
+@media (max-width: 768px) {
+  .admin-restaurant-gallery-panel {
+    padding: 20px 14px;
+  }
+
+  .admin-restaurant-gallery-panel-header {
+    align-items: flex-start;
+
+    margin-bottom: 16px;
+  }
+
+  .admin-restaurant-gallery-navigation {
+    display: none;
+  }
+
+  .admin-restaurant-gallery-carousel {
+    width: calc(100% + 14px);
+
+    gap: 12px;
+
+    margin-right: -14px;
+
+    padding-bottom: 14px;
+
+    scroll-snap-type: x mandatory;
+  }
+
+  .admin-restaurant-gallery-card {
+    flex: 0 0 80vw;
+
+    width: 80vw;
+    max-width: 320px;
+
+    scroll-snap-align: start;
+  }
+
+  .admin-restaurant-gallery-card-image {
+    height: 225px;
+  }
+
+  .admin-restaurant-gallery-swipe-hint {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 8px;
+
+    margin-top: 8px;
+
+    color: var(--vert-residence);
+
+    font-size: 0.7rem;
+    font-weight: 700;
+
+    opacity: 0.7;
+  }
+
+  .admin-restaurant-gallery-swipe-hint span:first-child,
+  .admin-restaurant-gallery-swipe-hint span:last-child {
+    color: var(--dore-prestige);
+
+    font-size: 1rem;
+  }
+}
+
+/* ============================================================
+   PETIT MOBILE
+   ============================================================ */
+
+@media (max-width: 480px) {
+  .admin-restaurant-gallery-card {
+    flex-basis: 84vw;
+
+    width: 84vw;
+  }
+
+  .admin-restaurant-gallery-card-image {
+    height: 215px;
+  }
+}

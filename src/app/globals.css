@@ -7514,3 +7514,534 @@ a {
     width: 86vw;
   }
 }
+
+
+/* ============================================================
+   RESTAURANT - GALERIE
+   ============================================================ */
+
+.restaurant-gallery-section {
+  padding: 72px 0;
+}
+
+.restaurant-gallery-heading {
+  margin-bottom: 30px;
+}
+
+.restaurant-gallery-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 220px;
+
+  padding: 32px;
+
+  border: 1px dashed rgba(0, 92, 75, 0.18);
+  border-radius: 18px;
+
+  background: rgba(0, 92, 75, 0.025);
+
+  text-align: center;
+}
+
+.restaurant-gallery-empty p {
+  margin: 0;
+
+  color: var(--gris-elegant);
+
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+  .restaurant-gallery-section {
+    padding: 48px 0;
+  }
+
+  .restaurant-gallery-heading {
+    margin-bottom: 22px;
+  }
+
+  .restaurant-gallery-empty {
+    min-height: 160px;
+
+    padding: 24px 18px;
+  }
+
+  .restaurant-gallery-empty p {
+    font-size: 0.88rem;
+  }
+}
+
+/* ============================================================
+   RESTAURANT - GALERIE PUBLIQUE
+   ============================================================ */
+
+.restaurant-gallery-section {
+  position: relative;
+  padding: 80px 0;
+}
+
+.restaurant-gallery-heading {
+  max-width: 780px;
+  margin: 0 auto 34px;
+}
+
+.restaurant-gallery-grid {
+  display: grid;
+  grid-template-columns: 1.35fr 1fr 1fr;
+  grid-template-rows: repeat(2, 230px);
+  gap: 14px;
+}
+
+.restaurant-gallery-item {
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
+
+  padding: 0;
+
+  border: 0;
+  border-radius: 18px;
+
+  background: #eceeea;
+
+  cursor: pointer;
+
+  box-shadow: 0 10px 28px rgba(20, 40, 35, 0.08);
+}
+
+.restaurant-gallery-item-1 {
+  grid-row: 1 / span 2;
+}
+
+.restaurant-gallery-image {
+  object-fit: cover;
+
+  transition:
+    transform 0.45s ease,
+    filter 0.45s ease;
+}
+
+.restaurant-gallery-item-overlay {
+  position: absolute;
+  inset: 0;
+
+  background:
+    linear-gradient(180deg,
+      rgba(0, 0, 0, 0.02),
+      rgba(0, 0, 0, 0.16));
+
+  opacity: 0;
+
+  transition: opacity 0.35s ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .restaurant-gallery-item:hover .restaurant-gallery-image {
+    transform: scale(1.04);
+  }
+
+  .restaurant-gallery-item:hover .restaurant-gallery-item-overlay {
+    opacity: 1;
+  }
+}
+
+.restaurant-gallery-actions {
+  display: flex;
+  justify-content: center;
+
+  margin-top: 26px;
+}
+
+.restaurant-gallery-view-all {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 10px;
+
+  padding: 11px 18px;
+
+  border: 0;
+  border-bottom: 1px solid var(--dore-prestige);
+
+  background: transparent;
+
+  color: var(--vert-residence);
+
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 800;
+
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+
+  cursor: pointer;
+
+  transition:
+    color 0.25s ease,
+    gap 0.25s ease;
+}
+
+.restaurant-gallery-view-all:hover {
+  color: var(--dore-prestige);
+  gap: 14px;
+}
+
+/* ============================================================
+   LIGHTBOX
+   ============================================================ */
+
+.restaurant-gallery-lightbox {
+  position: fixed;
+  inset: 0;
+
+  z-index: 2000;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 24px;
+}
+
+.restaurant-gallery-lightbox-backdrop {
+  position: absolute;
+  inset: 0;
+
+  background: rgba(8, 18, 16, 0.94);
+
+  backdrop-filter: blur(10px);
+}
+
+.restaurant-gallery-lightbox-panel {
+  position: relative;
+  z-index: 1;
+
+  display: flex;
+  flex-direction: column;
+
+  width: min(1180px, 100%);
+  max-height: calc(100vh - 48px);
+}
+
+.restaurant-gallery-lightbox-close {
+  position: absolute;
+  top: -10px;
+  right: 0;
+
+  z-index: 4;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 44px;
+  height: 44px;
+
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 50%;
+
+  background: rgba(255, 255, 255, 0.08);
+
+  color: #fff;
+
+  font-size: 1.8rem;
+  line-height: 1;
+
+  cursor: pointer;
+}
+
+.restaurant-gallery-lightbox-main {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 0;
+}
+
+.restaurant-gallery-lightbox-image-wrap {
+  position: relative;
+
+  width: min(100%, 1050px);
+  height: min(72vh, 720px);
+
+  overflow: hidden;
+
+  border-radius: 18px;
+
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.restaurant-gallery-lightbox-image {
+  object-fit: contain;
+}
+
+.restaurant-gallery-lightbox-arrow {
+  position: absolute;
+  top: 50%;
+
+  z-index: 3;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 48px;
+  height: 48px;
+
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+
+  background: rgba(0, 0, 0, 0.38);
+
+  color: #fff;
+
+  font-size: 2rem;
+
+  transform: translateY(-50%);
+
+  cursor: pointer;
+}
+
+.restaurant-gallery-lightbox-arrow.previous {
+  left: 16px;
+}
+
+.restaurant-gallery-lightbox-arrow.next {
+  right: 16px;
+}
+
+.restaurant-gallery-lightbox-counter {
+  margin-top: 12px;
+
+  color: rgba(255, 255, 255, 0.76);
+
+  font-size: 0.82rem;
+  font-weight: 700;
+
+  text-align: center;
+}
+
+.restaurant-gallery-lightbox-thumbnails {
+  display: flex;
+  justify-content: center;
+
+  gap: 8px;
+
+  margin-top: 14px;
+  padding: 2px 0 4px;
+
+  overflow-x: auto;
+
+  scrollbar-width: none;
+}
+
+.restaurant-gallery-lightbox-thumbnails::-webkit-scrollbar {
+  display: none;
+}
+
+.restaurant-gallery-lightbox-thumb {
+  position: relative;
+
+  flex: 0 0 76px;
+
+  width: 76px;
+  height: 56px;
+
+  overflow: hidden;
+
+  padding: 0;
+
+  border: 2px solid transparent;
+  border-radius: 9px;
+
+  background: rgba(255, 255, 255, 0.08);
+
+  opacity: 0.58;
+
+  cursor: pointer;
+
+  transition:
+    opacity 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.restaurant-gallery-lightbox-thumb.is-active {
+  border-color: var(--dore-prestige);
+  opacity: 1;
+}
+
+.restaurant-gallery-lightbox-thumb-image {
+  object-fit: cover;
+}
+
+/* ============================================================
+   TABLETTE
+   ============================================================ */
+
+@media (max-width: 1024px) {
+  .restaurant-gallery-section {
+    padding: 64px 0;
+  }
+
+  .restaurant-gallery-grid {
+    grid-template-columns: 1.2fr 1fr;
+    grid-template-rows: repeat(3, 210px);
+  }
+
+  .restaurant-gallery-item-1 {
+    grid-row: 1 / span 2;
+  }
+
+  .restaurant-gallery-item-4,
+  .restaurant-gallery-item-5 {
+    grid-row: 3;
+  }
+
+  .restaurant-gallery-lightbox-image-wrap {
+    height: min(68vh, 640px);
+  }
+}
+
+/* ============================================================
+   MOBILE
+   ============================================================ */
+
+@media (max-width: 768px) {
+  .restaurant-gallery-section {
+    padding: 48px 0;
+  }
+
+  .restaurant-gallery-heading {
+    margin-bottom: 24px;
+  }
+
+  .restaurant-gallery-grid {
+    display: flex;
+
+    width: calc(100% + 5vw);
+
+    gap: 12px;
+
+    margin-right: -5vw;
+
+    overflow-x: auto;
+
+    padding: 4px 0 18px;
+
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .restaurant-gallery-grid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .restaurant-gallery-item,
+  .restaurant-gallery-item-1,
+  .restaurant-gallery-item-4,
+  .restaurant-gallery-item-5 {
+    flex: 0 0 78vw;
+
+    width: 78vw;
+    height: 260px;
+
+    grid-row: auto;
+
+    scroll-snap-align: start;
+  }
+
+  .restaurant-gallery-actions {
+    margin-top: 16px;
+  }
+
+  .restaurant-gallery-lightbox {
+    padding: 12px;
+  }
+
+  .restaurant-gallery-lightbox-panel {
+    width: 100%;
+    max-height: calc(100vh - 24px);
+  }
+
+  .restaurant-gallery-lightbox-close {
+    top: 6px;
+    right: 6px;
+  }
+
+  .restaurant-gallery-lightbox-image-wrap {
+    width: 100%;
+    height: 68vh;
+
+    border-radius: 12px;
+  }
+
+  .restaurant-gallery-lightbox-arrow {
+    width: 42px;
+    height: 42px;
+
+    font-size: 1.6rem;
+  }
+
+  .restaurant-gallery-lightbox-arrow.previous {
+    left: 6px;
+  }
+
+  .restaurant-gallery-lightbox-arrow.next {
+    right: 6px;
+  }
+
+  .restaurant-gallery-lightbox-thumbnails {
+    justify-content: flex-start;
+
+    padding-inline: 4px;
+  }
+
+  .restaurant-gallery-lightbox-thumb {
+    flex-basis: 68px;
+
+    width: 68px;
+    height: 50px;
+  }
+}
+
+/* ============================================================
+   PETITS MOBILES
+   ============================================================ */
+
+@media (max-width: 480px) {
+
+  .restaurant-gallery-item,
+  .restaurant-gallery-item-1,
+  .restaurant-gallery-item-4,
+  .restaurant-gallery-item-5 {
+    flex-basis: 84vw;
+
+    width: 84vw;
+    height: 235px;
+  }
+
+  .restaurant-gallery-lightbox-image-wrap {
+    height: 62vh;
+  }
+}
+
+/* ============================================================
+   ACCESSIBILITÉ
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+
+  .restaurant-gallery-image,
+  .restaurant-gallery-item-overlay,
+  .restaurant-gallery-view-all {
+    transition: none;
+  }
+}
