@@ -8045,3 +8045,130 @@ a {
     transition: none;
   }
 }
+
+/* ============================================================
+   ADMIN HÉBERGEMENTS - RÉORGANISATION
+   ============================================================ */
+
+.admin-accommodation-reorder-hint {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+
+  margin: 18px 0;
+  padding: 12px 15px;
+
+  border: 1px solid rgba(0, 92, 75, 0.08);
+  border-radius: 10px;
+
+  background: rgba(0, 92, 75, 0.025);
+
+  color: var(--gris-elegant);
+
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.admin-accommodation-reorder-hint p {
+  margin: 0;
+}
+
+.admin-accommodation-reorder-hint.is-enabled {
+  border-color: rgba(200, 169, 81, 0.24);
+
+  background: rgba(200, 169, 81, 0.055);
+}
+
+.admin-accommodation-reorder-hint span {
+  flex: 0 0 auto;
+
+  color: var(--vert-residence);
+
+  font-weight: 700;
+}
+
+.admin-accommodation-drag-column {
+  width: 74px;
+
+  text-align: center;
+}
+
+.admin-accommodation-drag-cell {
+  width: 74px;
+
+  text-align: center;
+}
+
+.admin-accommodation-drag-handle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 7px;
+
+  min-width: 52px;
+}
+
+.admin-accommodation-order-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 24px;
+  height: 24px;
+
+  border-radius: 999px;
+
+  background: rgba(0, 92, 75, 0.07);
+
+  color: var(--vert-residence);
+
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+
+.admin-accommodation-drag-icon {
+  color: rgba(0, 92, 75, 0.55);
+
+  font-size: 1.05rem;
+  font-weight: 800;
+
+  letter-spacing: -4px;
+
+  cursor: grab;
+
+  user-select: none;
+}
+
+.admin-accommodations-sortable-table tbody tr.is-sortable {
+  transition:
+    background 0.18s ease,
+    opacity 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.admin-accommodations-sortable-table tbody tr.is-sortable:hover .admin-accommodation-drag-icon {
+  color: var(--dore-prestige);
+}
+
+.admin-accommodations-sortable-table tbody tr.is-dragging {
+  opacity: 0.45;
+
+  background: rgba(200, 169, 81, 0.08);
+}
+
+.admin-accommodations-sortable-table tbody tr.is-drag-over {
+  box-shadow:
+    inset 0 2px 0 var(--dore-prestige);
+}
+
+@media (max-width: 768px) {
+  .admin-accommodation-reorder-hint {
+    align-items: flex-start;
+
+    flex-direction: column;
+
+    gap: 6px;
+  }
+}

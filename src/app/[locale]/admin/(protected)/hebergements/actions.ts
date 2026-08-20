@@ -16,7 +16,9 @@ import { requireAdmin } from "@/lib/auth/require-admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 function featureIds(formData: FormData) {
-  return formData.getAll("feature_ids").filter((value): value is string => typeof value === "string");
+  return formData
+    .getAll("feature_ids")
+    .filter((value): value is string => typeof value === "string");
 }
 
 function deletedAccommodationImageIds(formData: FormData) {
@@ -24,7 +26,10 @@ function deletedAccommodationImageIds(formData: FormData) {
     ...new Set(
       formData
         .getAll("deleted_image_ids")
-        .filter((value): value is string => typeof value === "string" && value.length > 0),
+        .filter(
+          (value): value is string =>
+            typeof value === "string" && value.length > 0,
+        ),
     ),
   ];
 }
@@ -89,7 +94,10 @@ export async function deleteAccommodationAction(accommodationId: string) {
   redirect("/fr/admin/hebergements?notice=deleted");
 }
 
-export async function toggleAccommodationAction(accommodationId: string, nextActive: boolean) {
+export async function toggleAccommodationAction(
+  accommodationId: string,
+  nextActive: boolean,
+) {
   await requireAdmin("fr");
   const supabase = (await createSupabaseServerClient()).schema("site");
   const { error } = await supabase
@@ -105,11 +113,17 @@ export async function toggleAccommodationAction(accommodationId: string, nextAct
   revalidateAccommodationPaths(accommodationId);
   return {
     ok: true,
-    message: nextActive ? "Hébergement activé avec succès." : "Hébergement désactivé avec succès.",
+    message: nextActive
+      ? "Hébergement activé avec succès."
+      : "Hébergement désactivé avec succès.",
   };
 }
 
-export async function toggleAccommodationImageAction(imageId: string, accommodationId: string, nextActive: boolean) {
+export async function toggleAccommodationImageAction(
+  imageId: string,
+  accommodationId: string,
+  nextActive: boolean,
+) {
   await requireAdmin("fr");
   const supabase = (await createSupabaseServerClient()).schema("site");
   const { error } = await supabase
@@ -123,10 +137,16 @@ export async function toggleAccommodationImageAction(imageId: string, accommodat
   }
 
   revalidateAccommodationPaths(accommodationId);
-  return { ok: true, message: nextActive ? "Image activée." : "Image désactivée." };
+  return {
+    ok: true,
+    message: nextActive ? "Image activée." : "Image désactivée.",
+  };
 }
 
-export async function setAccommodationCoverAction(imageId: string, accommodationId: string) {
+export async function setAccommodationCoverAction(
+  imageId: string,
+  accommodationId: string,
+) {
   await requireAdmin("fr");
   const supabase = (await createSupabaseServerClient()).schema("site");
   await supabase
@@ -141,7 +161,10 @@ export async function setAccommodationCoverAction(imageId: string, accommodation
 
   if (error) {
     console.error("[admin-accommodations] Cover update failed:", error.message);
-    return { ok: false, message: "Impossible de définir l'image de couverture." };
+    return {
+      ok: false,
+      message: "Impossible de définir l'image de couverture.",
+    };
   }
 
   revalidateAccommodationPaths(accommodationId);
@@ -182,7 +205,10 @@ export async function updateAccommodationFeatureAction(
   redirect("/fr/admin/hebergements/caracteristiques?notice=updated");
 }
 
-export async function toggleAccommodationFeatureAction(featureId: string, nextActive: boolean) {
+export async function toggleAccommodationFeatureAction(
+  featureId: string,
+  nextActive: boolean,
+) {
   await requireAdmin("fr");
   const supabase = (await createSupabaseServerClient()).schema("site");
   const { error } = await supabase
@@ -191,13 +217,99 @@ export async function toggleAccommodationFeatureAction(featureId: string, nextAc
     .eq("id", featureId);
 
   if (error) {
-    console.error("[admin-accommodations] Feature toggle failed:", error.message);
+    console.error(
+      "[admin-accommodations] Feature toggle failed:",
+      error.message,
+    );
     return { ok: false, message: "Impossible de modifier la caractéristique." };
   }
 
   revalidateAccommodationPaths();
   return {
     ok: true,
-    message: nextActive ? "Caractéristique activée." : "Caractéristique désactivée.",
+    message: nextActive
+      ? "Caractéristique activée."
+      : "Caractéristique désactivée.",
+  };
+}
+
+export async function reorderAccommodationsAction(orderedIds: string[]) {
+  await requireAdmin("fr");
+
+  if (orderedIds.length === 0) {
+    return {
+      ok: false,
+      message: "Aucun hébergement à réorganiser.",
+    };
+  }
+
+  const uniqueIds = [...new Set(orderedIds)];
+
+  if (uniqueIds.length !== orderedIds.length) {
+    return {
+      ok: false,
+      message: "La liste des hébergements est invalide.",
+    };
+  }
+
+  const supabase = (await createSupabaseServerClient()).schema("site");
+
+  const { data, error } = await supabase
+    .from("accommodations")
+    .select("id")
+    .in("id", uniqueIds);
+
+  if (error) {
+    console.error(
+      "[admin-accommodations] Reorder validation failed:",
+      error.message,
+    );
+
+    return {
+      ok: false,
+      message: "Impossible de vérifier les hébergements.",
+    };
+  }
+
+  const existingIds = new Set((data ?? []).map((row) => row.id as string));
+
+  if (uniqueIds.some((id) => !existingIds.has(id))) {
+    return {
+      ok: false,
+      message: "Un hébergement est introuvable.",
+    };
+  }
+
+  for (let index = 0; index < uniqueIds.length; index += 1) {
+    const id = uniqueIds[index];
+
+    const sortOrder = (index + 1) * 10;
+
+    const { error: updateError } = await supabase
+      .from("accommodations")
+      .update({
+        sort_order: sortOrder,
+      })
+      .eq("id", id);
+
+    if (updateError) {
+      console.error("[admin-accommodations] Reorder update failed:", {
+        id,
+        sortOrder,
+        message: updateError.message,
+      });
+
+      return {
+        ok: false,
+        message: "Impossible d'enregistrer le nouvel ordre.",
+      };
+    }
+  }
+
+  revalidateAccommodationPaths();
+
+  return {
+    ok: true,
+    message: "Ordre des hébergements mis à jour.",
   };
 }
