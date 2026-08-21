@@ -8230,3 +8230,236 @@ a {
     font-size: 0.88rem;
   }
 }
+
+
+/* ============================================================
+   PAGE SALLES - CORRECTION LARGEUR DESKTOP / TABLETTE
+   ============================================================ */
+
+/*
+ * Empêche les éléments décoratifs des catégories
+ * de créer un débordement horizontal de toute la page.
+ */
+.page-venues {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+.page-venues .rooms-catalog-section {
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.page-venues .venues-category-groups,
+.page-venues .venue-category-section {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* ============================================================
+   DESKTOP
+   ============================================================ */
+
+@media (min-width: 1025px) {
+  .page-venues .venue-category-section .slider-wrapper {
+    position: relative;
+
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .page-venues .venue-category-section .rooms-slider {
+    display: flex;
+
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+
+    gap: 24px;
+
+    padding: 18px 4px 28px;
+
+    overflow-x: auto;
+    overflow-y: hidden;
+
+    scroll-behavior: smooth;
+    scroll-snap-type: x proximity;
+
+    scrollbar-width: none;
+
+    overscroll-behavior-inline: contain;
+  }
+
+  .page-venues .venue-category-section .rooms-slider::-webkit-scrollbar {
+    display: none;
+  }
+
+  /*
+   * 3 cartes visibles dans la largeur disponible.
+   *
+   * 2 espaces de 24px = 48px
+   * puis on divise le reste par 3.
+   */
+  .page-venues .venue-category-section .room-card {
+    flex: 0 0 calc((100% - 48px) / 3);
+
+    width: calc((100% - 48px) / 3);
+
+    min-width: 0;
+    max-width: none;
+
+    scroll-snap-align: start;
+  }
+
+  /*
+   * On évite qu'un contenu interne oblige
+   * la carte à dépasser sa largeur.
+   */
+  .page-venues .venue-category-section .room-card-body,
+  .page-venues .venue-category-section .room-card-body>* {
+    min-width: 0;
+  }
+}
+
+/* ============================================================
+   TABLETTE
+   ============================================================ */
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .page-venues .venue-category-section .slider-wrapper {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .page-venues .venue-category-section .rooms-slider {
+    display: flex;
+
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+
+    gap: 20px;
+
+    padding: 16px 4px 26px;
+
+    overflow-x: auto;
+    overflow-y: hidden;
+
+    scrollbar-width: none;
+
+    scroll-snap-type: x proximity;
+    overscroll-behavior-inline: contain;
+  }
+
+  .page-venues .venue-category-section .rooms-slider::-webkit-scrollbar {
+    display: none;
+  }
+
+  /*
+   * Deux cartes visibles sur tablette.
+   */
+  .page-venues .venue-category-section .room-card {
+    flex: 0 0 calc((100% - 20px) / 2);
+
+    width: calc((100% - 20px) / 2);
+
+    min-width: 0;
+    max-width: none;
+
+    scroll-snap-align: start;
+  }
+}
+
+/* ============================================================
+   MOBILE
+   On conserve ton fonctionnement actuel
+   ============================================================ */
+
+@media (max-width: 768px) {
+  .page-venues .venue-category-section {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .page-venues .venue-category-section .slider-wrapper {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .page-venues .venue-category-section .rooms-slider {
+    width: calc(100% + 5vw);
+
+    min-width: 0;
+
+    gap: 14px;
+
+    margin-right: -5vw;
+
+    padding: 10px 0 22px 2px;
+
+    overflow-x: auto;
+    overflow-y: hidden;
+
+    scroll-padding-left: 2px;
+    scroll-snap-type: x mandatory;
+
+    scrollbar-width: none;
+
+    overscroll-behavior-inline: contain;
+
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .page-venues .venue-category-section .rooms-slider::-webkit-scrollbar {
+    display: none;
+  }
+
+  .page-venues .venue-category-section .room-card {
+    flex: 0 0 82vw;
+
+    width: 82vw;
+    max-width: 340px;
+
+    min-width: 0;
+
+    scroll-snap-align: start;
+  }
+
+  .page-venues .venue-category-section .slider-arrow {
+    display: none;
+  }
+}
+
+/* ============================================================
+   PETITS MOBILES
+   ============================================================ */
+
+@media (max-width: 480px) {
+  .page-venues .venue-category-section .rooms-slider {
+    gap: 12px;
+  }
+
+  .page-venues .venue-category-section .room-card {
+    flex-basis: 84vw;
+
+    width: 84vw;
+    max-width: none;
+  }
+}
+
+/* ============================================================
+   TRÈS PETITS MOBILES
+   ============================================================ */
+
+@media (max-width: 360px) {
+  .page-venues .venue-category-section .room-card {
+    flex-basis: 86vw;
+
+    width: 86vw;
+  }
+}
