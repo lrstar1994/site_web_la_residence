@@ -14,7 +14,7 @@
     "browser-image-compression": "^2.0.2",
     "clsx": "latest",
     "lucide-react": "latest",
-    "next": "latest",
+    "next": "16.4.3",
     "next-intl": "latest",
     "react": "latest",
     "react-dom": "latest",
