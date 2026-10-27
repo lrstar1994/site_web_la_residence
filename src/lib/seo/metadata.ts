@@ -1,7 +1,13 @@
 import type { Metadata } from "next";
 import { SHOP_ENABLED } from "@/config/features";
 import { siteConfig } from "@/data/site";
+import { getAccommodationDetailPath } from "@/lib/accommodations/accommodation-routes";
+import { getEventServiceDetailPath } from "@/lib/events/event-service-routes";
 import type { Locale, RouteKey } from "@/lib/i18n/routing";
+import { getVenueDetailPath } from "@/lib/venues/venue-routes";
+import type { Accommodation } from "@/types/accommodation";
+import type { EventService } from "@/types/event-service";
+import type { Venue } from "@/types/venue";
 
 const fallbackBaseUrl = "https://domain.com";
 
@@ -212,6 +218,67 @@ export function getAccommodationMetadata(locale: Locale): Metadata {
   };
 }
 
+export function getAccommodationDetailMetadata(
+  locale: Locale,
+  accommodation: Accommodation,
+): Metadata {
+  const baseUrl = getBaseUrl();
+  const title = `${accommodation.name[locale]} | ${siteConfig.name}`;
+  const description =
+    accommodation.shortDescription[locale] || accommodation.description[locale];
+  const canonical = getAccommodationDetailPath(locale, accommodation.code);
+  const coverImage =
+    accommodation.images.find((image) => image.isCover)?.imagePath ??
+    accommodation.images[0]?.imagePath ??
+    "/hebergement.jpeg";
+  const coverAlt =
+    accommodation.images.find((image) => image.isCover)?.alt[locale] ??
+    accommodation.images[0]?.alt[locale] ??
+    accommodation.name[locale];
+  const openGraphLocale = locale === "fr" ? "fr_FR" : "en_US";
+  const alternateLocale = locale === "fr" ? "en_US" : "fr_FR";
+
+  return {
+    metadataBase: new URL(baseUrl),
+    title,
+    description,
+    alternates: {
+      canonical,
+      languages: {
+        fr: getAccommodationDetailPath("fr", accommodation.code),
+        en: getAccommodationDetailPath("en", accommodation.code),
+        "x-default": getAccommodationDetailPath("fr", accommodation.code),
+      },
+    },
+    openGraph: {
+      type: "website",
+      locale: openGraphLocale,
+      alternateLocale,
+      siteName: siteConfig.name,
+      title,
+      description,
+      url: canonical,
+      images: [
+        {
+          url: coverImage,
+          width: 1200,
+          height: 630,
+          alt: coverAlt,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [coverImage],
+    },
+    icons: {
+      icon: "/favicon.ico",
+    },
+  };
+}
+
 export function getRestaurantMetadata(locale: Locale): Metadata {
   const baseUrl = getBaseUrl();
   const route = routeForKey("restaurant");
@@ -312,6 +379,66 @@ export function getVenuesMetadata(locale: Locale): Metadata {
   };
 }
 
+export function getVenueDetailMetadata(locale: Locale, venue: Venue): Metadata {
+  const baseUrl = getBaseUrl();
+  const title =
+    locale === "fr"
+      ? `${venue.name} | Salle événementielle à Antananarivo`
+      : `${venue.name} | Event venue in Antananarivo`;
+  const description = venue.shortDescription[locale] || venue.description[locale];
+  const canonical = getVenueDetailPath(locale, venue.code);
+  const coverImage =
+    venue.images.find((image) => image.isCover)?.imagePath ??
+    venue.images[0]?.imagePath ??
+    "/salles.jpeg";
+  const coverAlt =
+    venue.images.find((image) => image.isCover)?.alt[locale] ??
+    venue.images[0]?.alt[locale] ??
+    venue.name;
+  const openGraphLocale = locale === "fr" ? "fr_FR" : "en_US";
+  const alternateLocale = locale === "fr" ? "en_US" : "fr_FR";
+
+  return {
+    metadataBase: new URL(baseUrl),
+    title,
+    description,
+    alternates: {
+      canonical,
+      languages: {
+        fr: getVenueDetailPath("fr", venue.code),
+        en: getVenueDetailPath("en", venue.code),
+        "x-default": getVenueDetailPath("fr", venue.code),
+      },
+    },
+    openGraph: {
+      type: "website",
+      locale: openGraphLocale,
+      alternateLocale,
+      siteName: siteConfig.name,
+      title,
+      description,
+      url: canonical,
+      images: [
+        {
+          url: coverImage,
+          width: 1200,
+          height: 630,
+          alt: coverAlt,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [coverImage],
+    },
+    icons: {
+      icon: "/favicon.ico",
+    },
+  };
+}
+
 export function getEventsMetadata(locale: Locale): Metadata {
   const baseUrl = getBaseUrl();
   const route = routeForKey("evenements");
@@ -355,6 +482,68 @@ export function getEventsMetadata(locale: Locale): Metadata {
       title,
       description,
       images: ["/evenements.jpeg"],
+    },
+    icons: {
+      icon: "/favicon.ico",
+    },
+  };
+}
+
+export function getEventServiceDetailMetadata(
+  locale: Locale,
+  service: EventService,
+): Metadata {
+  const baseUrl = getBaseUrl();
+  const title = `${service.title[locale]} | ${siteConfig.name}`;
+  const description = service.description[locale];
+  const canonical = getEventServiceDetailPath(locale, service.code);
+  const coverImage =
+    service.images.find((image) => image.isCover)?.imagePath ??
+    service.images[0]?.imagePath ??
+    service.imagePath ??
+    "/evenements.jpeg";
+  const coverAlt =
+    service.images.find((image) => image.isCover)?.alt[locale] ??
+    service.images[0]?.alt[locale] ??
+    service.imageAlt[locale] ??
+    service.title[locale];
+  const openGraphLocale = locale === "fr" ? "fr_FR" : "en_US";
+  const alternateLocale = locale === "fr" ? "en_US" : "fr_FR";
+
+  return {
+    metadataBase: new URL(baseUrl),
+    title,
+    description,
+    alternates: {
+      canonical,
+      languages: {
+        fr: getEventServiceDetailPath("fr", service.code),
+        en: getEventServiceDetailPath("en", service.code),
+        "x-default": getEventServiceDetailPath("fr", service.code),
+      },
+    },
+    openGraph: {
+      type: "website",
+      locale: openGraphLocale,
+      alternateLocale,
+      siteName: siteConfig.name,
+      title,
+      description,
+      url: canonical,
+      images: [
+        {
+          url: coverImage,
+          width: 1200,
+          height: 630,
+          alt: coverAlt,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [coverImage],
     },
     icons: {
       icon: "/favicon.ico",

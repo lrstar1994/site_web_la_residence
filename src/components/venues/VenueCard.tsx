@@ -51,6 +51,7 @@
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import type { Locale } from "@/lib/i18n/routing";
+import { getVenueDetailPath } from "@/lib/venues/venue-routes";
 import type { VenueCardModel } from "@/types/venue";
 
 type VenueCardProps = {
@@ -61,6 +62,7 @@ type VenueCardProps = {
     details: string;
     detailsPrefix: string;
     detailsSuffix: string;
+    discover: string;
   };
   onOpen: (venueId: string, trigger: HTMLButtonElement) => void;
 };
@@ -235,16 +237,24 @@ export function VenueCard({
 
         <p>{venue.shortDescription[locale]}</p>
 
-        <button
-          className="btn-details"
-          type="button"
-          aria-label={`${labels.detailsPrefix} ${venue.name[locale]}${labels.detailsSuffix}`}
-          onClick={(event) =>
-            onOpen(venue.id, event.currentTarget)
-          }
-        >
-          {labels.details}
-        </button>
+        <div className="venue-card-actions">
+          <button
+            className="btn-details"
+            type="button"
+            aria-label={`${labels.detailsPrefix} ${venue.name[locale]}${labels.detailsSuffix}`}
+            onClick={(event) =>
+              onOpen(venue.id, event.currentTarget)
+            }
+          >
+            {labels.details}
+          </button>
+          <a
+            className="venue-card-detail-link"
+            href={getVenueDetailPath(locale, venue.code ?? "")}
+          >
+            {labels.discover}
+          </a>
+        </div>
       </div>
     </article>
   );

@@ -16,6 +16,7 @@ type EventServicesGridProps = {
     previousImage: string;
     nextImage: string;
     thumbnail: string;
+    discoverService: string;
   };
 };
 
@@ -52,7 +53,10 @@ export function EventServicesGrid({ locale, services, labels }: EventServicesGri
             key={service.id}
             service={service}
             locale={locale}
-            labels={{ viewDetails: labels.viewDetails }}
+            labels={{
+              viewDetails: labels.viewDetails,
+              discoverService: labels.discoverService,
+            }}
             onOpen={openModal}
           />
         ))}

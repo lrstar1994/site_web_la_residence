@@ -47,6 +47,7 @@ export async function AccommodationGrid({
               unit: t("price_unit"),
               details: t("details"),
               detailsPrefix: t("details_prefix"),
+              discover: modal("discover"),
             },
             modal: {
               close: modal("close"),
@@ -61,6 +62,7 @@ export async function AccommodationGrid({
               }),
               bookOnline: modal("book_online"),
               bookOnlineDescription: modal("book_online_description"),
+              discover: modal("discover"),
               essentials: modal("essentials"),
               residenceBenefits: modal("residence_benefits"),
             },

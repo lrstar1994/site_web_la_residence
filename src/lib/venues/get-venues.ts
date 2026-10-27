@@ -1,9 +1,15 @@
 import "server-only";
 
-import { getSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabasePublicServerClient } from "@/lib/supabase/public-server";
+import {
+  getCanonicalVenueCode,
+  getPhysicalVenueMemberCodes,
+} from "@/lib/venues/venue-routes";
 import type {
+  PhysicalVenueDetail,
   Venue,
   VenueCardModel,
+  VenueImage,
   VenueSetup,
   VenueUsePresentation,
 } from "@/types/venue";
@@ -107,8 +113,160 @@ export type VenuesResult =
       error: string;
     };
 
+export type VenueResult =
+  | {
+      ok: true;
+      venue: Venue;
+    }
+  | {
+      ok: false;
+      venue: null;
+      error: string;
+    };
+
+export type PhysicalVenueResult =
+  | {
+      ok: true;
+      venue: PhysicalVenueDetail;
+    }
+  | {
+      ok: false;
+      venue: null;
+      error: string;
+    };
+
+export type ActiveVenueCodesResult =
+  | {
+      ok: true;
+      venues: Array<{
+        code: string;
+        updatedAt: string;
+      }>;
+    }
+  | {
+      ok: false;
+      venues: [];
+      error: string;
+    };
+
 function formatArea(surfaceM2: number | null) {
   return surfaceM2 ? `${Number(surfaceM2)} m²` : "";
+}
+
+function dedupeVenueImages(venues: Venue[]) {
+  const imagesByPath = new Map<string, VenueImage>();
+
+  for (const venue of venues) {
+    const sortedImages = [...venue.images].sort(
+      (a, b) =>
+        Number(b.isCover) - Number(a.isCover) || a.sortOrder - b.sortOrder,
+    );
+
+    for (const image of sortedImages) {
+      if (!imagesByPath.has(image.imagePath)) {
+        imagesByPath.set(image.imagePath, image);
+      }
+    }
+  }
+
+  return Array.from(imagesByPath.values()).map((image, index) => ({
+    ...image,
+    isCover: index === 0,
+    sortOrder: index * 10,
+  }));
+}
+
+function dedupeVenueSetups(venues: Venue[]) {
+  const setupsByCode = new Map<string, VenueSetup>();
+
+  for (const venue of venues) {
+    for (const setup of venue.setups) {
+      const current = setupsByCode.get(setup.code);
+
+      if (!current) {
+        setupsByCode.set(setup.code, setup);
+        continue;
+      }
+
+      setupsByCode.set(setup.code, {
+        ...current,
+        capacity: current.capacity ?? setup.capacity,
+        sortOrder: Math.min(current.sortOrder, setup.sortOrder),
+      });
+    }
+  }
+
+  return Array.from(setupsByCode.values()).sort(
+    (a, b) => a.sortOrder - b.sortOrder,
+  );
+}
+
+function getUseSortOrder(code: string) {
+  if (code === "seminar") {
+    return 10;
+  }
+
+  if (code === "reception") {
+    return 20;
+  }
+
+  return 100;
+}
+
+function buildPhysicalVenueDetail(
+  canonicalVenue: Venue,
+  memberVenues: Venue[],
+): PhysicalVenueDetail {
+  const orderedMembers = [...memberVenues].sort((a, b) => {
+    if (a.code === canonicalVenue.code) {
+      return -1;
+    }
+
+    if (b.code === canonicalVenue.code) {
+      return 1;
+    }
+
+    return a.sortOrder - b.sortOrder;
+  });
+
+  const images = dedupeVenueImages(orderedMembers);
+  const setups = dedupeVenueSetups(orderedMembers);
+  const newestUpdatedAt = orderedMembers
+    .map((venue) => venue.updatedAt)
+    .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())[0];
+
+  const physicalUses = orderedMembers
+    .filter((venue) => venue.category)
+    .map((venue) => ({
+      id: venue.id,
+      sourceCode: venue.code,
+      typeCode: venue.category?.code ?? venue.code,
+      typeName:
+        venue.category?.name ??
+        ({
+          fr: venue.name,
+          en: venue.name,
+        } as const),
+      title: {
+        fr: venue.name,
+        en: venue.name,
+      },
+      shortDescription: venue.shortDescription,
+      description: venue.description,
+      images: venue.images,
+      setups: venue.setups,
+      sortOrder: getUseSortOrder(venue.category?.code ?? venue.code),
+    }))
+    .sort((a, b) => a.sortOrder - b.sortOrder);
+
+  return {
+    ...canonicalVenue,
+    images,
+    setups,
+    updatedAt: newestUpdatedAt ?? canonicalVenue.updatedAt,
+    memberCodes: orderedMembers.map((venue) => venue.code),
+    physicalUses,
+  };
 }
 
 /* =========================================================
@@ -279,13 +437,9 @@ function toCards(venues: Venue[]): VenueCardModel[] {
   });
 }
 
-/* =========================================================
-   Chargement public des salles
-   ========================================================= */
-
-export async function getVenues(): Promise<VenuesResult> {
+async function loadVenues(): Promise<VenuesResult> {
   try {
-    const supabase = (await getSupabaseServerClient()).schema("site");
+    const supabase = createSupabasePublicServerClient().schema("site");
 
     const [
       venuesResult,
@@ -664,4 +818,111 @@ export async function getVenues(): Promise<VenuesResult> {
       error: "supabase_unavailable",
     };
   }
+}
+
+/* =========================================================
+   Chargement public des salles
+   ========================================================= */
+
+export async function getVenues(): Promise<VenuesResult> {
+  return loadVenues();
+}
+
+export async function getVenueByCode(code: string): Promise<VenueResult> {
+  const canonicalCode = getCanonicalVenueCode(code);
+  const venues = await loadVenues();
+
+  if (!venues.ok) {
+    return {
+      ok: false,
+      venue: null,
+      error: venues.error,
+    };
+  }
+
+  const venue = venues.venues.find((item) => item.code === canonicalCode) ?? null;
+
+  if (!venue || !venue.isActive) {
+    return {
+      ok: false,
+      venue: null,
+      error: "venue_not_found",
+    };
+  }
+
+  return {
+    ok: true,
+    venue,
+  };
+}
+
+export async function getPhysicalVenueByCode(
+  code: string,
+): Promise<PhysicalVenueResult> {
+  const canonicalCode = getCanonicalVenueCode(code);
+  const memberCodes = getPhysicalVenueMemberCodes(canonicalCode);
+  const venues = await loadVenues();
+
+  if (!venues.ok) {
+    return {
+      ok: false,
+      venue: null,
+      error: venues.error,
+    };
+  }
+
+  const canonicalVenue =
+    venues.venues.find((item) => item.code === canonicalCode) ?? null;
+
+  if (!canonicalVenue || !canonicalVenue.isActive) {
+    return {
+      ok: false,
+      venue: null,
+      error: "venue_not_found",
+    };
+  }
+
+  const memberVenues = memberCodes
+    .map((memberCode) =>
+      venues.venues.find(
+        (item) => item.code === memberCode && item.isActive,
+      ),
+    )
+    .filter((venue): venue is Venue => Boolean(venue));
+
+  return {
+    ok: true,
+    venue: buildPhysicalVenueDetail(canonicalVenue, memberVenues),
+  };
+}
+
+export async function getActiveVenueCodes(): Promise<ActiveVenueCodesResult> {
+  const venues = await loadVenues();
+
+  if (!venues.ok) {
+    return {
+      ok: false,
+      venues: [],
+      error: venues.error,
+    };
+  }
+
+  const deduplicated = new Map<string, { code: string; updatedAt: string }>();
+
+  for (const venue of venues.venues) {
+    const code = getCanonicalVenueCode(venue.code);
+    const current = deduplicated.get(code);
+
+    if (!current || new Date(venue.updatedAt) > new Date(current.updatedAt)) {
+      deduplicated.set(code, {
+        code,
+        updatedAt: venue.updatedAt,
+      });
+    }
+  }
+
+  return {
+    ok: true,
+    venues: Array.from(deduplicated.values()),
+  };
 }

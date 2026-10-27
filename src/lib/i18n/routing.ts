@@ -10,6 +10,10 @@ export const routing = defineRouting({
       fr: "/hebergement",
       en: "/accommodation",
     },
+    "/hebergement/[slug]": {
+      fr: "/hebergement/[slug]",
+      en: "/accommodation/[slug]",
+    },
     "/restaurant": {
       fr: "/restaurant",
       en: "/restaurant",
@@ -18,9 +22,17 @@ export const routing = defineRouting({
       fr: "/salles",
       en: "/venues",
     },
+    "/salles/[slug]": {
+      fr: "/salles/[slug]",
+      en: "/venues/[slug]",
+    },
     "/evenements": {
       fr: "/evenements",
       en: "/events",
+    },
+    "/evenements/[slug]": {
+      fr: "/evenements/[slug]",
+      en: "/events/[slug]",
     },
     "/actualites": {
       fr: "/actualites",

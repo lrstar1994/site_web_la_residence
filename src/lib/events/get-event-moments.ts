@@ -1,6 +1,6 @@
 import "server-only";
 
-import { getSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabasePublicServerClient } from "@/lib/supabase/public-server";
 
 export type PublicEventMomentImage = {
   id: string;
@@ -22,7 +22,7 @@ type EventMomentRow = {
 
 export async function getEventMoments(): Promise<PublicEventMomentImage[]> {
   try {
-    const supabase = (await getSupabaseServerClient()).schema("site");
+    const supabase = createSupabasePublicServerClient().schema("site");
 
     const { data, error } = await supabase
       .from("event_moment_images")

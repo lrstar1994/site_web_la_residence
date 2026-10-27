@@ -12,6 +12,7 @@ type EventQuoteFormProps = {
   locale: Locale;
   services: EventService[];
   fields: EventQuoteField[];
+  initialServiceCode?: string;
 };
 
 const initialState: EventQuoteFormState = {
@@ -84,14 +85,21 @@ function SectionHeading({
   );
 }
 
-export function EventQuoteForm({ locale, services, fields }: EventQuoteFormProps) {
+export function EventQuoteForm({
+  locale,
+  services,
+  fields,
+  initialServiceCode,
+}: EventQuoteFormProps) {
   const formRef = useRef<HTMLFormElement>(null);
   const eventTypeSelectRef = useRef<HTMLSelectElement>(null);
   const [state, formAction, isPending] = useActionState(
     submitEventQuoteRequestAction.bind(null, locale),
     initialState,
   );
-  const [eventTypeId, setEventTypeId] = useState(services[0]?.id ?? "");
+  const initialService =
+    services.find((service) => service.code === initialServiceCode) ?? services[0];
+  const [eventTypeId, setEventTypeId] = useState(initialService?.id ?? "");
   const [answers, setAnswers] = useState<Record<string, unknown>>({});
   const selectedFields = useMemo(
     () => fields.filter((field) => field.eventTypeId === eventTypeId && field.isActive),

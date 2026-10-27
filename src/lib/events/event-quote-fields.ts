@@ -6,7 +6,7 @@ import type {
   EventQuoteFieldOption,
   EventQuoteFieldType,
 } from "@/types/event-quote";
-import { getSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabasePublicServerClient } from "@/lib/supabase/public-server";
 
 export type EventQuoteFieldRow = {
   id: string;
@@ -97,7 +97,7 @@ export function mapEventQuoteField(row: EventQuoteFieldRow): EventQuoteField {
 }
 
 export async function getPublicEventQuoteFields(eventTypeId?: string) {
-  const supabase = (await getSupabaseServerClient()).schema("site");
+  const supabase = createSupabasePublicServerClient().schema("site");
   let query = supabase
     .from("event_quote_fields")
     .select(

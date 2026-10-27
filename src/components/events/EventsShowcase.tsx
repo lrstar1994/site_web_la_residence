@@ -140,6 +140,7 @@ export async function EventsShowcase({
               previousImage: t("previousImage"),
               nextImage: t("nextImage"),
               thumbnail: t("thumbnail"),
+              discoverService: t("discoverService"),
             }}
           />
         ) : (

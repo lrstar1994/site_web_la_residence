@@ -24,6 +24,7 @@ type VenuesExplorerProps = {
     details: string;
     detailsPrefix: string;
     detailsSuffix: string;
+    discover: string;
     modal: {
       close: string;
       previous: string;
@@ -32,6 +33,7 @@ type VenuesExplorerProps = {
       setupsTitle: string;
       area: string;
       capacity: string;
+      fullPage: string;
     };
   };
 };
@@ -247,6 +249,8 @@ function VenueCategorySlider({
                     labels.detailsPrefix,
                   detailsSuffix:
                     labels.detailsSuffix,
+                  discover:
+                    labels.discover,
                 }}
                 onOpen={onOpen}
               />

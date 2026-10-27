@@ -1,8 +1,10 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import type { KeyboardEvent } from "react";
+import { getEventServiceDetailPath } from "@/lib/events/event-service-routes";
 import type { Locale } from "@/lib/i18n/routing";
 import type { EventService } from "@/types/event-service";
 
@@ -15,6 +17,7 @@ type EventServiceModalProps = {
     previousImage: string;
     nextImage: string;
     thumbnail: string;
+    discoverService: string;
   };
   onClose: () => void;
   onRequestQuote: (service: EventService) => void;
@@ -204,6 +207,12 @@ export function EventServiceModal({
           >
             {labels.requestQuote}
           </button>
+          <Link
+            className="event-service-modal-detail-link"
+            href={getEventServiceDetailPath(locale, service.code)}
+          >
+            {labels.discoverService}
+          </Link>
         </div>
       </article>
     </div>

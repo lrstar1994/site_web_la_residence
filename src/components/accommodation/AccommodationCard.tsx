@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { getAccommodationDetailPath } from "@/lib/accommodations/accommodation-routes";
 import type { Locale } from "@/lib/i18n/routing";
 import { getAccommodationImageAlt } from "@/lib/seo/accommodation-alt";
 import type { AccommodationCardModel } from "@/types/accommodation";
@@ -13,6 +14,7 @@ type AccommodationCardProps = {
     unit: string;
     details: string;
     detailsPrefix: string;
+    discover: string;
   };
   onOpen?: (
     accommodationId: string,
@@ -28,6 +30,7 @@ export function AccommodationCard({
 }: AccommodationCardProps) {
   const mainImage =
     accommodation.images[0] ?? "/hebergement.jpeg";
+  const detailPath = getAccommodationDetailPath(locale, accommodation.code);
 
   const category =
     accommodation.category[locale].toLowerCase();
@@ -131,6 +134,10 @@ export function AccommodationCard({
           >
             {labels.details}
           </button>
+
+          <a className="room-detail-page-link" href={detailPath}>
+            {labels.discover}
+          </a>
         </div>
       </div>
     </article>

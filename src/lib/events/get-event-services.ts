@@ -1,7 +1,7 @@
 import "server-only";
 
 import type { EventService } from "@/types/event-service";
-import { getSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabasePublicServerClient } from "@/lib/supabase/public-server";
 
 type EventServiceRow = {
   id: string;
@@ -38,6 +38,31 @@ export type EventServicesResult =
   | {
       ok: false;
       services: EventService[];
+      error: string;
+    };
+
+export type EventServiceByCodeResult =
+  | {
+      ok: true;
+      service: EventService;
+    }
+  | {
+      ok: false;
+      service: null;
+      error: string;
+    };
+
+export type ActiveEventServiceCodesResult =
+  | {
+      ok: true;
+      services: {
+        code: string;
+        updatedAt: string;
+      }[];
+    }
+  | {
+      ok: false;
+      services: [];
       error: string;
     };
 
@@ -104,7 +129,7 @@ export function mapEventService(
 
 export async function getEventServices(): Promise<EventServicesResult> {
   try {
-    const supabase = (await getSupabaseServerClient()).schema("site");
+    const supabase = createSupabasePublicServerClient().schema("site");
     const { data, error } = await supabase
       .from("event_services")
       .select(
@@ -179,4 +204,50 @@ export async function getEventServices(): Promise<EventServicesResult> {
       error: "supabase_unavailable",
     };
   }
+}
+
+export async function getEventServiceByCode(
+  code: string,
+): Promise<EventServiceByCodeResult> {
+  let normalizedCode = "";
+
+  try {
+    normalizedCode = decodeURIComponent(code).trim();
+  } catch {
+    return { ok: false, service: null, error: "invalid_code" };
+  }
+
+  if (!normalizedCode) {
+    return { ok: false, service: null, error: "invalid_code" };
+  }
+
+  const result = await getEventServices();
+
+  if (!result.ok) {
+    return { ok: false, service: null, error: result.error };
+  }
+
+  const service = result.services.find((item) => item.code === normalizedCode) ?? null;
+
+  if (!service) {
+    return { ok: false, service: null, error: "not_found" };
+  }
+
+  return { ok: true, service };
+}
+
+export async function getActiveEventServiceCodes(): Promise<ActiveEventServiceCodesResult> {
+  const result = await getEventServices();
+
+  if (!result.ok) {
+    return { ok: false, services: [], error: result.error };
+  }
+
+  return {
+    ok: true,
+    services: result.services.map((service) => ({
+      code: service.code,
+      updatedAt: service.updatedAt,
+    })),
+  };
 }

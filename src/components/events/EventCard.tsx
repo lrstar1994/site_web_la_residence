@@ -1,6 +1,8 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
+import { getEventServiceDetailPath } from "@/lib/events/event-service-routes";
 import type { Locale } from "@/lib/i18n/routing";
 import type { EventService } from "@/types/event-service";
 
@@ -9,6 +11,7 @@ type EventCardProps = {
   locale: Locale;
   labels: {
     viewDetails: string;
+    discoverService: string;
   };
   onOpen: (service: EventService, trigger: HTMLButtonElement) => void;
 };
@@ -41,6 +44,12 @@ export function EventCard({ service, locale, labels, onOpen }: EventCardProps) {
         >
           {labels.viewDetails}
         </button>
+        <Link
+          className="event-card-full-link"
+          href={getEventServiceDetailPath(locale, service.code)}
+        >
+          {labels.discoverService}
+        </Link>
       </div>
     </article>
   );

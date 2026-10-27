@@ -15,6 +15,9 @@ type PageProps = {
   params: Promise<{
     locale: Locale;
   }>;
+  searchParams?: Promise<{
+    service?: string;
+  }>;
 };
 
 export const revalidate = 300;
@@ -29,8 +32,10 @@ export async function generateMetadata({
 
 export default async function EvenementsPage({
   params,
+  searchParams,
 }: PageProps) {
   const { locale } = await params;
+  const query = searchParams ? await searchParams : {};
   const baseUrl = getBaseUrl();
 
   const [
@@ -66,6 +71,7 @@ export default async function EvenementsPage({
           locale={locale}
           services={eventServices.services}
           fields={quoteFields}
+          initialServiceCode={query.service}
         />
       ) : null}
 

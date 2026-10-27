@@ -34,6 +34,19 @@ export type VenueUsePresentation = {
   isActive: boolean;
 };
 
+export type PhysicalVenueUse = {
+  id: string;
+  sourceCode: string;
+  typeCode: string;
+  typeName: LocalizedText;
+  title: LocalizedText;
+  shortDescription: LocalizedText;
+  description: LocalizedText;
+  images: VenueImage[];
+  setups: VenueSetup[];
+  sortOrder: number;
+};
+
 /*
  * Catégorie publique d'une salle.
  *
@@ -89,6 +102,11 @@ export type Venue = {
 
   createdAt: string;
   updatedAt: string;
+};
+
+export type PhysicalVenueDetail = Venue & {
+  memberCodes: string[];
+  physicalUses: PhysicalVenueUse[];
 };
 
 export type VenueCardImage = {

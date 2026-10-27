@@ -79,6 +79,7 @@ export type Accommodation = {
 
 export type AccommodationCardModel = {
   id: string;
+  code: string;
   category: { fr: string; en: string };
   name: { fr: string; en: string };
   subtitle: { fr: string; en: string };

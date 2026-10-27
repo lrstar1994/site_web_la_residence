@@ -11,6 +11,7 @@ type CardLabels = {
   unit: string;
   details: string;
   detailsPrefix: string;
+  discover: string;
 };
 
 export type AccommodationModalLabels = {
@@ -24,6 +25,7 @@ export type AccommodationModalLabels = {
   whatsappButton: string;
   bookOnline: string;
   bookOnlineDescription: string;
+  discover: string;
   essentials: string;
   residenceBenefits: string;
 };

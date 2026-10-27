@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { KeyboardEvent } from "react";
 import type { Locale } from "@/lib/i18n/routing";
+import { getVenueDetailPath } from "@/lib/venues/venue-routes";
 import { VenueSetupIcon } from "@/components/venues/VenueSetupIcon";
 import type { VenueCardModel } from "@/types/venue";
 
@@ -19,6 +20,7 @@ type VenueModalProps = {
     setupsTitle: string;
     area: string;
     capacity: string;
+    fullPage: string;
   };
   onClose: () => void;
 };
@@ -260,6 +262,9 @@ export function VenueModal({ venue, locale, labels, onClose }: VenueModalProps) 
                 <span>{venue.capacity[locale]}</span>
               </div>
             </div>
+            <a className="venue-modal-full-page-link" href={getVenueDetailPath(locale, venue.code ?? "")}>
+              {labels.fullPage}
+            </a>
           </div>
         </div>
       </div>

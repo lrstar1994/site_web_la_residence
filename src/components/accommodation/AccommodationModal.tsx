@@ -13,6 +13,7 @@ import type { KeyboardEvent } from "react";
 import type { Locale } from "@/lib/i18n/routing";
 import { AccommodationFeatureIcon } from "@/components/accommodation/AccommodationFeatureIcon";
 import type { AccommodationModalLabels } from "@/components/accommodation/AccommodationExplorer";
+import { getAccommodationDetailPath } from "@/lib/accommodations/accommodation-routes";
 import { getAccommodationGalleryImageAlt } from "@/lib/seo/accommodation-alt";
 import type { AccommodationCardModel, AccommodationFeature } from "@/types/accommodation";
 
@@ -72,6 +73,7 @@ export function AccommodationModal({
   const titleId = `accommodation-modal-${accommodation.id}`;
   const hasMultipleImages = images.length > 1;
   const currentImage = images[currentImageIndex] ?? images[0];
+  const detailPath = getAccommodationDetailPath(locale, accommodation.code);
   const whatsappUrl = useMemo(
     () =>
       buildWhatsAppUrl(
@@ -286,6 +288,9 @@ export function AccommodationModal({
                   <h2 className="bk-fiche-title" id={titleId}>
                     {accommodation.name[locale]}
                   </h2>
+                  <a className="bk-detail-page-link" href={detailPath}>
+                    {labels.discover}
+                  </a>
                   <div className="bk-fiche-specs" aria-label={accommodation.name[locale]}>
                     <span className="bk-fiche-spec">
                       <span aria-hidden="true">01</span>

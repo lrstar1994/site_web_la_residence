@@ -1,6 +1,6 @@
 import "server-only";
 
-import { getSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabasePublicServerClient } from "@/lib/supabase/public-server";
 import type {
   Accommodation,
   AccommodationCardModel,
@@ -69,6 +69,14 @@ export type AccommodationsResult =
   | { ok: true; accommodations: Accommodation[]; cards: AccommodationCardModel[] }
   | { ok: false; accommodations: Accommodation[]; cards: AccommodationCardModel[]; error: string };
 
+export type AccommodationCodesResult =
+  | { ok: true; accommodations: { code: string; updatedAt: string }[] }
+  | { ok: false; accommodations: { code: string; updatedAt: string }[]; error: string };
+
+export type AccommodationByCodeResult =
+  | { ok: true; accommodation: Accommodation }
+  | { ok: false; accommodation: null; error: string };
+
 function formatPrice(value: number) {
   return new Intl.NumberFormat("fr-FR").format(value);
 }
@@ -82,6 +90,7 @@ function toCards(accommodations: Accommodation[]): AccommodationCardModel[] {
 
     return {
       id: item.id,
+      code: item.code,
       category: {
         fr: item.category.fr ?? "",
         en: item.category.en ?? "",
@@ -112,9 +121,80 @@ function toCards(accommodations: Accommodation[]): AccommodationCardModel[] {
   });
 }
 
+function mapAccommodationRows(
+  accommodationData: AccommodationRow[],
+  imageData: ImageRow[],
+  linkData: LinkRow[],
+) {
+  const imagesByAccommodation = new Map<string, ImageRow[]>();
+  for (const image of imageData) {
+    const current = imagesByAccommodation.get(image.accommodation_id) ?? [];
+    current.push(image);
+    imagesByAccommodation.set(image.accommodation_id, current);
+  }
+
+  const groupsByAccommodation = new Map<string, Map<AccommodationFeatureGroupCode, AccommodationFeatureGroup>>();
+  for (const link of linkData) {
+    if (!link.feature?.group) continue;
+    const group = link.feature.group;
+    const accommodationGroups = groupsByAccommodation.get(link.accommodation_id) ?? new Map();
+    const existing = accommodationGroups.get(group.code) ?? {
+      id: group.id,
+      code: group.code,
+      name: { fr: group.name_fr, en: group.name_en },
+      sortOrder: group.sort_order,
+      features: [],
+    };
+    existing.features.push({
+      id: link.feature.id,
+      code: link.feature.code,
+      groupCode: group.code,
+      name: { fr: link.feature.name_fr, en: link.feature.name_en },
+      description: { fr: link.feature.description_fr, en: link.feature.description_en },
+      iconKey: link.feature.icon_key,
+      sortOrder: link.sort_order || link.feature.sort_order,
+      customLabel: { fr: link.custom_label_fr, en: link.custom_label_en },
+    });
+    accommodationGroups.set(group.code, existing);
+    groupsByAccommodation.set(link.accommodation_id, accommodationGroups);
+  }
+
+  return accommodationData.map((row) => {
+    const images = (imagesByAccommodation.get(row.id) ?? []).sort((a, b) => Number(b.is_cover) - Number(a.is_cover) || a.sort_order - b.sort_order);
+    const featureGroups = Array.from(groupsByAccommodation.get(row.id)?.values() ?? []).sort((a, b) => a.sortOrder - b.sortOrder);
+    featureGroups.forEach((group) => group.features.sort((a, b) => a.sortOrder - b.sortOrder));
+
+    return {
+      id: row.id,
+      code: row.code,
+      name: { fr: row.name_fr, en: row.name_en },
+      shortDescription: { fr: row.short_description_fr, en: row.short_description_en },
+      description: { fr: row.description_fr, en: row.description_en },
+      category: { fr: row.category_fr, en: row.category_en },
+      capacity: row.capacity,
+      surfaceM2: row.surface_m2,
+      priceFrom: row.price_from,
+      currency: row.currency,
+      sortOrder: row.sort_order,
+      isActive: row.is_active,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+      images: images.map((image) => ({
+        id: image.id,
+        imagePath: image.image_path,
+        alt: { fr: image.alt_fr, en: image.alt_en },
+        sortOrder: image.sort_order,
+        isCover: image.is_cover,
+        isActive: image.is_active,
+      })),
+      featureGroups,
+    } satisfies Accommodation;
+  });
+}
+
 export async function getAccommodations(): Promise<AccommodationsResult> {
   try {
-    const supabase = (await getSupabaseServerClient()).schema("site");
+    const supabase = createSupabasePublicServerClient().schema("site");
     const [{ data: accommodationData, error: accommodationError }, { data: imageData, error: imageError }, { data: linkData, error: linkError }] =
       await Promise.all([
         supabase.from("accommodations").select("*").eq("is_active", true).order("sort_order", { ascending: true }).order("created_at", { ascending: true }),
@@ -134,74 +214,62 @@ export async function getAccommodations(): Promise<AccommodationsResult> {
       return { ok: false, accommodations: [], cards: [], error: "accommodations_unavailable" };
     }
 
-    const imagesByAccommodation = new Map<string, ImageRow[]>();
-    for (const image of (imageData ?? []) as unknown as ImageRow[]) {
-      const current = imagesByAccommodation.get(image.accommodation_id) ?? [];
-      current.push(image);
-      imagesByAccommodation.set(image.accommodation_id, current);
-    }
-
-    const groupsByAccommodation = new Map<string, Map<AccommodationFeatureGroupCode, AccommodationFeatureGroup>>();
-    for (const link of (linkData ?? []) as unknown as LinkRow[]) {
-      if (!link.feature?.group) continue;
-      const group = link.feature.group;
-      const accommodationGroups = groupsByAccommodation.get(link.accommodation_id) ?? new Map();
-      const existing = accommodationGroups.get(group.code) ?? {
-        id: group.id,
-        code: group.code,
-        name: { fr: group.name_fr, en: group.name_en },
-        sortOrder: group.sort_order,
-        features: [],
-      };
-      existing.features.push({
-        id: link.feature.id,
-        code: link.feature.code,
-        groupCode: group.code,
-        name: { fr: link.feature.name_fr, en: link.feature.name_en },
-        description: { fr: link.feature.description_fr, en: link.feature.description_en },
-        iconKey: link.feature.icon_key,
-        sortOrder: link.sort_order || link.feature.sort_order,
-        customLabel: { fr: link.custom_label_fr, en: link.custom_label_en },
-      });
-      accommodationGroups.set(group.code, existing);
-      groupsByAccommodation.set(link.accommodation_id, accommodationGroups);
-    }
-
-    const accommodations = ((accommodationData ?? []) as unknown as AccommodationRow[]).map((row) => {
-      const images = (imagesByAccommodation.get(row.id) ?? []).sort((a, b) => Number(b.is_cover) - Number(a.is_cover) || a.sort_order - b.sort_order);
-      const featureGroups = Array.from(groupsByAccommodation.get(row.id)?.values() ?? []).sort((a, b) => a.sortOrder - b.sortOrder);
-      featureGroups.forEach((group) => group.features.sort((a, b) => a.sortOrder - b.sortOrder));
-
-      return {
-        id: row.id,
-        code: row.code,
-        name: { fr: row.name_fr, en: row.name_en },
-        shortDescription: { fr: row.short_description_fr, en: row.short_description_en },
-        description: { fr: row.description_fr, en: row.description_en },
-        category: { fr: row.category_fr, en: row.category_en },
-        capacity: row.capacity,
-        surfaceM2: row.surface_m2,
-        priceFrom: row.price_from,
-        currency: row.currency,
-        sortOrder: row.sort_order,
-        isActive: row.is_active,
-        createdAt: row.created_at,
-        updatedAt: row.updated_at,
-        images: images.map((image) => ({
-          id: image.id,
-          imagePath: image.image_path,
-          alt: { fr: image.alt_fr, en: image.alt_en },
-          sortOrder: image.sort_order,
-          isCover: image.is_cover,
-          isActive: image.is_active,
-        })),
-        featureGroups,
-      } satisfies Accommodation;
-    });
+    const accommodations = mapAccommodationRows(
+      (accommodationData ?? []) as unknown as AccommodationRow[],
+      (imageData ?? []) as unknown as ImageRow[],
+      (linkData ?? []) as unknown as LinkRow[],
+    );
 
     return { ok: true, accommodations, cards: toCards(accommodations) };
   } catch (error) {
     console.error("[accommodations] Loading failed:", error instanceof Error ? error.message : "Unknown error");
     return { ok: false, accommodations: [], cards: [], error: "supabase_unavailable" };
   }
+}
+
+export async function getAccommodationByCode(
+  code: string,
+): Promise<AccommodationByCodeResult> {
+  let normalizedCode = "";
+
+  try {
+    normalizedCode = decodeURIComponent(code).trim();
+  } catch {
+    return { ok: false, accommodation: null, error: "invalid_code" };
+  }
+
+  if (!normalizedCode) {
+    return { ok: false, accommodation: null, error: "invalid_code" };
+  }
+
+  const result = await getAccommodations();
+
+  if (!result.ok) {
+    return { ok: false, accommodation: null, error: result.error };
+  }
+
+  const accommodation =
+    result.accommodations.find((item) => item.code === normalizedCode) ?? null;
+
+  if (!accommodation) {
+    return { ok: false, accommodation: null, error: "not_found" };
+  }
+
+  return { ok: true, accommodation };
+}
+
+export async function getActiveAccommodationCodes(): Promise<AccommodationCodesResult> {
+  const result = await getAccommodations();
+
+  if (!result.ok) {
+    return { ok: false, accommodations: [], error: result.error };
+  }
+
+  return {
+    ok: true,
+    accommodations: result.accommodations.map((accommodation) => ({
+      code: accommodation.code,
+      updatedAt: accommodation.updatedAt,
+    })),
+  };
 }
