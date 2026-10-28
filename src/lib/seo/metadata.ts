@@ -11,15 +11,6 @@ import type { Venue } from "@/types/venue";
 
 const fallbackBaseUrl = "https://domain.com";
 
-const siteIcons: NonNullable<Metadata["icons"]> = {
-  icon: [
-    { url: "/favicon.ico", sizes: "any" },
-    { url: "/icon.png", type: "image/png", sizes: "512x512" },
-  ],
-  shortcut: "/favicon.ico",
-  apple: [{ url: "/apple-icon.png", type: "image/png", sizes: "180x180" }],
-};
-
 const titles: Record<Locale, string> = {
   fr: "La Résidence Ankerana | Hôtel, Restaurant et Événements à Antananarivo",
   en: "La Résidence Ankerana | Hotel, Restaurant and Events in Antananarivo",
@@ -171,7 +162,6 @@ export function getRouteMetadata(locale: Locale, routeKey: RouteKey): Metadata {
       title: getDefaultTitle(locale),
       description: getDefaultDescription(locale),
     },
-    icons: siteIcons,
   };
 }
 
@@ -219,7 +209,6 @@ export function getAccommodationMetadata(locale: Locale): Metadata {
       description,
       images: ["/hebergement.jpeg"],
     },
-    icons: siteIcons,
   };
 }
 
@@ -278,7 +267,6 @@ export function getAccommodationDetailMetadata(
       description,
       images: [coverImage],
     },
-    icons: siteIcons,
   };
 }
 
@@ -326,7 +314,6 @@ export function getRestaurantMetadata(locale: Locale): Metadata {
       description,
       images: ["/hero-restau-light.jpg"],
     },
-    icons: siteIcons,
   };
 }
 
@@ -374,7 +361,6 @@ export function getVenuesMetadata(locale: Locale): Metadata {
       description,
       images: ["/salles.jpeg"],
     },
-    icons: siteIcons,
   };
 }
 
@@ -432,7 +418,6 @@ export function getVenueDetailMetadata(locale: Locale, venue: Venue): Metadata {
       description,
       images: [coverImage],
     },
-    icons: siteIcons,
   };
 }
 
@@ -480,7 +465,6 @@ export function getEventsMetadata(locale: Locale): Metadata {
       description,
       images: ["/evenements.jpeg"],
     },
-    icons: siteIcons,
   };
 }
 
@@ -540,7 +524,6 @@ export function getEventServiceDetailMetadata(
       description,
       images: [coverImage],
     },
-    icons: siteIcons,
   };
 }
 
@@ -588,7 +571,6 @@ export function getNewsMetadata(locale: Locale): Metadata {
       description,
       images: ["/restaurant.jpeg"],
     },
-    icons: siteIcons,
   };
 }
 
@@ -634,6 +616,5 @@ export function getHomeMetadata(locale: Locale): Metadata {
       description,
       images: ["/couverture.jpeg"],
     },
-    icons: siteIcons,
   };
 }
