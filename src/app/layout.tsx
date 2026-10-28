@@ -17,8 +17,16 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "La Résidence Ankerana",
+  title: "La Résidence Ankerana | Hôtel à Antananarivo",
   description: "Hôtel, restaurant et événements à Antananarivo.",
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/icon.png", type: "image/png", sizes: "512x512" },
+    ],
+    shortcut: "/favicon.ico",
+    apple: [{ url: "/apple-icon.png", type: "image/png", sizes: "180x180" }],
+  },
 };
 
 function resolveLocale(value: string | null): Locale {
