@@ -10,7 +10,6 @@ import {
 import type { KeyboardEvent } from "react";
 
 import { VenueCard } from "@/components/venues/VenueCard";
-import { VenueModal } from "@/components/venues/VenueModal";
 import type { Locale } from "@/lib/i18n/routing";
 import type { VenueCardModel } from "@/types/venue";
 
@@ -24,17 +23,6 @@ type VenuesExplorerProps = {
     details: string;
     detailsPrefix: string;
     detailsSuffix: string;
-    discover: string;
-    modal: {
-      close: string;
-      previous: string;
-      next: string;
-      thumbnails: string;
-      setupsTitle: string;
-      area: string;
-      capacity: string;
-      fullPage: string;
-    };
   };
 };
 
@@ -46,10 +34,6 @@ type VenueCategorySliderProps = {
   eyebrow: string;
   description: string;
   labels: VenuesExplorerProps["labels"];
-  onOpen: (
-    venueId: string,
-    trigger: HTMLButtonElement,
-  ) => void;
 };
 
 function VenueCategorySlider({
@@ -60,7 +44,6 @@ function VenueCategorySlider({
   eyebrow,
   description,
   labels,
-  onOpen,
 }: VenueCategorySliderProps) {
   const sliderRef = useRef<HTMLDivElement>(null);
 
@@ -249,10 +232,7 @@ function VenueCategorySlider({
                     labels.detailsPrefix,
                   detailsSuffix:
                     labels.detailsSuffix,
-                  discover:
-                    labels.discover,
                 }}
-                onOpen={onOpen}
               />
             ),
           )}
@@ -282,19 +262,6 @@ export function VenuesExplorer({
   locale,
   labels,
 }: VenuesExplorerProps) {
-  const [selectedId, setSelectedId] =
-    useState<string | null>(
-      null,
-    );
-
-  const [
-    triggerElement,
-    setTriggerElement,
-  ] =
-    useState<HTMLButtonElement | null>(
-      null,
-    );
-
   const seminarVenues = useMemo(
     () =>
       venues.filter(
@@ -323,31 +290,6 @@ export function VenuesExplorer({
       ),
     [venues],
   );
-
-  const selectedVenue =
-    venues.find(
-      (venue) =>
-        venue.id === selectedId,
-    ) ?? null;
-
-  const handleOpen = useCallback(
-    (
-      venueId: string,
-      trigger: HTMLButtonElement,
-    ) => {
-      setTriggerElement(trigger);
-      setSelectedId(venueId);
-    },
-    [],
-  );
-
-  const handleClose = useCallback(() => {
-    setSelectedId(null);
-
-    triggerElement?.focus();
-
-    setTriggerElement(null);
-  }, [triggerElement]);
 
   const seminarLabels =
     locale === "fr"
@@ -398,8 +340,7 @@ export function VenuesExplorer({
       : "reception-venues";
 
   return (
-    <>
-      <div className="venues-category-groups">
+    <div className="venues-category-groups">
         <VenueCategorySlider
           id={seminarSectionId}
           venues={seminarVenues}
@@ -414,7 +355,6 @@ export function VenuesExplorer({
             seminarLabels.description
           }
           labels={labels}
-          onOpen={handleOpen}
         />
 
         <VenueCategorySlider
@@ -431,7 +371,6 @@ export function VenuesExplorer({
             receptionLabels.description
           }
           labels={labels}
-          onOpen={handleOpen}
         />
 
         {uncategorizedVenues.length >
@@ -457,19 +396,8 @@ export function VenuesExplorer({
                 : "Discover our other available spaces."
             }
             labels={labels}
-            onOpen={handleOpen}
           />
         ) : null}
-      </div>
-
-      {selectedVenue ? (
-        <VenueModal
-          venue={selectedVenue}
-          locale={locale}
-          labels={labels.modal}
-          onClose={handleClose}
-        />
-      ) : null}
-    </>
+    </div>
   );
 }

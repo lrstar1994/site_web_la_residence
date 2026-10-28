@@ -74,17 +74,6 @@ export default async function SallesPage({ params }: PageProps) {
                 details: t("details"),
                 detailsPrefix: t("details_prefix"),
                 detailsSuffix: t("details_suffix"),
-                discover: t("discover"),
-                modal: {
-                  close: t("modal.close"),
-                  previous: t("modal.previous"),
-                  next: t("modal.next"),
-                  thumbnails: t("modal.thumbnails"),
-                  setupsTitle: t("modal.setups_title"),
-                  area: t("modal.area"),
-                  capacity: t("modal.capacity"),
-                  fullPage: t("modal.full_page"),
-                },
               }}
             />
           )}

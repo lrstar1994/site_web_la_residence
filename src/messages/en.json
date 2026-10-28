@@ -344,7 +344,16 @@
       "gallery": "Gallery",
       "request_quote": "Request a quote",
       "description": "Overview",
-      "no_images": "No image is available for this service."
+      "no_images": "No image is available for this service.",
+      "gallery_eyebrow": "Photo gallery",
+      "gallery_title": "Discover this service in pictures",
+      "view_all_photos": "View all photos",
+      "close_gallery": "Close gallery",
+      "previous_image": "Previous photo",
+      "next_image": "Next photo",
+      "other_eyebrow": "Other services",
+      "other_title": "Discover our other event services",
+      "discover_service": "Discover this service"
     }
   },
   "accommodationPage": {

@@ -11,12 +11,10 @@ type EventCardProps = {
   locale: Locale;
   labels: {
     viewDetails: string;
-    discoverService: string;
   };
-  onOpen: (service: EventService, trigger: HTMLButtonElement) => void;
 };
 
-export function EventCard({ service, locale, labels, onOpen }: EventCardProps) {
+export function EventCard({ service, locale, labels }: EventCardProps) {
   const coverImage = service.images.find((image) => image.isCover) ?? service.images[0];
   const imagePath = coverImage?.imagePath ?? service.imagePath;
   const imageAlt = coverImage?.alt[locale] ?? service.imageAlt[locale];
@@ -36,19 +34,11 @@ export function EventCard({ service, locale, labels, onOpen }: EventCardProps) {
       <div className="event-card-content">
         <h3>{service.title[locale]}</h3>
         <p>{service.description[locale]}</p>
-        <button
-          className="event-card-details"
-          type="button"
-          aria-haspopup="dialog"
-          onClick={(event) => onOpen(service, event.currentTarget)}
-        >
-          {labels.viewDetails}
-        </button>
         <Link
-          className="event-card-full-link"
+          className="event-card-details"
           href={getEventServiceDetailPath(locale, service.code)}
         >
-          {labels.discoverService}
+          {labels.viewDetails}
         </Link>
       </div>
     </article>

@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { getAccommodationDetailPath } from "@/lib/accommodations/accommodation-routes";
 import type { Locale } from "@/lib/i18n/routing";
 import { getAccommodationImageAlt } from "@/lib/seo/accommodation-alt";
@@ -14,19 +15,13 @@ type AccommodationCardProps = {
     unit: string;
     details: string;
     detailsPrefix: string;
-    discover: string;
   };
-  onOpen?: (
-    accommodationId: string,
-    trigger: HTMLButtonElement,
-  ) => void;
 };
 
 export function AccommodationCard({
   accommodation,
   locale,
   labels,
-  onOpen,
 }: AccommodationCardProps) {
   const mainImage =
     accommodation.images[0] ?? "/hebergement.jpeg";
@@ -121,23 +116,13 @@ export function AccommodationCard({
             </small>
           </div>
 
-          <button
+          <Link
             className="btn-book-details"
-            type="button"
+            href={detailPath}
             aria-label={detailsLabel}
-            onClick={(event) =>
-              onOpen?.(
-                accommodation.id,
-                event.currentTarget,
-              )
-            }
           >
             {labels.details}
-          </button>
-
-          <a className="room-detail-page-link" href={detailPath}>
-            {labels.discover}
-          </a>
+          </Link>
         </div>
       </div>
     </article>

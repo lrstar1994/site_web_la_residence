@@ -1,6 +1,5 @@
 import { getTranslations } from "next-intl/server";
 import { AccommodationExplorer } from "@/components/accommodation/AccommodationExplorer";
-import { siteConfig } from "@/data/site";
 import type { Locale } from "@/lib/i18n/routing";
 import type { AccommodationCardModel } from "@/types/accommodation";
 
@@ -19,12 +18,6 @@ export async function AccommodationGrid({
     locale,
     namespace: "accommodationPage.grid",
   });
-  const modal = await getTranslations({
-    locale,
-    namespace: "accommodationPage.modal",
-  });
-  const whatsappBaseUrl = `https://wa.me/${siteConfig.contact.phoneHref.replace(/\D/g, "")}`;
-
   return (
     <section
       id="rooms"
@@ -39,32 +32,12 @@ export async function AccommodationGrid({
         <AccommodationExplorer
           accommodations={accommodations}
           locale={locale}
-          whatsappBaseUrl={whatsappBaseUrl}
-          onlineBookingUrl={siteConfig.reservationUrl[locale]}
           labels={{
             card: {
               from: t("price_from"),
               unit: t("price_unit"),
               details: t("details"),
               detailsPrefix: t("details_prefix"),
-              discover: modal("discover"),
-            },
-            modal: {
-              close: modal("close"),
-              previousImage: modal("previous_image"),
-              nextImage: modal("next_image"),
-              galleryLabel: modal("gallery_label"),
-              from: modal("price_from"),
-              unit: modal("price_unit"),
-              highlights: modal("highlights"),
-              whatsappButton: modal("whatsapp_button", {
-                number: siteConfig.contact.phoneDisplay,
-              }),
-              bookOnline: modal("book_online"),
-              bookOnlineDescription: modal("book_online_description"),
-              discover: modal("discover"),
-              essentials: modal("essentials"),
-              residenceBenefits: modal("residence_benefits"),
             },
           }}
         />

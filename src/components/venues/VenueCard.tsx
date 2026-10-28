@@ -49,6 +49,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import type { Locale } from "@/lib/i18n/routing";
 import { getVenueDetailPath } from "@/lib/venues/venue-routes";
@@ -62,16 +63,13 @@ type VenueCardProps = {
     details: string;
     detailsPrefix: string;
     detailsSuffix: string;
-    discover: string;
   };
-  onOpen: (venueId: string, trigger: HTMLButtonElement) => void;
 };
 
 export function VenueCard({
   venue,
   locale,
   labels,
-  onOpen,
 }: VenueCardProps) {
   const images = useMemo(() => {
     if (venue.allImages && venue.allImages.length > 0) {
@@ -238,22 +236,13 @@ export function VenueCard({
         <p>{venue.shortDescription[locale]}</p>
 
         <div className="venue-card-actions">
-          <button
+          <Link
             className="btn-details"
-            type="button"
+            href={getVenueDetailPath(locale, venue.code ?? "")}
             aria-label={`${labels.detailsPrefix} ${venue.name[locale]}${labels.detailsSuffix}`}
-            onClick={(event) =>
-              onOpen(venue.id, event.currentTarget)
-            }
           >
             {labels.details}
-          </button>
-          <a
-            className="venue-card-detail-link"
-            href={getVenueDetailPath(locale, venue.code ?? "")}
-          >
-            {labels.discover}
-          </a>
+          </Link>
         </div>
       </div>
     </article>

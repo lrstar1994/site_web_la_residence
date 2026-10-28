@@ -135,12 +135,6 @@ export async function EventsShowcase({
             services={services}
             labels={{
               viewDetails: t("viewDetails"),
-              requestQuote: t("requestQuote"),
-              closeDetails: t("closeDetails"),
-              previousImage: t("previousImage"),
-              nextImage: t("nextImage"),
-              thumbnail: t("thumbnail"),
-              discoverService: t("discoverService"),
             }}
           />
         ) : (

@@ -344,7 +344,16 @@
       "gallery": "Galerie",
       "request_quote": "Demander un devis",
       "description": "Présentation",
-      "no_images": "Aucune image disponible pour cette prestation."
+      "no_images": "Aucune image disponible pour cette prestation.",
+      "gallery_eyebrow": "Galerie photos",
+      "gallery_title": "Découvrez cette prestation en images",
+      "view_all_photos": "Voir toutes les photos",
+      "close_gallery": "Fermer la galerie",
+      "previous_image": "Photo précédente",
+      "next_image": "Photo suivante",
+      "other_eyebrow": "Autres prestations",
+      "other_title": "Découvrez nos autres prestations événementielles",
+      "discover_service": "Découvrir cette prestation"
     }
   },
   "accommodationPage": {
