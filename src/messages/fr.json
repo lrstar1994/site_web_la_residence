@@ -413,6 +413,7 @@
     "detail": {
       "back": "Voir tous les hébergements",
       "gallery": "Galerie photos",
+      "gallery_title": "Découvrez cet hébergement en images",
       "no_images": "Les photos de cet hébergement seront bientôt disponibles.",
       "breadcrumb_root": "Hébergements",
       "view_photos": "Voir les photos",
@@ -430,7 +431,9 @@
       "description_eyebrow": "Description",
       "description_title": "Votre hébergement",
       "features": "Équipements et services",
+      "features_title": "Tout pour un séjour confortable",
       "booking": "Réservation",
+      "booking_rate_unit": "À partir de / nuitée",
       "booking_text": "Consultez les disponibilités ou contactez notre équipe pour préparer votre séjour.",
       "book_online": "Réserver en ligne",
       "whatsapp": "WhatsApp : {number}",

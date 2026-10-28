@@ -413,6 +413,7 @@
     "detail": {
       "back": "View all accommodation",
       "gallery": "Photo gallery",
+      "gallery_title": "Discover this accommodation in pictures",
       "no_images": "Photos of this accommodation will be available soon.",
       "breadcrumb_root": "Accommodation",
       "view_photos": "View photos",
@@ -430,7 +431,9 @@
       "description_eyebrow": "Description",
       "description_title": "Your accommodation",
       "features": "Amenities and services",
+      "features_title": "Everything for a comfortable stay",
       "booking": "Booking",
+      "booking_rate_unit": "From / night",
       "booking_text": "Check availability online or contact our team to prepare your stay.",
       "book_online": "Book online",
       "whatsapp": "WhatsApp: {number}",
