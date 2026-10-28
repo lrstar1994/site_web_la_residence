@@ -38,3 +38,8 @@ yarn-error.log*
 
 # typescript
 *.tsbuildinfo
+
+# DirectAdmin / Passenger
+/.htaccess
+/app.js
+/tmp/

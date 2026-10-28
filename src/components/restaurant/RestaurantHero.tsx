@@ -13,11 +13,11 @@ const timingItems = [
   },
   {
     key: "dinner",
-    image: "/ChatGPT Image 23 juil. 2026, 15_59_20.png",
+    image: "/restaurant-ankerana-02.png",
   },
   {
     key: "lunch",
-    image: "/ChatGPT Image 23 juil. 2026, 16_00_42.png",
+    image: "/restaurant-ankerana-01.png",
   },
   {
     key: "atmosphere",
