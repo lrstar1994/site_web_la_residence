@@ -4,48 +4,60 @@ import { SHOP_ENABLED } from "@/config/features";
 const futureItems = SHOP_ENABLED ? ["Boutique"] : [];
 
 type AdminSidebarProps = {
-  active: "news" | "events" | "quotes" | "accommodations" | "venues" | "restaurant";
+  active: "home" | "news" | "events" | "quotes" | "accommodations" | "venues" | "restaurant";
+  locale: "fr" | "en";
+  canManageHomeHero: boolean;
 };
 
-export function AdminSidebar({ active }: AdminSidebarProps) {
+export function AdminSidebar({ active, locale, canManageHomeHero }: AdminSidebarProps) {
+  const adminBase = `/${locale}/admin`;
+
   return (
     <aside className="admin-sidebar" aria-label="Navigation administration">
-      <Link className="admin-sidebar-brand" href="/fr/admin/hebergements" aria-label="Administration La Résidence Ankerana">
+      <Link className="admin-sidebar-brand" href={`${adminBase}/hebergements`} aria-label="Administration La Résidence Ankerana">
         <span>La Résidence Ankerana</span>
       </Link>
       <nav className="admin-sidebar-nav">
+        {canManageHomeHero ? (
+          <Link
+            href={`${adminBase}/accueil/diaporama`}
+            className={active === "home" ? "admin-sidebar-link active" : "admin-sidebar-link"}
+          >
+            {locale === "fr" ? "Diaporama de l’accueil" : "Homepage slideshow"}
+          </Link>
+        ) : null}
         <Link
-          href="/fr/admin/hebergements"
+          href={`${adminBase}/hebergements`}
           className={active === "accommodations" ? "admin-sidebar-link active" : "admin-sidebar-link"}
         >
           Hébergements
         </Link>
         <Link
-          href="/fr/admin/salles"
+          href={`${adminBase}/salles`}
           className={active === "venues" ? "admin-sidebar-link active" : "admin-sidebar-link"}
         >
           Salles
         </Link>
         <Link
-          href="/fr/admin/restaurant"
+          href={`${adminBase}/restaurant`}
           className={active === "restaurant" ? "admin-sidebar-link active" : "admin-sidebar-link"}
         >
           Restaurant
         </Link>
         <Link
-          href="/fr/admin/evenements"
+          href={`${adminBase}/evenements`}
           className={active === "events" ? "admin-sidebar-link active" : "admin-sidebar-link"}
         >
           Prestations événementielles
         </Link>
         <Link
-          href="/fr/admin/demandes-de-devis"
+          href={`${adminBase}/demandes-de-devis`}
           className={active === "quotes" ? "admin-sidebar-link active" : "admin-sidebar-link"}
         >
           Demandes de devis
         </Link>
         <Link
-          href="/fr/admin/actualites"
+          href={`${adminBase}/actualites`}
           className={active === "news" ? "admin-sidebar-link active" : "admin-sidebar-link"}
         >
           Actualités

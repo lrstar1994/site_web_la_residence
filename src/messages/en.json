@@ -21,6 +21,7 @@
       "sub": "Ankerana"
     },
     "reservation": "Book my stay",
+    "contactUs": "Contact us",
     "languages": {
       "fr": "French",
       "en": "English"
@@ -37,7 +38,9 @@
       "contact": "Contact",
       "addressLabel": "Address:",
       "reservationsLabel": "Reservations:",
-      "emailLabel": "Email:",
+      "phoneLabel": "Phone",
+      "whatsappLabel": "WhatsApp",
+      "emailLabel": "Email",
       "copyright": "© 2026 Résidence Ankerana. All rights reserved.",
       "serviceItems": {
         "stays": "Stays in Antananarivo",
@@ -443,6 +446,43 @@
       "discover": "Discover",
       "whatsapp_message": "Hello, I would like more information and to book the {name} accommodation at La Résidence Ankerana."
     }
+  },
+  "homeHeroAdmin": {
+    "eyebrow": "Homepage",
+    "title": "Homepage slideshow",
+    "description": "Manage the photographs displayed behind the Hero’s fixed content.",
+    "counter": "{count} / {max} images",
+    "add_title": "Add a photograph",
+    "add_description": "JPG, PNG or WebP, up to 5 MB. The image will be optimized to WebP before upload.",
+    "choose_image": "Choose an image",
+    "replace_image": "Change image",
+    "alt_fr": "French alternative text",
+    "alt_en": "English alternative text",
+    "active": "Active",
+    "inactive": "Inactive",
+    "activate_on_add": "Display immediately in the slideshow",
+    "add": "Add to slideshow",
+    "adding": "Adding…",
+    "list_title": "Slideshow photographs",
+    "list_description": "Drag items or use the arrows to set their display order.",
+    "empty": "No photograph has been saved. The fallback image remains visible on the homepage.",
+    "order": "Position",
+    "save": "Save",
+    "saving": "Saving…",
+    "move_up": "Move this image up",
+    "move_down": "Move this image down",
+    "drag": "Drag to reorder",
+    "delete": "Delete",
+    "delete_title": "Permanently delete this photograph?",
+    "delete_description": "The Storage file and its database row will be deleted. This action cannot be undone.",
+    "delete_confirm": "Delete permanently",
+    "cancel": "Cancel",
+    "deleting": "Deleting…",
+    "max_reached": "The six-photograph limit has been reached. Delete one before adding another.",
+    "invalid_file": "Select a JPG, PNG or WebP image up to 5 MB.",
+    "alt_required": "French and English alternative texts are required for an active image.",
+    "upload_failed": "Cleanup of the uploaded file could not be confirmed.",
+    "reorder_failed": "The previous order has been restored."
   },
   "adminAuth": {
     "login": {

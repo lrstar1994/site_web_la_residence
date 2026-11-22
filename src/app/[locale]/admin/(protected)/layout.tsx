@@ -27,7 +27,9 @@ export default async function AdminProtectedLayout({
   const admin = await requireAdmin(locale as Locale);
   const headersList = await headers();
   const pathname = headersList.get("x-pathname") ?? "";
-  const active = pathname.includes("/admin/actualites")
+  const active = pathname.includes("/admin/accueil")
+    ? "home"
+    : pathname.includes("/admin/actualites")
     ? "news"
     : pathname.includes("/admin/demandes-de-devis")
       ? "quotes"
@@ -41,7 +43,9 @@ export default async function AdminProtectedLayout({
               ? "venues"
               : "accommodations";
   const title =
-    active === "news"
+    active === "home"
+      ? locale === "fr" ? "Diaporama de l’accueil" : "Homepage slideshow"
+      : active === "news"
       ? "Actualités"
       : active === "quotes"
         ? "Demandes de devis"
@@ -57,7 +61,11 @@ export default async function AdminProtectedLayout({
 
   return (
     <div className="admin-shell">
-      <AdminSidebar active={active} />
+      <AdminSidebar
+        active={active}
+        locale={locale as Locale}
+        canManageHomeHero={admin.role === "admin"}
+      />
       <div className="admin-shell-main">
         <AdminHeader title={title} admin={admin} />
         <div className="admin-content">{children}</div>

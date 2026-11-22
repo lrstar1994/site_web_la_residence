@@ -1,8 +1,10 @@
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
+import { MapPin } from "lucide-react";
 import { SHOP_ENABLED } from "@/config/features";
 import { siteConfig } from "@/data/site";
 import type { Locale } from "@/lib/i18n/routing";
+import { FooterContactInfo } from "@/components/layout/FooterContactInfo";
 
 type FooterProps = {
   locale: Locale;
@@ -14,8 +16,6 @@ export async function Footer({ locale }: FooterProps) {
   const navigationRoutes = siteConfig.primaryRoutes.filter(
     (route) => SHOP_ENABLED || route.key !== "boutique",
   );
-  const legalLinks = ["legal", "privacy", "terms"] as const;
-
   return (
     <footer className="footer-luxe" role="contentinfo">
       <div className="footer-main">
@@ -116,27 +116,24 @@ export async function Footer({ locale }: FooterProps) {
             <div className="footer-col">
               <h2 className="footer-title">{layout("footer.contact")}</h2>
               <div className="contact-info">
-                <p>
-                  <strong>{layout("footer.addressLabel")}</strong>
-                  <br />
-                  {siteConfig.contact.addressLine1}
-                  <br />
-                  {t("footer_location")}
-                </p>
-                <p>
-                  <strong>{layout("footer.reservationsLabel")}</strong>
-                  <br />
-                  <a href={`tel:${siteConfig.contact.phoneHref}`}>
-                    {siteConfig.contact.phoneDisplay}
-                  </a>
-                </p>
-                <p>
-                  <strong>{layout("footer.emailLabel")}</strong>
-                  <br />
-                  <a href={`mailto:${siteConfig.contact.email}`}>
-                    {siteConfig.contact.email}
-                  </a>
-                </p>
+                <div className="footer-contact-item footer-contact-address">
+                  <MapPin aria-hidden="true" />
+                  <div>
+                    <strong>{layout("footer.addressLabel")}</strong>
+                    <span>
+                      {siteConfig.contact.addressLine1}
+                      <br />
+                      {t("footer_location")}
+                    </span>
+                  </div>
+                </div>
+                <FooterContactInfo
+                  labels={{
+                    phone: layout("footer.phoneLabel"),
+                    whatsapp: layout("footer.whatsappLabel"),
+                    email: layout("footer.emailLabel"),
+                  }}
+                />
               </div>
             </div>
           </div>

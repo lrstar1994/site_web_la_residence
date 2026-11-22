@@ -8,6 +8,7 @@ import { HomeRestaurant } from "@/components/home/HomeRestaurant";
 import { HomeServices } from "@/components/home/HomeServices";
 import { HomeVenues } from "@/components/home/HomeVenues";
 import { SHOP_ENABLED } from "@/config/features";
+import { getActiveHomeHeroImages } from "@/lib/home/get-home-hero-images";
 import type { Locale } from "@/lib/i18n/routing";
 import { getBaseUrl, getHomeMetadata } from "@/lib/seo/metadata";
 import { buildHomepageSchema } from "@/lib/seo/schema";
@@ -25,7 +26,10 @@ export async function generateMetadata({
 
 export default async function HomePage({ params }: HomePageProps) {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: "home" });
+  const [t, heroImages] = await Promise.all([
+    getTranslations({ locale, namespace: "home" }),
+    getActiveHomeHeroImages(),
+  ]);
   const baseUrl = getBaseUrl();
   const HomeShop = SHOP_ENABLED
     ? (await import("@/components/home/HomeShop")).HomeShop
@@ -39,6 +43,11 @@ export default async function HomePage({ params }: HomePageProps) {
         description={t("hero.description")}
         cta={t("hero.cta")}
         imageAlt={t("hero.image_alt")}
+        images={heroImages.map((image) => ({
+          id: image.id,
+          src: image.publicUrl,
+          alt: image.alt[locale],
+        }))}
       />
       <HomeServices locale={locale} />
       <HomeRestaurant locale={locale} />

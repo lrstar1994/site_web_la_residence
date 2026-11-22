@@ -64,3 +64,13 @@ export async function requireAdmin(locale: Locale) {
 
   return admin;
 }
+
+export async function requireFullAdmin(locale: Locale) {
+  const admin = await requireAdmin(locale);
+
+  if (admin.role !== "admin") {
+    redirect(`/${locale}/admin/hebergements`);
+  }
+
+  return admin;
+}

@@ -8,7 +8,6 @@ import type { Locale } from "@/lib/i18n/routing";
 type LanguageSwitcherProps = {
   locale: Locale;
   currentLabel: string;
-  currentLanguageName: string;
   variant?: "desktop" | "mobile";
   onNavigate?: () => void;
 };
@@ -25,7 +24,6 @@ function getAlternateHref(pathname: string, locale: Locale) {
 export function LanguageSwitcher({
   locale,
   currentLabel,
-  currentLanguageName,
   variant = "desktop",
   onNavigate,
 }: LanguageSwitcherProps) {
@@ -60,7 +58,6 @@ export function LanguageSwitcher({
     <details className="lang-switcher">
       <summary>
         <span>{currentLabel}</span>
-        <span className="lang-current-label">{currentLanguageName}</span>
       </summary>
       <div className="lang-menu">
         <Link

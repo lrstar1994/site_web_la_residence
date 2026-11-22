@@ -21,6 +21,7 @@
       "sub": "Ankerana"
     },
     "reservation": "Réserver mon séjour",
+    "contactUs": "Contactez-nous",
     "languages": {
       "fr": "Français",
       "en": "Anglais"
@@ -37,7 +38,9 @@
       "contact": "Contact",
       "addressLabel": "Adresse :",
       "reservationsLabel": "Réservations :",
-      "emailLabel": "Email :",
+      "phoneLabel": "Téléphone",
+      "whatsappLabel": "WhatsApp",
+      "emailLabel": "E-mail",
       "copyright": "© 2026 Résidence Ankerana. Tous droits réservés.",
       "serviceItems": {
         "stays": "Séjours à Antananarivo",
@@ -443,6 +446,43 @@
       "discover": "Découvrir",
       "whatsapp_message": "Bonjour, je souhaite obtenir plus d’informations et réserver l’hébergement {name} à La Résidence Ankerana."
     }
+  },
+  "homeHeroAdmin": {
+    "eyebrow": "Accueil",
+    "title": "Diaporama de l’accueil",
+    "description": "Gérez les photographies affichées derrière le contenu fixe du Hero.",
+    "counter": "{count} / {max} images",
+    "add_title": "Ajouter une photographie",
+    "add_description": "JPG, PNG ou WebP, 5 Mo maximum. L’image sera optimisée en WebP avant l’envoi.",
+    "choose_image": "Choisir une image",
+    "replace_image": "Changer l’image",
+    "alt_fr": "Texte alternatif français",
+    "alt_en": "Texte alternatif anglais",
+    "active": "Active",
+    "inactive": "Inactive",
+    "activate_on_add": "Afficher immédiatement dans le diaporama",
+    "add": "Ajouter au diaporama",
+    "adding": "Ajout en cours…",
+    "list_title": "Photographies du diaporama",
+    "list_description": "Glissez les éléments ou utilisez les flèches pour définir leur ordre d’affichage.",
+    "empty": "Aucune photographie enregistrée. L’image de secours reste affichée sur l’accueil.",
+    "order": "Position",
+    "save": "Enregistrer",
+    "saving": "Enregistrement…",
+    "move_up": "Monter cette image",
+    "move_down": "Descendre cette image",
+    "drag": "Glisser pour réorganiser",
+    "delete": "Supprimer",
+    "delete_title": "Supprimer définitivement cette photographie ?",
+    "delete_description": "Le fichier Storage et sa ligne seront supprimés. Cette action est irréversible.",
+    "delete_confirm": "Supprimer définitivement",
+    "cancel": "Annuler",
+    "deleting": "Suppression en cours…",
+    "max_reached": "La limite de six photographies est atteinte. Supprimez-en une avant d’en ajouter une nouvelle.",
+    "invalid_file": "Sélectionnez une image JPG, PNG ou WebP de 5 Mo maximum.",
+    "alt_required": "Les textes alternatifs français et anglais sont obligatoires pour une image active.",
+    "upload_failed": "Le nettoyage du fichier envoyé n’a pas pu être confirmé.",
+    "reorder_failed": "L’ordre précédent a été restauré."
   },
   "adminAuth": {
     "login": {

@@ -35,7 +35,7 @@ export async function Header({ locale }: HeaderProps) {
               ? "Logo officiel La Résidence Ankerana"
               : "Official logo of La Résidence Ankerana",
           reservation: layout("reservation"),
-          languageName: layout(`languages.${locale}`),
+          contact: layout("contactUs"),
           menuOpen: layout("menu.open"),
           menuClose: layout("menu.close"),
           primaryNavigation: t("primary_navigation"),

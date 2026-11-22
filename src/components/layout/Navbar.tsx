@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Mail } from "lucide-react";
 import { useState } from "react";
 import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
 import type { Locale } from "@/lib/i18n/routing";
@@ -18,7 +19,7 @@ type NavbarProps = {
   labels: {
     logoAlt: string;
     reservation: string;
-    languageName: string;
+    contact: string;
     menuOpen: string;
     menuClose: string;
     primaryNavigation: string;
@@ -104,10 +105,19 @@ export function Navbar({
           <LanguageSwitcher
             locale={locale}
             currentLabel={locale.toUpperCase()}
-            currentLanguageName={labels.languageName}
             variant="mobile"
             onNavigate={() => setIsOpen(false)}
           />
+        </li>
+        <li className="mobile-contact-item">
+          <a
+            href="mailto:laresidence@laresidence-ankerana.mg"
+            className="btn-contact-mobile"
+            onClick={() => setIsOpen(false)}
+          >
+            <Mail aria-hidden="true" />
+            {labels.contact}
+          </a>
         </li>
         <li className="mobile-reserve-item">
           <a
@@ -126,8 +136,14 @@ export function Navbar({
         <LanguageSwitcher
           locale={locale}
           currentLabel={locale.toUpperCase()}
-          currentLanguageName={labels.languageName}
         />
+        <a
+          href="mailto:laresidence@laresidence-ankerana.mg"
+          className="btn-header-contact"
+        >
+          <Mail aria-hidden="true" />
+          {labels.contact}
+        </a>
         <a
           href={reservationUrl}
           className="btn-reservation"

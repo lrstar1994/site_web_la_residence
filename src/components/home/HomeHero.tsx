@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { HomeHeroSlideshow } from "@/components/home/HomeHeroSlideshow";
 
 type HomeHeroProps = {
   eyebrow: string;
@@ -6,6 +6,7 @@ type HomeHeroProps = {
   description: string;
   cta: string;
   imageAlt: string;
+  images: Array<{ id: string; src: string; alt: string }>;
 };
 
 export function HomeHero({
@@ -14,19 +15,17 @@ export function HomeHero({
   description,
   cta,
   imageAlt,
+  images,
 }: HomeHeroProps) {
   return (
     <header className="hero" id="home-hero" role="banner">
       <div className="hero-image-container">
-        <Image
-          src="/couverture-acceuil.png"
-          alt={imageAlt}
-          fill
-          priority
-          sizes="100vw"
-          className="hero-img"
+        <HomeHeroSlideshow
+          key={images.map((image) => image.id).join(":") || "fallback"}
+          images={images}
+          fallbackAlt={imageAlt}
         />
-        <div className="overlay" aria-hidden="true" />
+        <div className="home-hero-overlay" aria-hidden="true" />
       </div>
       <div className="hero-content">
         <div className="welcome-text">
